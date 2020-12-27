@@ -1,10 +1,10 @@
 from pyfacebook import Api
 import json  # Use the json module to write the files
 
-APP_ID = "432341101134225"
-KEY_SECRET = "5f1a24aa9fc8ebd8f6e5cd26a1603ac3"
+APP_ID = "396600268287980"
+KEY_SECRET = "c5b4c791b1dc437544ff45af562410ac"  # The key changes through the time, check the app in facebook.developers
 PAGE_ID = "108139397867813"
-ACCESS_TOKEN = "EAAFotLIb7ZBwBADv62AN2B1zTgji8HZC8wOcM3fAzoFt22eu637VLoSlPagZCIAE3P6Xz0SB6LPC7nGQZBDukejsynb1xa56sediPEVASl2orQjBNEZCs4LxpCzlb8u2IW1iCFAdUt4z8Vl1Kz1dFIpQVo60dZBtILIyqF4j2E4mtyUT55MF1K0aF5OYLLgdNtEc5bOOwXF9Wb6S9Dy3c40ozzJHlFJk6Jw0ganbgp5wZDZD"
+ACCESS_TOKEN = "EAAFotLIb7ZBwBAIKp9NX4TxZCI8tPUkCY7KekrQwqj3mv2zJRnTQjxrprHKK4JBbkY1rUSN18vEBV6vGUZAV2QU5Odv1EBBYa33qALAnL3RcLmz9o9vmytd1eQSZAjDelalzrz4ZCLqcgw87fiNioTbdtCBoMWZBux7UmUX6oLfardN2t6NVQpO7kQIW20r2YXnqWy0743fsfzTqvfwZBdEJawH426FH7ZBbh5aB6qO05wZDZD" # The key changes through the time, check the app in facebook.developers
 
 # TODO Declare the necessary functions to carry out the draft
 
