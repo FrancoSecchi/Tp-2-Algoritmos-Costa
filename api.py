@@ -13,6 +13,8 @@ def connection():
     try:
         api = Api(app_id=APP_ID, app_secret=KEY_SECRET, long_term_token=ACCESS_TOKEN)
         return api, True
+    except ConnectionError as error:
+        print(f'Problemas de conexion: {error}')
     except Exception as error:
         print(error)
 
