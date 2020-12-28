@@ -33,7 +33,6 @@ Having already installed the virtual environment, to work within the virtual env
 `. venv/bin/activate` o `source venv/bin/activate`
 
 And once inside it, proceed to install the corresponding modules.
-
 To be able to exit the virtual environment, run the following command
 
 `deactivate`
