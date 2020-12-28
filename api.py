@@ -19,10 +19,10 @@ def connection():
         print(error)
 
 
-def processor():
+def main():
     data, isConnected = connection()
     if isConnected:
         print(data.get_token_info())
 
 
-processor()
+main()
