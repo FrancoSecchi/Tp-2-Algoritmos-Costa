@@ -10,7 +10,7 @@ Se recomienda usar un virtual environment (Ej: modulo **_virtualenv_** de python
 Crux requiere estas versiones: 
 - **Python3.7**
 - Api de facebook
-    - **Python-facebook-api==0.4.2**
+    - **python-facebook-api==0.4.2**
 - ChatBot
     - ... 
 
