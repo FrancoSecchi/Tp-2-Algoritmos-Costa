@@ -1,11 +1,11 @@
 import facebook
-from logs import writeStatusLog
+from logs import write_status_log
 import os
 
 USER_TOKEN = "EAAGJNkHBQZAEBAPaFOXzg1ZBiEiKcmHJlKEOQCygEwsH20hhYlqc9mmPZCEv3pbfxIHR7qxEykjKniz38wZAZASrxZCDiFKu4ICZBvWjEJqB22N2BRc2ClIrlJ2gMXuYn63SdYsBsco1K17ITTgcuRL20esIzhehdh91MZBXsuFDL0AYff9kKrFBQ2uHuSoow9nfVpjSgnQzfAZDZD"
 
 
-def connection():
+def connection() -> tuple:
     """
     Returns the GraphApi and checks if there was any error while connecting to Facebook
     :return:
@@ -14,16 +14,16 @@ def connection():
     try:
         api = facebook.GraphAPI(access_token=USER_TOKEN, version="2.12")
     except ConnectionError as error:
-        writeStatusLog(503, error)
-        print(f'Problemas de conexion: {error}')
+        write_status_log(503, error)
+        print(f'You dont have internet: {error}')
     except Exception as error:
-        writeStatusLog(404, error)
+        write_status_log(404, error)
         print(error)
-    writeStatusLog(200, 'You have successfully connected with the api')
+    write_status_log(200, 'You have successfully connected with the api')
     return api, True
 
 
-def search_file():
+def search_file() -> str:
     """
     Searchs for a photo in the user desktop. The file must be .jpg
     :return:
@@ -86,6 +86,7 @@ def upload_post(graph):
     try:
         graph.put_object(parent_object='me', connection_name='feed', message=user_message)
     except Exception as error:
+        write_status_log('Failed', error)
         print(f"Hubo un problema subiendo su post, error: {error}")
 
 
@@ -121,7 +122,7 @@ def edit_post(graph):
     """
     post = get_post(graph)
 
-    option = input("Desea eliminar el post o editar?: ").capitalize()
+    option = input("Do you want to delete the post or edit?: ").lower()
 
     if option == "Eliminar" or option == "Eliminarlo":
         graph.delete_object(id=post)
