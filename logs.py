@@ -28,9 +28,6 @@ def write_status_log(message, status_code='Success'):
 def write_chat_bot(user, message):
     format_date = get_formatted_time()
     string = f"{format_date}, {user}, '{message}'"
-    try:
-        with open('chat.txt', 'a') as file:
-            file.write(string + '\n')
-    except FileExistsError as error:
-        write_status_log(500, str(error))
-        print(f"Error: {error}")
+    with open('chat.txt', 'a') as file:
+        file.write(string + '\n')
+
