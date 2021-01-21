@@ -2,6 +2,9 @@ from datetime import datetime
 
 
 def get_formatted_time() -> str:
+    """
+    :return
+    """
     now = datetime.now()
     hours = now.strftime("%H:%M:%S")
     today = datetime.today().strftime("%m/%d/%y")
