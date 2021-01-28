@@ -224,13 +224,16 @@ def search_users(bot) -> None:
     query = input("Who do you want to search? ")
     bot.search_users(query=query)
     json_data = bot.last_json
+    counter = 1
     if json_data['num_results'] > 0:
         print("The users found are \n")
         for user in json_data['users']:
             full_data = ''
-            full_data += f"{user['username']} {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
+            full_data += f"{counter}) {user['username']} - {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
             if 'social_context' in user.keys():
-                full_data += f" Someone you know follows this account: {user['social_context']}"
+                full_data += f" - someone you know follows this account: {user['social_context']}"
+            print(full_data, '\n')
+            counter += 1
 
     else:
         print("")
