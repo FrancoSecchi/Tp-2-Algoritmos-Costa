@@ -38,7 +38,7 @@ def main():
     option = str
     graph, isConnected = connection()
     if isConnected:
-    post = get_post(graph)
+        post = get_post(graph)
     
     option = input("Desea eliminar el post o editar?: ").capitalize()
     

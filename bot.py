@@ -1,33 +1,42 @@
 from chatterbot import ChatBot
-
-
-# Uncomment the following lines to enable verbose logging
-# import logging
-# logging.basicConfig(level=logging.INFO)
+from logs import write_chat_bot
+import api
 
 # Create a new instance of a ChatBot
-bot = ChatBot(
-    'Terminal',
-    storage_adapter='chatterbot.storage.SQLStorageAdapter',
-    logic_adapters=[
-        'chatterbot.logic.MathematicalEvaluation',
-        'chatterbot.logic.TimeLogicAdapter',
-        'chatterbot.logic.BestMatch'
-    ],
-    database_uri='sqlite:///database.db'
-)
+
 
 print('Type something to begin...')
 
+
 # The following loop will execute each time the user enters input
-while True:
-    try:
-        user_input = input()
+def run_bot(bot):
+    """
 
-        bot_response = bot.get_response(user_input)
+    :param bot:
+    :return:
+    """
+    start_bot = True
+    while start_bot:
+        try:
+            user_input = input()
 
-        print(bot_response)
+            bot_response = bot.get_response(user_input)
 
-    # Press ctrl-c or ctrl-d on the keyboard to exit
-    except (KeyboardInterrupt, EOFError, SystemExit):
-        break
+            print(bot_response)
+
+        except (KeyboardInterrupt, EOFError, SystemExit):
+            start_bot = False
+
+
+def main():
+    bot = ChatBot(
+        'Terminal',
+        storage_adapter='chatterbot.storage.SQLStorageAdapter',
+        logic_adapters=[
+            'chatterbot.logic.MathematicalEvaluation',
+            'chatterbot.logic.TimeLogicAdapter',
+            'chatterbot.logic.BestMatch'
+        ],
+        database_uri='sqlite:///database.db'
+    )
+    run_bot(bot)
