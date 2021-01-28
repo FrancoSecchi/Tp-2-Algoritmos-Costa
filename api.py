@@ -1,6 +1,7 @@
 import facebook
-from logs import write_status_log
 import os
+from instabot import Bot
+from logs import write_status_log
 
 USER_TOKEN = "EAAGJNkHBQZAEBAPaFOXzg1ZBiEiKcmHJlKEOQCygEwsH20hhYlqc9mmPZCEv3pbfxIHR7qxEykjKniz38wZAZASrxZCDiFKu4ICZBvWjEJqB22N2BRc2ClIrlJ2gMXuYn63SdYsBsco1K17ITTgcuRL20esIzhehdh91MZBXsuFDL0AYff9kKrFBQ2uHuSoow9nfVpjSgnQzfAZDZD"
 
@@ -37,7 +38,7 @@ def search_file() -> str:
     return path
 
 
-def upload_to_albums(graph, caption, path):
+def upload_to_albums(graph, caption, path) -> None:
     """
     PRE: It needs the graph, a caption for the photo, and the path for said photo
     POST: It uploads it to an album which the user specifies
@@ -64,7 +65,7 @@ def upload_to_albums(graph, caption, path):
     graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
 
 
-def upload_photo(graph, caption):
+def upload_photo(graph, caption) -> None:
     """
     PRE: Needs the path of the picture and a caption
     POST: It uploads it with a caption written by the user
@@ -81,7 +82,7 @@ def upload_photo(graph, caption):
         print(f"Hubo un problema abriendo el archivo, error: {error}")
 
 
-def upload_post(graph):
+def upload_post(graph) -> None:
     user_message = input("Que desea escribir?: ").capitalize()
     try:
         graph.put_object(parent_object='me', connection_name='feed', message=user_message)
@@ -114,7 +115,7 @@ def get_post(graph):
     return posts_id[option - 1]
 
 
-def edit_post(graph):
+def edit_post(graph) -> None:
     """
     The user can edit or delete a post made by them
     :param graph:

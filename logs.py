@@ -11,7 +11,7 @@ def get_formatted_time() -> str:
     return f"{today}, {hours}"
 
 
-def write_status_log(message, status_code='Success'):
+def write_status_log(message, status_code='Success') -> None:
     """
     PRE: message cannot be empty
     POST: Write a api call file
@@ -25,7 +25,7 @@ def write_status_log(message, status_code='Success'):
         file.write(string + '\n')
 
 
-def write_chat_bot(user, message):
+def write_chat_bot(user, message) -> None:
     format_date = get_formatted_time()
     string = f"{format_date}, {user}, '{message}'"
     with open('chat.txt', 'a') as file:
