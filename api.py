@@ -3,7 +3,6 @@ import os
 from instabot import Bot
 from logs import write_status_log
 
-
 USER_TOKEN = "EAAGJNkHBQZAEBAPaFOXzg1ZBiEiKcmHJlKEOQCygEwsH20hhYlqc9mmPZCEv3pbfxIHR7qxEykjKniz38wZAZASrxZCDiFKu4ICZBvWjEJqB22N2BRc2ClIrlJ2gMXuYn63SdYsBsco1K17ITTgcuRL20esIzhehdh91MZBXsuFDL0AYff9kKrFBQ2uHuSoow9nfVpjSgnQzfAZDZD"
 READ_POST_OPTION = 0
 UPDATE_POST_OPTION = 1
@@ -68,6 +67,7 @@ def upload_to_albums(graph, caption, path) -> None:
         select = int(input("Seleccione el album: "))
 
     graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
+
 
 # TODO Refactorizar las funciones de posts y photos, son muy similares todas
 def upload_photo(graph, caption) -> None or Exception:
