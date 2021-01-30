@@ -26,7 +26,7 @@ def connectionApi(user_token=USER_TOKEN) -> tuple or Exception:
         print(error)
     write_status_log(200, 'You have successfully connected with the api')
     print('You have successfully connected with the Facebook api')
-    return api, True
+    return api
 
 
 def search_file() -> str:
@@ -43,7 +43,7 @@ def search_file() -> str:
     return path
 
 
-def upload_to_albums(graph, caption, path) -> None:
+def upload_to_albums(graph) -> None:
     """
     PRE: It needs the graph, a caption for the photo, and the path for said photo
     POST: It uploads it to an album which the user specifies
@@ -67,10 +67,11 @@ def upload_to_albums(graph, caption, path) -> None:
     while select > counter or select < 1:
         select = int(input("Seleccione el album: "))
 
+    caption = input("Caption: ")
     graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
 
 # TODO Refactorizar las funciones de posts y photos, son muy similares todas
-def upload_photo(graph, caption) -> None or Exception:
+def upload_photo(graph) -> None or Exception:
     """
     PRE: Needs the path of the picture and a caption
     POST: It uploads it with a caption written by the user
@@ -79,6 +80,7 @@ def upload_photo(graph, caption) -> None or Exception:
     :return:
     """
     path = search_file()
+    caption = input("Caption: ")
     try:
         graph.put_photo(image=open(path, 'rb'), message=caption)
     except FileNotFoundError:
@@ -88,12 +90,12 @@ def upload_photo(graph, caption) -> None or Exception:
 
 
 def upload_post(graph) -> None or Exception:
-    user_message = input("Que desea escribir?: ").capitalize()
+    user_message = input("What would you like to write?: ").capitalize()
     try:
         graph.put_object(parent_object='me', connection_name='feed', message=user_message)
     except Exception as error:
         write_status_log('Failed', error)
-        print(f"Hubo un problema subiendo su post, error: {error}")
+        print(f"There was a problem uploading your post, error: {error}")
 
 
 def like_post(graph):
@@ -161,7 +163,7 @@ def get_post_to_edit(graph) -> str or int:
     posts_id = []
     posts = graph.get_connections(id='me', connection_name='posts')
     info_list = posts['data']
-    print("Sus posts son: ")
+    print("This are your last 5 posts: ")
     for info in info_list[0:5]:
         if 'message' in info:
             print(f"{counter} -", info["message"])
@@ -169,7 +171,7 @@ def get_post_to_edit(graph) -> str or int:
             posts_id.append(info["id"])
 
     while option > counter or option < 1:
-        option = int(input("Seleccione el post a editar: "))
+        option = int(input("Select one: "))
 
     return posts_id[option - 1]
 
@@ -187,7 +189,7 @@ def edit_post(graph) -> None:
     if option in ['delete', 'd', 'del', 'delete post']:
         graph.delete_object(id=post)
     elif option in ['edit', 'e', 'ed', 'edit post']:
-        text = input("Que desea escribir: ").capitalize()
+        text = input("What would you like to post?: ").capitalize()
         graph.put_object(parent_object=post, connection_name='', message=text)
 
 
