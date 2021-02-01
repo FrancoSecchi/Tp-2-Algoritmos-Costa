@@ -4,9 +4,8 @@ import api
 from chatterbot.trainers import ListTrainer
 
 # Create a new instance of a ChatBot
-USER_TOKEN = "EAAGJNkHBQZAEBAIMMz78M1ZArgjk1IiP4asgl72V0PtbxZAIVIzVhjc0L3xXenU3awpLI3exj5T8sK8XPqjLZBXEUtjFhy8HJumudDIAJUYeRti57d13764IV2LL7tn2YldrF8TCiTzqIXF2YH9Kk4PUQQheRP6M9x5oddQn9oiQ4Blsgs1noYf6QozpW70Fw06gPevV5AZDZD"
+USER_TOKEN = "EAAGJNkHBQZAEBAO73ZAGv7kK71OPd3a7TSmF17OxluZBkOLKgQ8GZAvPm4J5PWUzwKdZCHrSQE2SuNmFl2lTgPcSZCY5hPbV8ZBfPElL1hkIJC2Ra7tucOf3m2Y0Qo90X9ZAfYcZBfDOfaf46CbmXQ0usEmkmg3yF8Ywr134bVeMlpJ1tJm164AmNghli50YJULkZD"
 
-print('Type something to begin...')
 
 
 # The following loop will execute each time the user enters input
@@ -29,37 +28,31 @@ def run_bot(bot):
             
             if any(word in user_input for word in photo_list):
                 album_option = input ("Would you like to upload the photo to an album?\n").capitalize()
-                if album_option == "Yes" or album_option == "Ok":
+                if album_option in ["Ok","Yes","Y"]:
                     api.upload_to_albums(graph)
+                    print("Pic uploaded! Want to do anything else? Press ctrl+c to exit")
                 else:    
                     api.upload_photo(graph)
+                    print("Pic uploaded! Want to do anything else? Press ctrl+c to exit")
 
             elif any(word in user_input for word in post_list):
                 if "upload" in user_input:
                     api.upload_post(graph)
+                    print("Post uploaded! Want to do anything else? Press ctrl+c to exit")
                 else:
-                    api.edit_post(graph)    
+                    api.edit_post(graph)
+                    print("Post edited! Want to do anything else? Press ctrl+c to exit")      
         except (KeyboardInterrupt, EOFError, SystemExit):
             start_bot = False
 
-
-def main():
-    bot = ChatBot(
-        'Crux',
-        storage_adapter='chatterbot.storage.SQLStorageAdapter',
-        logic_adapters=[
-            'chatterbot.logic.MathematicalEvaluation',
-            'chatterbot.logic.BestMatch'
-        ],
-        database_uri='sqlite:///database.db'
-    )
-    bot.storage.drop()
+def bot_training(bot):
+    #This are the predetermined conversations the bot can have
     trainer = ListTrainer(bot)
     greetings = [
                 "Greetings",
                 "Hello",
                 "Hi",
-                "How can i help you?",
+                "Welcome!",
                 "Crux",
                 "At your service!"
                 ]
@@ -79,8 +72,43 @@ def main():
             "Delete post",
             "Ok"
             ]
-    for item in (greetings,photo):
+
+    error = [
+             "Sorry, i did not get that",
+             "What did you mean?",
+             "Remember, my keywords are: Photo, Edit or Delete!"
+            ]
+
+    options = [
+                "What can you do?",
+                "I can help you to upload, edit or delete post or photos in your Facebook page!",
+                "Help",
+                "Remember to use my keywords: Photo, Edit or Delete!"
+              ]
+
+    jokes = [
+             "Tell me a joke",
+             "What do you call an alligator in a vest? An investigator",
+             "Make me laugh",
+             "What did the buffalo say to his son when he left for college? BI-son"   
+            ]  
+
+    for item in (greetings,photo,post,error,options,jokes):
         trainer.train(item)
+
+def main():
+    bot = ChatBot(
+        'Crux',
+        storage_adapter='chatterbot.storage.SQLStorageAdapter',
+        logic_adapters=[
+            'chatterbot.logic.MathematicalEvaluation',
+            'chatterbot.logic.BestMatch'
+        ],
+        database_uri='sqlite:///database.db'
+    )
+    
+    bot_training(bot)
+    
     run_bot(bot)
 
 main()    

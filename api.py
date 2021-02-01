@@ -4,7 +4,7 @@ from instabot import Bot
 from logs import write_status_log
 
 
-USER_TOKEN = "EAAGJNkHBQZAEBAPaFOXzg1ZBiEiKcmHJlKEOQCygEwsH20hhYlqc9mmPZCEv3pbfxIHR7qxEykjKniz38wZAZASrxZCDiFKu4ICZBvWjEJqB22N2BRc2ClIrlJ2gMXuYn63SdYsBsco1K17ITTgcuRL20esIzhehdh91MZBXsuFDL0AYff9kKrFBQ2uHuSoow9nfVpjSgnQzfAZDZD"
+USER_TOKEN = "EAAGJNkHBQZAEBAO73ZAGv7kK71OPd3a7TSmF17OxluZBkOLKgQ8GZAvPm4J5PWUzwKdZCHrSQE2SuNmFl2lTgPcSZCY5hPbV8ZBfPElL1hkIJC2Ra7tucOf3m2Y0Qo90X9ZAfYcZBfDOfaf46CbmXQ0usEmkmg3yF8Ywr134bVeMlpJ1tJm164AmNghli50YJULkZD"
 READ_POST_OPTION = 0
 UPDATE_POST_OPTION = 1
 GET_POST_OPTION = 2
@@ -183,7 +183,7 @@ def edit_post(graph) -> None:
     :return:
     """
     post = get_post_to_edit(graph)
-
+    
     option = input("Do you want to delete the post or edit?: ").lower()
 
     if option in ['delete', 'd', 'del', 'delete post']:
