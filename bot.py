@@ -1,12 +1,7 @@
 from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
 from logs import write_chat_bot
 import api
-
-# Create a new instance of a ChatBot
-
-
-print('Type something to begin...')
-
 
 # The following loop will execute each time the user enters input
 def run_bot(bot):
@@ -16,27 +11,35 @@ def run_bot(bot):
     :return:
     """
     start_bot = True
+    is_taken_name = False
+    name = ''
     while start_bot:
         try:
-            user_input = input()
+            if not is_taken_name:
+                name = input("What's your name? ")
+                is_taken_name = True
+                print(f"Hi {name}!".upper())
 
-            bot_response = bot.get_response(user_input)
+            user_input = input("Escribi algo: ")
 
-            print(bot_response)
+            bot_response = str(bot.get_response(user_input))
+
+            if "(" in bot_response or ")" in bot_response:
+                exec(bot_response)
+            else:
+                print(bot_response)
 
         except (KeyboardInterrupt, EOFError, SystemExit):
             start_bot = False
 
 
 def main():
-    bot = ChatBot(
-        'Terminal',
-        storage_adapter='chatterbot.storage.SQLStorageAdapter',
-        logic_adapters=[
-            'chatterbot.logic.MathematicalEvaluation',
-            'chatterbot.logic.TimeLogicAdapter',
-            'chatterbot.logic.BestMatch'
-        ],
-        database_uri='sqlite:///database.db'
-    )
+    bot = ChatBot(name='Crux')
+
+    trainer = ChatterBotCorpusTrainer(bot)
+    trainer.train('./trainer.yml')
+
     run_bot(bot)
+
+
+main()

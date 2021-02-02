@@ -1,0 +1,9 @@
+category:
+- greetings
+conversations:
+- - Hello my friend
+  - hello(False)
+- - A test
+  - api.test()
+- - Hi
+  - Hi! How are you?

@@ -9,9 +9,14 @@ UPDATE_POST_OPTION = 1
 GET_POST_OPTION = 2
 
 
+def test():
+    print("Esto es un testeo carnal, no mas que eso")
+
+
 def connectionApi(user_token=USER_TOKEN) -> tuple or Exception:
     """
     Returns the GraphApi and checks if there was any error while connecting to Facebook
+    :parameter user_token:  :type str
     :return:
     """
     api = ''
@@ -46,9 +51,9 @@ def upload_to_albums(graph, caption, path) -> None:
     """
     PRE: It needs the graph, a caption for the photo, and the path for said photo
     POST: It uploads it to an album which the user specifies
-    :param graph:
-    :param caption:
-    :param path:
+    :param graph: :type facebook.GraphAPI
+    :param caption: :type str
+    :param path: :type str
     :return:
     """
     path = search_file()
@@ -75,7 +80,7 @@ def upload_photo(graph, caption) -> None or Exception:
     PRE: Needs the path of the picture and a caption
     POST: It uploads it with a caption written by the user
     :param graph:
-    :param caption:
+    :param caption: :type str
     :return:
     """
     path = search_file()
