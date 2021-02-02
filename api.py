@@ -3,20 +3,16 @@ import os
 from instabot import Bot
 from logs import write_status_log
 
-USER_TOKEN = "EAAGJNkHBQZAEBAPaFOXzg1ZBiEiKcmHJlKEOQCygEwsH20hhYlqc9mmPZCEv3pbfxIHR7qxEykjKniz38wZAZASrxZCDiFKu4ICZBvWjEJqB22N2BRc2ClIrlJ2gMXuYn63SdYsBsco1K17ITTgcuRL20esIzhehdh91MZBXsuFDL0AYff9kKrFBQ2uHuSoow9nfVpjSgnQzfAZDZD"
+
+USER_TOKEN = "EAAGJNkHBQZAEBAO73ZAGv7kK71OPd3a7TSmF17OxluZBkOLKgQ8GZAvPm4J5PWUzwKdZCHrSQE2SuNmFl2lTgPcSZCY5hPbV8ZBfPElL1hkIJC2Ra7tucOf3m2Y0Qo90X9ZAfYcZBfDOfaf46CbmXQ0usEmkmg3yF8Ywr134bVeMlpJ1tJm164AmNghli50YJULkZD"
 READ_POST_OPTION = 0
 UPDATE_POST_OPTION = 1
 GET_POST_OPTION = 2
 
 
-def test():
-    print("Esto es un testeo carnal, no mas que eso")
-
-
 def connectionApi(user_token=USER_TOKEN) -> tuple or Exception:
     """
     Returns the GraphApi and checks if there was any error while connecting to Facebook
-    :parameter user_token:  :type str
     :return:
     """
     api = ''
@@ -30,7 +26,7 @@ def connectionApi(user_token=USER_TOKEN) -> tuple or Exception:
         print(error)
     write_status_log(200, 'You have successfully connected with the api')
     print('You have successfully connected with the Facebook api')
-    return api, True
+    return api
 
 
 def search_file() -> str:
@@ -47,13 +43,13 @@ def search_file() -> str:
     return path
 
 
-def upload_to_albums(graph, caption, path) -> None:
+def upload_to_albums(graph) -> None:
     """
     PRE: It needs the graph, a caption for the photo, and the path for said photo
     POST: It uploads it to an album which the user specifies
-    :param graph: :type facebook.GraphAPI
-    :param caption: :type str
-    :param path: :type str
+    :param graph:
+    :param caption:
+    :param path:
     :return:
     """
     path = search_file()
@@ -71,19 +67,20 @@ def upload_to_albums(graph, caption, path) -> None:
     while select > counter or select < 1:
         select = int(input("Seleccione el album: "))
 
+    caption = input("Caption: ")
     graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
 
-
 # TODO Refactorizar las funciones de posts y photos, son muy similares todas
-def upload_photo(graph, caption) -> None or Exception:
+def upload_photo(graph) -> None or Exception:
     """
     PRE: Needs the path of the picture and a caption
     POST: It uploads it with a caption written by the user
     :param graph:
-    :param caption: :type str
+    :param caption:
     :return:
     """
     path = search_file()
+    caption = input("Caption: ")
     try:
         graph.put_photo(image=open(path, 'rb'), message=caption)
     except FileNotFoundError:
@@ -93,12 +90,12 @@ def upload_photo(graph, caption) -> None or Exception:
 
 
 def upload_post(graph) -> None or Exception:
-    user_message = input("Que desea escribir?: ").capitalize()
+    user_message = input("What would you like to write?: ").capitalize()
     try:
         graph.put_object(parent_object='me', connection_name='feed', message=user_message)
     except Exception as error:
         write_status_log('Failed', error)
-        print(f"Hubo un problema subiendo su post, error: {error}")
+        print(f"There was a problem uploading your post, error: {error}")
 
 
 def like_post(graph):
@@ -166,7 +163,7 @@ def get_post_to_edit(graph) -> str or int:
     posts_id = []
     posts = graph.get_connections(id='me', connection_name='posts')
     info_list = posts['data']
-    print("Sus posts son: ")
+    print("This are your last 5 posts: ")
     for info in info_list[0:5]:
         if 'message' in info:
             print(f"{counter} -", info["message"])
@@ -174,7 +171,7 @@ def get_post_to_edit(graph) -> str or int:
             posts_id.append(info["id"])
 
     while option > counter or option < 1:
-        option = int(input("Seleccione el post a editar: "))
+        option = int(input("Select one: "))
 
     return posts_id[option - 1]
 
@@ -186,19 +183,19 @@ def edit_post(graph) -> None:
     :return:
     """
     post = get_post_to_edit(graph)
-
+    
     option = input("Do you want to delete the post or edit?: ").lower()
 
     if option in ['delete', 'd', 'del', 'delete post']:
         graph.delete_object(id=post)
     elif option in ['edit', 'e', 'ed', 'edit post']:
-        text = input("Que desea escribir: ").capitalize()
+        text = input("What would you like to post?: ").capitalize()
         graph.put_object(parent_object=post, connection_name='', message=text)
 
 
 # <======= INSTAGRAM =========>
 
-def connectionInstagram(username='crux.bot', password='crux123') -> tuple or Exception:
+def connectionInstagram(username='crux.bot', password='crux123'):
     """
 
     :param username:
@@ -229,16 +226,13 @@ def search_users(bot) -> None:
     query = input("Who do you want to search? ")
     bot.search_users(query=query)
     json_data = bot.last_json
-    counter = 1
     if json_data['num_results'] > 0:
         print("The users found are \n")
         for user in json_data['users']:
             full_data = ''
-            full_data += f"{counter}) {user['username']} - {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
+            full_data += f"{user['username']} {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
             if 'social_context' in user.keys():
-                full_data += f" - someone you know follows this account: {user['social_context']}"
-            print(full_data, '\n')
-            counter += 1
+                full_data += f" Someone you know follows this account: {user['social_context']}"
 
     else:
         print("")
