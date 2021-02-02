@@ -198,7 +198,7 @@ def edit_post(graph) -> None:
 
 # <======= INSTAGRAM =========>
 
-def connectionInstagram(username='crux.bot', password='crux123'):
+def connectionInstagram(username='crux.bot', password='crux123') -> tuple or Exception:
     """
 
     :param username:
