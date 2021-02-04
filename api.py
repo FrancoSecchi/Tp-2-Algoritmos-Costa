@@ -3,7 +3,6 @@ import os
 from instabot import Bot
 from logs import write_status_log
 
-
 USER_TOKEN = "EAAGJNkHBQZAEBAO73ZAGv7kK71OPd3a7TSmF17OxluZBkOLKgQ8GZAvPm4J5PWUzwKdZCHrSQE2SuNmFl2lTgPcSZCY5hPbV8ZBfPElL1hkIJC2Ra7tucOf3m2Y0Qo90X9ZAfYcZBfDOfaf46CbmXQ0usEmkmg3yF8Ywr134bVeMlpJ1tJm164AmNghli50YJULkZD"
 READ_POST_OPTION = 0
 UPDATE_POST_OPTION = 1
@@ -69,6 +68,7 @@ def upload_to_albums(graph) -> None:
 
     caption = input("Caption: ")
     graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
+
 
 # TODO Refactorizar las funciones de posts y photos, son muy similares todas
 def upload_photo(graph) -> None or Exception:
@@ -183,7 +183,7 @@ def edit_post(graph) -> None:
     :return:
     """
     post = get_post_to_edit(graph)
-    
+
     option = input("Do you want to delete the post or edit?: ").lower()
 
     if option in ['delete', 'd', 'del', 'delete post']:
@@ -195,7 +195,7 @@ def edit_post(graph) -> None:
 
 # <======= INSTAGRAM =========>
 
-def connectionInstagram(username='crux.bot', password='crux123'):
+def connectionInstagram(username='crux.bot', password='crux123') -> object:
     """
 
     :param username:
@@ -214,7 +214,7 @@ def connectionInstagram(username='crux.bot', password='crux123'):
     write_status_log(200, 'You have successfully connected with the Instagram bot')
     print('You have successfully connected with the Instagram bot')
 
-    return instaBot, True
+    return instaBot
 
 
 def search_users(bot) -> None:
