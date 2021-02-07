@@ -1,7 +1,8 @@
 from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer
-from logs import write_chat_bot
-import api
+from chatterbot.trainers import ListTrainer
+from logs import write_chat_bot, write_status_log
+import facebook_bot
+import instagram_bot
 
 # The following loop will execute each time the user enters input
 def run_bot(bot):
@@ -24,7 +25,7 @@ def run_bot(bot):
 
             bot_response = str(bot.get_response(user_input))
 
-            if "(" in bot_response or ")" in bot_response:
+            if "_" in bot_response:
                 exec(bot_response)
             else:
                 print(bot_response)
@@ -36,8 +37,19 @@ def run_bot(bot):
 def main():
     bot = ChatBot(name='Crux')
 
-    trainer = ChatterBotCorpusTrainer(bot)
-    trainer.train('./trainer.yml')
+    trainer = ListTrainer(bot)
+    list_trainer = []
+    try:
+        with open("trainer.txt") as file:
+            lines = file.readlines()
+    except Exception as error:
+        write_status_log(error, 'Failed')
+        raise Exception(error)
+
+    for line in lines:
+        list_trainer.append(line.strip())
+
+    trainer.train(list_trainer)
 
     run_bot(bot)
 
