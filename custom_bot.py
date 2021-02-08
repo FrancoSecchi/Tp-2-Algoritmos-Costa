@@ -1,10 +1,8 @@
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-from logs import write_chat_bot, write_status_log
-import facebook_bot
-import instagram_bot
+from logs import write_status_log, write_chat_bot, user_options, SAVE_USER
+from apis import facebook, instagram
 
-# The following loop will execute each time the user enters input
 def run_bot(bot):
     """
 
@@ -13,13 +11,13 @@ def run_bot(bot):
     """
     start_bot = True
     is_taken_name = False
-    name = ''
     while start_bot:
         try:
             if not is_taken_name:
                 name = input("What's your name? ")
                 is_taken_name = True
                 print(f"Hi {name}!".upper())
+                user_options(SAVE_USER, name)
 
             user_input = input("Escribi algo: ")
 

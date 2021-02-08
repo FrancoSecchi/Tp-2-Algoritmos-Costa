@@ -1,10 +1,5 @@
 from instabot import Bot
-from logs import write_status_log
-
-
-# ESTO SE USA PARA TESTEAR EL TRAINER.TXT
-def hello():
-    print("Uesa kpo desde instagram")
+from logs import write_status_log, write_chat_bot, user_options, GET_NAME
 
 
 def connection_instagram(username='crux.bot', password='crux123') -> object:
@@ -24,7 +19,8 @@ def connection_instagram(username='crux.bot', password='crux123') -> object:
         write_status_log(500, error)
         raise Exception(error)
     write_status_log(200, 'You have successfully connected with the Instagram bot')
-    print('You have successfully connected with the Instagram bot')
+    write_chat_bot('You have successfully connected with the Instagram bot')
+    print('You have successfully connected with the Instagram api!')
 
     return instaBot
 
@@ -35,10 +31,15 @@ def search_users(bot) -> None:
     :param bot:
     :return:
     """
+    user_name = user_options(GET_NAME)
     query = input("Who do you want to search? ")
+    write_chat_bot("Who do you want to search? ")
+    write_chat_bot(query, user_name)
+
     bot.search_users(query=query)
     bot.upload_photo()
     json_data = bot.last_json
+    text_to_log = "The users found are \n"
     if json_data['num_results'] > 0:
         print("The users found are \n")
         for user in json_data['users']:
@@ -46,6 +47,9 @@ def search_users(bot) -> None:
             full_data += f"{user['username']} {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
             if 'social_context' in user.keys():
                 full_data += f" Someone you know follows this account: {user['social_context']}"
+            print(full_data)
+            text_to_log += full_data
+        write_chat_bot(text_to_log)
 
     else:
         print("")

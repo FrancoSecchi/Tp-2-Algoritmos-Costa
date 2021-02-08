@@ -1,5 +1,8 @@
 from datetime import datetime
 
+GET_NAME = 0
+SAVE_USER = 1
+
 
 def get_formatted_time() -> str:
     """
@@ -28,7 +31,13 @@ def write_status_log(message, status_code='Success') -> None or Exception:
         print(error)
 
 
-def write_chat_bot(user, message) -> None or Exception:
+def write_chat_bot(message, user='Crux') -> None or Exception:
+    """
+
+    :param message:
+    :param user:
+    :return:
+    """
     format_date = get_formatted_time()
     string = f"{format_date}, {user}, '{message}'"
     try:
@@ -36,3 +45,24 @@ def write_chat_bot(user, message) -> None or Exception:
             file.write(string + '\n')
     except Exception as error:
         print(error)
+
+
+def user_options(action, *args) -> str or None or Exception:
+    """
+
+    :param action:
+    :param args:
+    :return:
+    """
+    option_file = 'r' if action == GET_NAME else 'a'
+    try:
+        with open('session.txt', option_file) as file:
+            if option_file == GET_NAME:
+                return file.readline()
+            else:
+                for name in args:
+                    file.write(name)
+
+    except Exception as error:
+        write_status_log(error, 'Failed')
+        raise Exception(error)
