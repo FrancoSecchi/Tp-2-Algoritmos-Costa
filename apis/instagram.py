@@ -1,4 +1,5 @@
 from instabot import Bot
+from instagram_private_api import Client
 from logs import write_status_log, write_chat_bot, user_options, GET_NAME
 
 
