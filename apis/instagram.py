@@ -6,6 +6,7 @@ from logs import write_status_log, write_chat_bot, user_options, GET_NAME
 def connection_instagram(username='crux.bot', password='crux123') -> object:
     """
     PRE: The parameter can't be null
+    POST:
     :param username:
     :param password:
     :return:
@@ -49,7 +50,7 @@ def search_users(bot) -> None:
             if 'social_context' in user.keys():
                 full_data += f" Someone you know follows this account: {user['social_context']}"
             print(full_data)
-            text_to_log += full_data
+            text_to_log += full_data + '\n'
         write_chat_bot(text_to_log)
 
     else:
@@ -73,3 +74,13 @@ def follow_actions(bot, username, type_follow='follow') -> bool or Exception:
     except Exception as error:
         write_status_log(error, 500)
         print(error)
+
+
+def get_profile(bot):
+    """
+    PRE: -
+    POST: -
+    :param bot: Client
+    :return:
+    """
+    return False

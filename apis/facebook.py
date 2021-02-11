@@ -7,11 +7,6 @@ READ_POST_OPTION = 0
 UPDATE_POST_OPTION = 1
 GET_POST_OPTION = 2
 
-# ESTO SE USA PARA TESTEAR EL TRAINER.TXT
-def hello():
-    print("Uesa kpo desde facebook")
-
-
 def connection_api(user_token=USER_TOKEN) -> object or Exception:
     """
     Returns the GraphApi and checks if there was any error while connecting to Facebook
