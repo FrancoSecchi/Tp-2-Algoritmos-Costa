@@ -40,16 +40,12 @@ facebook_bot.read_post(graph)
 
 I want to know my follower count
 facebook_bot.follower_count(graph)
-How many do i have?
+How many followers do i have?
 facebook_bot.follower_count(graph)
 How much people follow me?
 facebook_bot.follower_count(graph)
 follow
 facebook_bot.follower_count(graph)
-
------------INSTAGRAM-----------
-
-
 
 -----------PROBLEMS------------
 sdgsdgsdf

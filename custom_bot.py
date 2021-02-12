@@ -10,6 +10,7 @@ def run_bot(bot):
     :param bot:
     :return:
     """
+    graph = facebook_bot.connection_api()
     start_bot = True
     is_taken_name = False
     while start_bot:
@@ -20,9 +21,9 @@ def run_bot(bot):
                 print(f"Hi {name}!".upper())
                 user_options(SAVE_USER, name)
 
-            user_input = input("Escribi algo: ")
+            user_input = input("You: ")
 
-            bot_response = str(bot.get_response(user_input))
+            bot_response ="Crux: "+str(bot.get_response(user_input))
 
             if "_" in bot_response:
                 exec(bot_response)
@@ -35,12 +36,12 @@ def run_bot(bot):
 
 def main():
     bot = ChatBot(name='Crux')
-
     trainer = ListTrainer(bot)
     list_trainer = []
     try:
         with open("trainer.txt") as file:
             lines = file.readlines()
+
     except Exception as error:
         write_status_log(error, 'Failed')
         raise Exception(error)
