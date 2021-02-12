@@ -1,11 +1,12 @@
-import facebook
-import os
 from logs import write_status_log
+import facebook
+import os.path
 
 USER_TOKEN = "EAAGJNkHBQZAEBAO73ZAGv7kK71OPd3a7TSmF17OxluZBkOLKgQ8GZAvPm4J5PWUzwKdZCHrSQE2SuNmFl2lTgPcSZCY5hPbV8ZBfPElL1hkIJC2Ra7tucOf3m2Y0Qo90X9ZAfYcZBfDOfaf46CbmXQ0usEmkmg3yF8Ywr134bVeMlpJ1tJm164AmNghli50YJULkZD"
 READ_POST_OPTION = 0
 UPDATE_POST_OPTION = 1
 GET_POST_OPTION = 2
+
 
 def connection_api(user_token=USER_TOKEN) -> object or Exception:
     """
@@ -27,18 +28,20 @@ def connection_api(user_token=USER_TOKEN) -> object or Exception:
     return api
 
 
-def search_file() -> str:
+def search_file() -> str or bool:
     """
     PRE: -
     POST: Searchs for a photo in the user desktop. The file must be .jpg
     :return:
     """
-    name = input("Ingrese el nombre del archivo: ")
+    found_file = False
     path = ''
-    for root, dirs, files in os.walk(os.path.join(os.environ["HOMEPATH"], "Desktop")):
-        for file in files:
-            if file.endswith(name + ".jpg"):
-                path = "C:" + root + f"\{str(file)}"
+    while not found_file:
+        path = input("Enter the file path: ")
+        if os.path.exists(path):
+            found_file = True
+        else:
+            print("The path doesnt exists, please enter a correct path \n")
     return path
 
 
@@ -50,23 +53,23 @@ def upload_to_albums(graph) -> None:
     :return:
     """
     path = search_file()
-    counter = 1
-    select = 0
-    albums_id = []
-    albums = graph.get_connections(id='me', connection_name='albums')
-    info_list = albums['data']
-    print("Sus albums son: ")
-    for info in info_list[0:5]:
-        print(f"{counter} -", info["name"])
-        counter += 1
-        albums_id.append(info["id"])
+    if path:
+        counter = 1
+        select = 0
+        albums_id = []
+        albums = graph.get_connections(id='me', connection_name='albums')
+        info_list = albums['data']
+        print("Sus albums son: ")
+        for info in info_list[0:5]:
+            print(f"{counter} -", info["name"])
+            counter += 1
+            albums_id.append(info["id"])
 
-    while select > counter or select < 1:
-        select = int(input("Seleccione el album: "))
+        while select > counter or select < 1:
+            select = int(input("Seleccione el album: "))
 
-    caption = input("Caption: ")
-    graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
-
+        caption = input("Caption: ")
+        graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
 
 # TODO Refactorizar las funciones de posts y photos, son muy similares todas
 def upload_photo(graph) -> None or Exception:
@@ -202,6 +205,3 @@ def edit_post(graph) -> None:
     elif option in ['edit', 'e', 'ed', 'edit post']:
         text = input("What would you like to post?: ").capitalize()
         graph.put_object(parent_object=post, connection_name='', message=text)
-
-
-

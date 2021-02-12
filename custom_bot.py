@@ -1,7 +1,8 @@
+from apis import facebook, instagram
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 from logs import write_status_log, write_chat_bot, user_options, SAVE_USER
-from apis import facebook, instagram
+
 
 def run_bot(bot):
     """
@@ -45,7 +46,8 @@ def main():
         raise Exception(error)
 
     for line in lines:
-        list_trainer.append(line.strip())
+        if "---" not in line or line:
+            list_trainer.append(line.strip())
 
     trainer.train(list_trainer)
 

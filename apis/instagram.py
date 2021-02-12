@@ -15,19 +15,19 @@ def connection_instagram(username='crux.bot', password='crux123') -> object:
     try:
         instaBot.login(username=username, password=password)
     except ConnectionError as error:
-        write_status_log(503, error)
+        write_status_log(error, 'Connection error')
         raise ConnectionError(f'You dont have internet: {error}')
     except Exception as error:
-        write_status_log(500, error)
+        write_status_log(error, 'Internal server error')
         raise Exception(error)
-    write_status_log(200, 'You have successfully connected with the Instagram bot')
+    write_status_log('You have successfully connected with the Instagram bot')
     write_chat_bot('You have successfully connected with the Instagram bot')
     print('You have successfully connected with the Instagram api!')
 
     return instaBot
 
 
-def search_users(bot) -> None:
+def show_search_users(bot) -> None:
     """
     PRE: The parameter can't be null
     :param bot:
@@ -39,11 +39,10 @@ def search_users(bot) -> None:
     write_chat_bot(query, user_name)
 
     bot.search_users(query=query)
-    bot.upload_photo()
     json_data = bot.last_json
     text_to_log = "The users found are \n"
     if json_data['num_results'] > 0:
-        print("The users found are \n")
+        print(text_to_log)
         for user in json_data['users']:
             full_data = ''
             full_data += f"{user['username']} {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
@@ -54,7 +53,8 @@ def search_users(bot) -> None:
         write_chat_bot(text_to_log)
 
     else:
-        print("")
+        print("No user with that name was found \n")
+        write_chat_bot("No user with that name was found \n")
 
 
 def follow_actions(bot, username, type_follow='follow') -> bool or Exception:
@@ -72,15 +72,11 @@ def follow_actions(bot, username, type_follow='follow') -> bool or Exception:
         else:
             return True if bot.unfollow(user_id=user_id) else False
     except Exception as error:
-        write_status_log(error, 500)
-        print(error)
+        write_status_log(error, 'Internal server error')
+        raise Exception(error)
 
-
-def get_profile(bot):
+def ():
     """
-    PRE: -
-    POST: -
-    :param bot: Client
+
     :return:
     """
-    return False
