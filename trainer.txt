@@ -47,6 +47,11 @@ facebook_bot.follower_count(graph)
 follow
 facebook_bot.follower_count(graph)
 
+-----------INSTAGRAM-----------
+follow person
+instagram.follow_actions(insta_bot)
+
+
 -----------PROBLEMS------------
 sdgsdgsdf
 Im sorry, i couldn't get that

@@ -1,6 +1,6 @@
 from instabot import Bot
 from instagram_private_api import Client
-from logs import write_status_log, write_chat_bot, user_options, GET_NAME
+from logs import write_status_log, remove_file, write_chat_bot, user_options, GET_NAME
 
 
 def connection_instagram(username='crux.bot', password='crux123') -> object:
@@ -11,6 +11,7 @@ def connection_instagram(username='crux.bot', password='crux123') -> object:
     :param password:
     :return:
     """
+    remove_file('config/crux.bot_uuid_and_cookie.json')
     instaBot = Bot()
     try:
         instaBot.login(username=username, password=password)
@@ -57,7 +58,7 @@ def show_search_users(bot) -> None:
         write_chat_bot("No user with that name was found \n")
 
 
-def follow_actions(bot, username, type_follow='follow') -> bool or Exception:
+def follow_actions(bot, type_follow='follow') -> bool or Exception:
     """
     PRE: The parameter can't be null
     :param type_follow:
@@ -65,18 +66,22 @@ def follow_actions(bot, username, type_follow='follow') -> bool or Exception:
     :param username:
     :return:
     """
+    show_search_users(bot)
+    username = input(f"Who do you want to {type_follow}? ")
     try:
         user_id = bot.get_user_id_from_username(username)
+
+        print(bot.last_json)
         if type_follow == 'follow':
-            return True if bot.follow(user_id=user_id) else False
+            if bot.follow(user_id=user_id):
+                print("Se ha seguido al usuario con exito!")
+            else:
+                print("Hubo un problemita capo")
         else:
-            return True if bot.unfollow(user_id=user_id) else False
+            if bot.unfollow(user_id=user_id):
+                print("Se ha seguido al usuario con exito!")
+            else:
+                print("Hubo un problemita capo")
     except Exception as error:
         write_status_log(error, 'Internal server error')
         raise Exception(error)
-
-def ():
-    """
-
-    :return:
-    """

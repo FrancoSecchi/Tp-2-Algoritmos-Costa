@@ -1,7 +1,7 @@
 from apis import facebook, instagram
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-from logs import write_status_log, write_chat_bot, user_options, SAVE_USER
+from logs import write_status_log, remove_file , write_chat_bot, user_options, SAVE_USER
 
 
 def run_bot(bot):
@@ -10,20 +10,21 @@ def run_bot(bot):
     :param bot:
     :return:
     """
-    graph = facebook_bot.connection_api()
-    start_bot = True
+    #graph = facebook.connection_api()
+    insta_bot = instagram.connection_instagram()
+    running = True
     is_taken_name = False
-    while start_bot:
+    while running:
         try:
             if not is_taken_name:
                 name = input("What's your name? ")
                 is_taken_name = True
                 print(f"Hi {name}!".upper())
-                user_options(SAVE_USER, name)
+                user_options(SAVE_USER, name=name, first_time=True)
 
             user_input = input("You: ")
 
-            bot_response ="Crux: "+str(bot.get_response(user_input))
+            bot_response = str(bot.get_response(user_input))
 
             if "_" in bot_response:
                 exec(bot_response)
@@ -31,19 +32,20 @@ def run_bot(bot):
                 print(bot_response)
 
         except (KeyboardInterrupt, EOFError, SystemExit):
-            start_bot = False
+            running = False
 
 
 def main():
     bot = ChatBot(name='Crux')
     trainer = ListTrainer(bot)
     list_trainer = []
+    remove_file('status.txt')
     try:
         with open("trainer.txt") as file:
             lines = file.readlines()
 
     except Exception as error:
-        write_status_log(error, 'Failed')
+        write_status_log('Failed', error)
         raise Exception(error)
 
     for line in lines:

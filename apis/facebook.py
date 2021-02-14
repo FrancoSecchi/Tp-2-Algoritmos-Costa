@@ -22,7 +22,7 @@ def connection_api(user_token=USER_TOKEN) -> object or Exception:
         write_status_log(error, 'Failed')
         raise Exception(error)
     else:
-        write_status_log('You have successfully connected with the api')
+        write_status_log('Successfully connected with the api')
         print('You have successfully connected with the Facebook api!')
 
     return api
@@ -31,7 +31,7 @@ def connection_api(user_token=USER_TOKEN) -> object or Exception:
 def search_file() -> str or bool:
     """
     PRE: -
-    POST: Searchs for a photo in the user desktop. The file must be .jpg
+    POST: Searches for a photo in the user desktop. The file must be .jpg
     :return:
     """
     found_file = False
@@ -70,6 +70,7 @@ def upload_to_albums(graph) -> None:
 
         caption = input("Caption: ")
         graph.put_photo(image=open(path, 'rb'), album_path=albums_id[select - 1] + "/photos", message=caption)
+
 
 # TODO Refactorizar las funciones de posts y photos, son muy similares todas
 def upload_photo(graph) -> None or Exception:
@@ -200,8 +201,8 @@ def edit_post(graph) -> None:
 
     option = input("Do you want to delete the post or edit?: ").lower()
 
-    if option in ['delete', 'd', 'del', 'delete post']:
+    if option in ['delete', 'd', 'del', 'delete post', 'delete the post']:
         graph.delete_object(id=post)
-    elif option in ['edit', 'e', 'ed', 'edit post']:
+    elif option in ['edit', 'e', 'ed', 'edit post', 'edit the post']:
         text = input("What would you like to post?: ").capitalize()
         graph.put_object(parent_object=post, connection_name='', message=text)

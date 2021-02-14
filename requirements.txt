@@ -1,4 +1,5 @@
-ChatterBot~=1.0.8
+spacy
+ChatterBot
 facebook-sdk
 instabot
 instagram_private_api
