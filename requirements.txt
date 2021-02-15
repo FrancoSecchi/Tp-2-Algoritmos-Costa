@@ -3,3 +3,4 @@ ChatterBot
 facebook-sdk
 instabot
 instagram_private_api
+termcolor

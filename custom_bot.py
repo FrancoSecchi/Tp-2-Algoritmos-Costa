@@ -18,8 +18,11 @@ def run_bot(bot):
         try:
             if not is_taken_name:
                 name = input("What's your name? ")
+                write_chat_bot("What's your name? ")
+                write_chat_bot(name, name)
                 is_taken_name = True
-                print(f"Hi {name}!".upper())
+                print(f"Hi {name}!")
+                write_chat_bot(f"Hi {name}!")
                 user_options(SAVE_USER, name=name, first_time=True)
 
             user_input = input("You: ")
@@ -40,6 +43,7 @@ def main():
     trainer = ListTrainer(bot)
     list_trainer = []
     remove_file('status.txt')
+    remove_file('chat.txt')
     try:
         with open("trainer.txt") as file:
             lines = file.readlines()
@@ -49,7 +53,7 @@ def main():
         raise Exception(error)
 
     for line in lines:
-        if "---" not in line or line:
+        if "<" not in line or ">" not in line:
             list_trainer.append(line.strip())
 
     trainer.train(list_trainer)

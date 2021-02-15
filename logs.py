@@ -52,7 +52,6 @@ def user_options(action, **extra_data) -> str or None or Exception:
     """
 
     :param action:
-    :param args:
     :return:
     """
     option_file = 'r' if action == GET_NAME else 'a'
@@ -61,8 +60,8 @@ def user_options(action, **extra_data) -> str or None or Exception:
             if 'first_time' in extra_data.keys():
                 file.truncate(0)
                 file.write(extra_data['name'])
-            elif option_file == GET_NAME:
-                return file.readline().rstrip()
+            else:
+                return file.readline()
 
     except Exception as error:
         write_status_log(error, 'Failed')
