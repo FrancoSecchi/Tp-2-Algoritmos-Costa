@@ -1,6 +1,6 @@
 spacy
-ChatterBot
+ChatterBot~=1.0.8
 facebook-sdk
-instabot
+instabot~=0.117.0
 instagram_private_api
-termcolor
+termcolor~=1.1.0
