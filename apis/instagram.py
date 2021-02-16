@@ -3,7 +3,7 @@ from logs import write_status_log, write_chat_bot, user_options, GET_NAME
 import json
 import codecs
 import os.path
-from termcolor import cprint
+from termcolor import cprint, colored
 
 try:
     from instagram_private_api import (
@@ -20,7 +20,117 @@ except ImportError:
         __version__ as client_version)
 
 
-def edit_profile(bot) -> None or Exception:
+def check_if_following(bot, username) -> bool:
+    """
+    
+    :param bot:
+    :param username:
+    :return:
+    """
+    following = get_followings(bot, False)
+    user_info = bot.username_info(username)
+    can_get_feed = False
+    if user_info['user']['is_private']:
+        for users in following['users']:
+            if user_info['user']['pk'] in users:
+                can_get_feed = True
+    else:
+        can_get_feed = True
+    
+    return can_get_feed
+
+
+def prepare_text(post, post_to_show, attribute, **extra_data) -> tuple:
+    """
+
+    :param post:
+    :param post_to_show:
+    :param attribute:
+    :return:
+    """
+    title = colored(" {}: \n".format(extra_data['text']), 'white', attrs = ['bold'])
+    post_to_show += title
+    if attribute == "likers":
+        count_likes = int(post['like_count'])
+        if extra_data['username'] == extra_data['username_bot']:
+            if count_likes <= 5:
+                for users in post[attribute]:
+                    name = users['full_name'] if len(users['full_name']) else users['username']
+                    post_to_show += "\t- " + name + '\n'
+            else:
+                post_to_show += "\t- " + post[attribute][0]['full_name'] + " +{} users \n".format(int(count_likes) - 1)
+        else:
+            post_to_show += f"\t- total likes: {count_likes} \n"
+    else:
+        for comment in post[attribute]:
+            text_comment = "\t- " + f"'{comment['text']}'"
+            name = comment['user']['full_name'] if len(comment['user']['full_name']) else comment['user']['username']
+            post_to_show += text_comment + f" by {name} with {comment['comment_like_count']} likes \n"
+    
+    return post_to_show, title
+
+
+def show_user_feed(feed) -> None:
+    """
+    
+    :param feed:
+    :return:
+    """
+    number_post = 1
+    post_to_show = ''
+    for post in feed:
+        indicator_post = colored("\nPost Nº{} \n".format(number_post), 'white', attrs = ['bold', 'underline'])
+        title = colored('\n Caption: \n\t', 'white', attrs = ['bold'])
+        
+        if type(post["caption"]) == dict:
+            post_to_show += indicator_post + title + f'"{post["caption"]["text"]}"' + "\n"
+        else:
+            post_to_show += indicator_post + title + f'' + "\n"
+        
+        attributes = {'likers': "Likes", 'preview_comments': "Comments"}
+        
+        for attr, text in attributes.items():
+            post_to_show, title = prepare_text(post, post_to_show, attr, username = username, username_bot = username, text = text)
+        
+        number_post += 1
+        print(post_to_show)
+        write_chat_bot(post_to_show)
+        post_to_show = ''
+
+
+def likes_actions(bot, target = "comment") -> Exception or ClientError or None:
+    """
+    
+    :param bot:
+    :param target:
+    :return:
+    """
+    if target != "comment":
+        show_search_users(bot, "Which user do you want to like the posts? ")
+        write_chat_bot("Which user do you want to like the posts? \n Enter username: ")
+        username = input("Enter username: ")
+        try:
+            can_get_feed = check_if_following(bot, username)
+            if can_get_feed:
+                feed = bot.username_feed(username)
+                if feed['items'][0]:
+                    show_user_feed(feed)
+                    number_post = int(input("Which post would you like to post a like? enter the Nº: "))
+                    if number_post in [0, len(feed['items']) - 1]:
+                        id_post = feed['items'][number_post]
+                        result = bot.post_like(media_id = id_post)
+                        if result['status'] == 'ok':
+                            cprint("It has been liked correctly!", 'green', ['bold'])
+                else:
+                    cprint("The user has no posts", 'red', attrs = ['bold', 'underline'])
+            else:
+                cprint(f"You cannot access the feed of the user {username} because it is a private account that you do not follow, or because it has blocked you", 'red', attrs = ['bold', 'underline'])
+
+        except Exception as error:
+            raise Exception(error)
+
+
+def edit_profile(bot) -> Exception or ClientError or None:
     """
     PRE:
     POST:
@@ -81,7 +191,7 @@ def edit_profile(bot) -> None or Exception:
         raise Exception(error)
 
 
-def prepare_data(profile, attributes, data_change, genders):
+def prepare_data(profile, attributes, data_change, genders) -> None:
     """
     PRE:
     POST:
@@ -95,7 +205,7 @@ def prepare_data(profile, attributes, data_change, genders):
         if attribute == 'full_name':
             cprint("IMPORTANT!", 'red', attrs = ['bold', 'blink'])
             cprint(
-                "If you have changed the full name 2 times within a period of 14 days, you will not be able to modify your full name, just leave it empty, the program will not be able to change the full name. Be aware of your decision",
+                "If you have changed the full name 2 times within a period of 14 days, you will not be able to modify your full name, just leave it empty, the program will not be able to change the full name.\n Be aware of your decision",
                 'red',
                 attrs = ['bold'])
         change_attribute = input(f"Do you want to change {key}? yes/no: ".lower()) in ['yes', 'y', 'ye']
@@ -127,17 +237,17 @@ def prepare_data(profile, attributes, data_change, genders):
             data_change[attribute] = profile[attribute]
 
 
-def follow_actions(bot, type_follow = 'follow') -> bool or Exception or None:
+def follow_actions(bot, follow_type = 'follow') -> Exception or ClientError or None:
     """
     PRE: The parameter can't be null
     POST:
-    :param type_follow:
+    :param follow_type:
     :param bot:
     :return:
     """
-    if type_follow != 'follow':
-        results = show_followings(bot)
-        username = input(f"Who do you want to {type_follow}? ")
+    if follow_type != 'follow':
+        results = get_followings(bot)
+        username = input(f"Who do you want to {follow_type}? ")
         for user in results['users']:
             if user['username'] == username:
                 if bot.friendships_destroy(user['pk']):
@@ -147,12 +257,13 @@ def follow_actions(bot, type_follow = 'follow') -> bool or Exception or None:
     
     else:
         show_search_users(bot)
-        username = input(f"Who do you want to {type_follow}? ")
+        username = input(f"Who do you want to {follow_type}? ")
         try:
             user = bot.username_info(username)['user']
             user_id = user['pk']
             if bot.friendships_create(user_id = user_id):
                 text = f"{username} has a private account, we have sent him a request with success!" if user['is_private'] else f"{username} has been followed with success!"
+                write_chat_bot(text)
                 cprint(text, 'green', attrs = ['bold'])
             else:
                 text = "There was a problem performing the action, please try again"
@@ -164,33 +275,43 @@ def follow_actions(bot, type_follow = 'follow') -> bool or Exception or None:
             raise Exception(error)
 
 
-def show_followings(bot):
+def get_followings(bot, show = True, type_show = 'following') -> dict or list:
     """
     PRE:
     POST:
+    :param show:
+    :param type_show:
     :param bot:
     :return:
     """
     rank = bot.generate_uuid()
     user_id = bot.authenticated_user_id
-    results = bot.user_following(user_id, rank)
-    print("You are following: \n")
-    for user in results['users']:
-        print(f"{user['username']} \n")
+    if type_show == 'following':
+        results = bot.user_following(user_id, rank)
+        text = "You are following: \n"
+    else:
+        results = bot.user_followers(user_id, rank)
+        text = "Your followers: \n"
+    
+    if show:
+        cprint(text, 'blue', attrs = ['bold', 'underline'])
+        for user in results['users']:
+            print(f"{user['username']} \n")
     
     return results
 
 
-def show_search_users(bot) -> None:
+def show_search_users(bot, text = 'Who do you want to search?') -> None:
     """
     PRE: The parameter can't be null
     POST:
+    :param text:
     :param bot:
     :return:
     """
     user_name = user_options(GET_NAME)
-    query = input("Who do you want to search? ")
-    write_chat_bot("Who do you want to search? ")
+    query = input(text)
+    write_chat_bot(text)
     write_chat_bot(query, user_name)
     
     results = bot.search_users(query = query)
@@ -214,7 +335,7 @@ def show_search_users(bot) -> None:
 # ------------ CONNECTION AND CREDENTIALS ---------------#
 
 
-def to_json(python_object):
+def to_json(python_object) -> dict:
     """
     
     :param python_object:
@@ -237,7 +358,7 @@ def from_json(json_object):
     return json_object
 
 
-def onlogin_callback(api, new_settings_file):
+def onlogin_callback(api, new_settings_file) -> None:
     """
     :param api: the actual Client object
     :param new_settings_file: The json file where the credentials will be saved
@@ -262,7 +383,7 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
     """
     device_id = None
     try:
-        settings_file = 'credentials.json'
+        settings_file = os.path.abspath('credentials/instagram_api.json')
         if not os.path.isfile(settings_file):
             # If the credentials do not exist, do a new login
             insta_bot = Client(
@@ -277,7 +398,7 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
                 write_status_log(error, 'failed')
                 raise Exception(error)
             
-            print('Reusing settings: {0!s}'.format(settings_file))
+            print('Reusing settings: {0!s} \n'.format(settings_file))
             
             device_id = cached_settings.get('device_id')
             insta_bot = Client(
@@ -302,7 +423,8 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
         write_status_log('Unexpected Exception: {0!s}'.format(e), 'Exception')
         raise Exception('Unexpected Exception: {0!s}'.format(e))
     
-    write_status_log('It has been possible to connect successfully with instagram')
-    cprint("It has been possible to connect successfully with instagram", 'green', attrs = ['bold'])
+    write_status_log('You have successfully connected with the instagram!')
+    write_chat_bot('You have successfully connected with the instagram!')
+    cprint("You have successfully connected with the instagram! \n", 'green', attrs = ['bold'])
     
     return insta_bot
