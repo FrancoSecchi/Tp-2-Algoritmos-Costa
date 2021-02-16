@@ -40,7 +40,7 @@ def check_if_following(bot, username) -> bool:
     return can_get_feed
 
 
-def prepare_text(post, post_to_show, attribute, **extra_data) -> tuple:
+def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple:
     """
 
     :param post:
@@ -62,15 +62,17 @@ def prepare_text(post, post_to_show, attribute, **extra_data) -> tuple:
         else:
             post_to_show += f"\t- total likes: {count_likes} \n"
     else:
-        for comment in post[attribute]:
-            text_comment = "\t- " + f"'{comment['text']}'"
+        comment_number = 1
+        for comment in comments[attribute]:
+            text_comment = f"\tNº{comment_number} - " + f"'{comment['text']}'"
             name = comment['user']['full_name'] if len(comment['user']['full_name']) else comment['user']['username']
             post_to_show += text_comment + f" by {name} with {comment['comment_like_count']} likes \n"
+            comment_number += 1
     
     return post_to_show, title
 
 
-def show_user_feed(feed) -> None:
+def show_user_feed(bot, feed) -> None:
     """
     
     :param feed:
@@ -78,7 +80,9 @@ def show_user_feed(feed) -> None:
     """
     number_post = 1
     post_to_show = ''
-    for post in feed:
+    for post in feed['items']:
+        comments = bot.media_comments(post['pk'])
+        
         indicator_post = colored("\nPost Nº{} \n".format(number_post), 'white', attrs = ['bold', 'underline'])
         title = colored('\n Caption: \n\t', 'white', attrs = ['bold'])
         
@@ -87,15 +91,65 @@ def show_user_feed(feed) -> None:
         else:
             post_to_show += indicator_post + title + f'' + "\n"
         
-        attributes = {'likers': "Likes", 'preview_comments': "Comments"}
+        attributes = {'likers': "Likes", 'comments': "Comments"}
         
         for attr, text in attributes.items():
-            post_to_show, title = prepare_text(post, post_to_show, attr, username = username, username_bot = username, text = text)
+            post_to_show, title = prepare_text(post, post_to_show, attr, comments, username = username, username_bot = username, text = text)
         
         number_post += 1
         print(post_to_show)
         write_chat_bot(post_to_show)
         post_to_show = ''
+
+
+def validate_comment(feed, position_comment, bot):
+    """
+    
+    :param feed:
+    :param comment_post:
+    :return:
+    """
+    correct_post = False
+    while not correct_post:
+        if not feed[position_comment[0] - 1]:
+            cprint("The post doesnt exist, please enter a correct post number", 'red', attrs = ['bold'])
+            position_comment[0] = int(input("Number post: "))
+        else:
+            correct_post = True
+    
+    correct_comment = False
+    post = feed[position_comment[0] - 1]
+    comments = bot.media_comments(post['pk'])
+    
+    while not correct_comment:
+        if not comments['comments'][position_comment[1] - 1]:
+            cprint("The comment doesnt exist, please enter a correct comment number", 'red', attrs = ['bold'])
+            position_comment[1] = int(input("Number comment: "))
+        else:
+            correct_comment = True
+    
+    return position_comment
+
+
+def post_like_comment(bot, feed):
+    """
+    
+    :param bot:
+    :param feed:
+    :return:
+    """
+    if feed[0]:
+        position_comment = input("Which comment would you like to post a like? enter the post number and comment number. Ej: 1, 2 : ").split(',')
+        position_comment = [int(x.strip()) for x in position_comment]
+        position_comment = validate_comment(feed, position_comment, bot)
+        post_id = feed[position_comment[0] - 1]['pk']
+        comments = bot.media_comments(post_id)['comments']
+        id_comment = comments[position_comment[1] - 1]['pk']
+        result = bot.comment_like(id_comment)
+        if result['status'] == 'ok':
+            cprint(f"The comment '{comments[position_comment[1] - 1]['text']}' has been liked correctly", 'green', attrs = ['bold'])
+        else:
+            cprint(f"The comment '{comments[position_comment[1] - 1]['text']}' could not be liked, please try again later", 'red', attrs = ['bold', 'underline'])
 
 
 def likes_actions(bot, target = "comment") -> Exception or ClientError or None:
@@ -105,11 +159,11 @@ def likes_actions(bot, target = "comment") -> Exception or ClientError or None:
     :param target:
     :return:
     """
-    if target != "comment":
+    try:
         show_search_users(bot, "Which user do you want to like the posts? ")
         write_chat_bot("Which user do you want to like the posts? \n Enter username: ")
-        username = input("Enter username: ")
-        try:
+        if target != "comment":
+            username = input("Enter username: ")
             can_get_feed = check_if_following(bot, username)
             if can_get_feed:
                 feed = bot.username_feed(username)
@@ -117,7 +171,7 @@ def likes_actions(bot, target = "comment") -> Exception or ClientError or None:
                     show_user_feed(feed)
                     number_post = int(input("Which post would you like to post a like? enter the Nº: "))
                     if number_post in [0, len(feed['items']) - 1]:
-                        id_post = feed['items'][number_post]
+                        id_post = feed['items'][number_post]['pk']
                         result = bot.post_like(media_id = id_post)
                         if result['status'] == 'ok':
                             cprint("It has been liked correctly!", 'green', ['bold'])
@@ -125,9 +179,14 @@ def likes_actions(bot, target = "comment") -> Exception or ClientError or None:
                     cprint("The user has no posts", 'red', attrs = ['bold', 'underline'])
             else:
                 cprint(f"You cannot access the feed of the user {username} because it is a private account that you do not follow, or because it has blocked you", 'red', attrs = ['bold', 'underline'])
-
-        except Exception as error:
-            raise Exception(error)
+        else:
+            cprint("Your feeed: ", 'blue', attrs = ['bold'])
+            feed = bot.username_feed(bot.username)['items']
+            show_user_feed(bot, feed)
+            post_like_comment(bot, feed)
+            
+    except Exception as error:
+        raise Exception(error)
 
 
 def edit_profile(bot) -> Exception or ClientError or None:
