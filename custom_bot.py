@@ -13,6 +13,7 @@ def run_bot(bot):
     """
     #graph = facebook.connection_api()
     insta_bot = instagram.connection_instagram()
+    
     running = True
     is_taken_name = False
     print("Hello! I am Crux. I am the boss here. God I'm sorry ... I mean bot! Oh my, I'm damned if they find out I said that ... \n Ah, well, before Mark Zuckerberg finds me and steals my information.\n")

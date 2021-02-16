@@ -5,8 +5,7 @@ Hello
 Crux
 At your service!
 You
-Hola! I’m the friendly chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
-
+Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
 <-----------FACEBOOK------------>
 I want to upload a photo
 facebook.upload_photo(graph)
@@ -63,6 +62,12 @@ unlike comment
 instagram.likes_actions(insta_bot, 'comment', 'unlike')
 unlike post
 instagram.likes_actions(insta_bot, type_like = 'unlike')
+send message
+instagram.messages(insta_bot, 'send')
+get messages
+instagram.messages(insta_bot, 'show')
+messages
+instagram.messages(insta_bot, 'show')
 <-----------PROBLEMS------------>
 sdgsdgsdf
 Sorry, I don't speak in hexadecimal

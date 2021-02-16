@@ -1,9 +1,10 @@
 from instabot import Bot
 from logs import write_status_log, write_chat_bot, user_options, GET_NAME
-import json
-import codecs
-import os.path
 from termcolor import cprint, colored
+import codecs
+import json
+import logging
+import os.path
 
 try:
     from instagram_private_api import (
@@ -27,7 +28,7 @@ def check_if_following(bot, username) -> bool:
     :param username:
     :return:
     """
-    following = get_followings(bot, False)
+    following = get_follows(bot, False)
     user_info = bot.username_info(username)
     can_get_feed = False
     if user_info['user']['is_private']:
@@ -177,58 +178,8 @@ def already_liked(bot, id_property, type_like = 'post') -> bool:
     for likers in likes['users']:
         if bot_id == likers['pk']:
             is_liked = True
-            
+    
     return is_liked
-
-
-def unlike(bot, id_property, type_property = 'post'):
-    """
-    
-    :param bot:
-    :param id_property:
-    :param type_property:
-    :return:
-    """
-    
-    if type_property == 'post':
-        result = bot.delete_like(id_property)
-    else:
-        result = bot.comment_unlike(id_property)
-    
-    if result['status'] == 'ok':
-        cprint(f"The {type_property} is unliked correctly!\n", 'green', attrs = ['bold'])
-    else:
-        cprint(f"There was a problem disliking the {type_property}, please try again later!\n", 'red', attrs = ['bold'])
-
-
-def like(bot, id_property, type_property = 'post', comment_text = ''):
-    """
-    
-    :param id_property:
-    :param comment_text:
-    :param type_property:
-    :param bot:
-    :param id_post:
-    :return:
-    """
-    
-    if not already_liked(bot, id_property, type_property):
-        if type_property == 'post':
-            result = bot.post_like(media_id = id_property)
-        else:
-            result = bot.comment_like(comment_id = id_property)
-        
-        if result['status'] == 'ok':
-            text = "It has been liked correctly!\n" if type_property == 'post' else f"The comment '{comment_text}' has been liked correctly"
-            cprint(text, 'green', attrs = ['bold'])
-        else:
-            cprint(f"There was a problem liking the {type_property}, try again later!\n", 'red', attrs = ['bold', 'underline'])
-    else:
-        do_unlike = input(f"The {type_property} is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
-        if do_unlike:
-            unlike(bot, id_property, type_property)
-        else:
-            print("The like has been left as it was\n")
 
 
 def likes_actions(bot, target = "comment", type_like = 'like') -> Exception or ClientError or None:
@@ -284,6 +235,56 @@ def likes_actions(bot, target = "comment", type_like = 'like') -> Exception or C
     
     except Exception as error:
         raise Exception(error)
+
+
+def unlike(bot, id_property, type_property = 'post'):
+    """
+    
+    :param bot:
+    :param id_property:
+    :param type_property:
+    :return:
+    """
+    
+    if type_property == 'post':
+        result = bot.delete_like(id_property)
+    else:
+        result = bot.comment_unlike(id_property)
+    
+    if result['status'] == 'ok':
+        cprint(f"The {type_property} is unliked correctly!\n", 'green', attrs = ['bold'])
+    else:
+        cprint(f"There was a problem disliking the {type_property}, please try again later!\n", 'red', attrs = ['bold'])
+
+
+def like(bot, id_property, type_property = 'post', comment_text = ''):
+    """
+    
+    :param id_property:
+    :param comment_text:
+    :param type_property:
+    :param bot:
+    :param id_post:
+    :return:
+    """
+    
+    if not already_liked(bot, id_property, type_property):
+        if type_property == 'post':
+            result = bot.post_like(media_id = id_property)
+        else:
+            result = bot.comment_like(comment_id = id_property)
+        
+        if result['status'] == 'ok':
+            text = "It has been liked correctly!\n" if type_property == 'post' else f"The comment '{comment_text}' has been liked correctly"
+            cprint(text, 'green', attrs = ['bold'])
+        else:
+            cprint(f"There was a problem liking the {type_property}, try again later!\n", 'red', attrs = ['bold', 'underline'])
+    else:
+        do_unlike = input(f"The {type_property} is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
+        if do_unlike:
+            unlike(bot, id_property, type_property)
+        else:
+            print("The like has been left as it was\n")
 
 
 def edit_profile(bot) -> Exception or ClientError or None:
@@ -402,7 +403,7 @@ def follow_actions(bot, follow_type = 'follow') -> Exception or ClientError or N
     :return:
     """
     if follow_type != 'follow':
-        results = get_followings(bot)
+        results = get_follows(bot)
         username = input(f"Who do you want to {follow_type}? ")
         for user in results['users']:
             if user['username'] == username:
@@ -431,7 +432,7 @@ def follow_actions(bot, follow_type = 'follow') -> Exception or ClientError or N
             raise Exception(error)
 
 
-def get_followings(bot, show = True, type_show = 'following') -> dict or list:
+def get_follows(bot, show = True, type_show = 'following') -> dict or list:
     """
     PRE:
     POST:
@@ -486,6 +487,10 @@ def show_search_users(bot, text = 'Who do you want to search?') -> None:
     else:
         print("No user with that name was found \n")
         write_chat_bot("No user with that name was found \n")
+
+
+def messages(bot, type_action = 'send'):
+    aux_bot = connection_aux_api(bot.username, bot.password)
 
 
 # ------------ CONNECTION AND CREDENTIALS ---------------#
@@ -584,3 +589,22 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
     cprint("You have successfully connected with the instagram! \n", 'green', attrs = ['bold'])
     
     return insta_bot
+
+
+def connection_aux_api(username, password) -> object:
+    """
+    
+    :param username:
+    :param password:
+    :return:
+    """
+    try:
+        logging.disable(logging.CRITICAL)
+        aux_api = Bot(base_path = "credentials")
+        aux_api.login(username = username, password = password)
+    except Exception as error:
+        raise Exception(error)
+    
+    write_status_log('You have successfully connected with the auxiliar api!')
+    
+    return aux_api
