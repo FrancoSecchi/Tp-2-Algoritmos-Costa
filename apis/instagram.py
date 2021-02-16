@@ -43,6 +43,7 @@ def check_if_following(bot, username) -> bool:
 def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple:
     """
 
+    :param comments:
     :param post:
     :param post_to_show:
     :param attribute:
@@ -72,15 +73,33 @@ def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple
     return post_to_show, title
 
 
-def show_user_feed(bot, feed) -> None:
+def validate_number_post(number, max_number) -> int:
+    """
+
+    :param number:
+    :param max_number:
+    :return:
+    """
+    correct = False
+    while not correct:
+        if number < 0 or number >= max_number:
+            cprint("Number post incorrect", 'red', attrs = ['bold'])
+            number = int(input("Enter a valid posting number"))
+        else:
+            correct = True
+    return number
+
+
+def show_user_feed(bot, feed, **data_usernames) -> None:
     """
     
+    :param bot:
     :param feed:
     :return:
     """
     number_post = 1
     post_to_show = ''
-    for post in feed['items']:
+    for post in feed:
         comments = bot.media_comments(post['pk'])
         
         indicator_post = colored("\nPost Nº{} \n".format(number_post), 'white', attrs = ['bold', 'underline'])
@@ -94,7 +113,14 @@ def show_user_feed(bot, feed) -> None:
         attributes = {'likers': "Likes", 'comments': "Comments"}
         
         for attr, text in attributes.items():
-            post_to_show, title = prepare_text(post, post_to_show, attr, comments, username = username, username_bot = username, text = text)
+            post_to_show, title = prepare_text(
+                post,
+                post_to_show,
+                attr,
+                comments,
+                username = data_usernames['username'],
+                username_bot = data_usernames['username_bot'],
+                text = text)
         
         number_post += 1
         print(post_to_show)
@@ -102,9 +128,11 @@ def show_user_feed(bot, feed) -> None:
         post_to_show = ''
 
 
-def validate_comment(feed, position_comment, bot):
+def validate_post_comment(feed, position_comment, bot) -> list:
     """
     
+    :param bot:
+    :param position_comment:
     :param feed:
     :param comment_post:
     :return:
@@ -131,60 +159,129 @@ def validate_comment(feed, position_comment, bot):
     return position_comment
 
 
-def post_like_comment(bot, feed):
+def already_liked(bot, id_property, type_like = 'post') -> bool:
+    """
+    
+    :param id_property:
+    :param bot:
+    :param type_like:
+    :return:
+    """
+    is_liked = False
+    if type_like == 'post':
+        likes = bot.media_likers(id_property)['users']
+    else:
+        likes = bot.comment_likers(id_property)
+    
+    bot_id = int(bot.authenticated_user_id)
+    for likers in likes['users']:
+        if bot_id == likers['pk']:
+            is_liked = True
+            
+    return is_liked
+
+
+def unlike(bot, id_property, type_property = 'post'):
     """
     
     :param bot:
-    :param feed:
+    :param id_property:
+    :param type_property:
     :return:
     """
-    if feed[0]:
-        position_comment = input("Which comment would you like to post a like? enter the post number and comment number. Ej: 1, 2 : ").split(',')
-        position_comment = [int(x.strip()) for x in position_comment]
-        position_comment = validate_comment(feed, position_comment, bot)
-        post_id = feed[position_comment[0] - 1]['pk']
-        comments = bot.media_comments(post_id)['comments']
-        id_comment = comments[position_comment[1] - 1]['pk']
-        result = bot.comment_like(id_comment)
-        if result['status'] == 'ok':
-            cprint(f"The comment '{comments[position_comment[1] - 1]['text']}' has been liked correctly", 'green', attrs = ['bold'])
-        else:
-            cprint(f"The comment '{comments[position_comment[1] - 1]['text']}' could not be liked, please try again later", 'red', attrs = ['bold', 'underline'])
+    
+    if type_property == 'post':
+        result = bot.delete_like(id_property)
+    else:
+        result = bot.comment_unlike(id_property)
+    
+    if result['status'] == 'ok':
+        cprint(f"The {type_property} is unliked correctly!\n", 'green', attrs = ['bold'])
+    else:
+        cprint(f"There was a problem disliking the {type_property}, please try again later!\n", 'red', attrs = ['bold'])
 
 
-def likes_actions(bot, target = "comment") -> Exception or ClientError or None:
+def like(bot, id_property, type_property = 'post', comment_text = ''):
     """
     
+    :param id_property:
+    :param comment_text:
+    :param type_property:
+    :param bot:
+    :param id_post:
+    :return:
+    """
+    
+    if not already_liked(bot, id_property, type_property):
+        if type_property == 'post':
+            result = bot.post_like(media_id = id_property)
+        else:
+            result = bot.comment_like(comment_id = id_property)
+        
+        if result['status'] == 'ok':
+            text = "It has been liked correctly!\n" if type_property == 'post' else f"The comment '{comment_text}' has been liked correctly"
+            cprint(text, 'green', attrs = ['bold'])
+        else:
+            cprint(f"There was a problem liking the {type_property}, try again later!\n", 'red', attrs = ['bold', 'underline'])
+    else:
+        do_unlike = input(f"The {type_property} is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
+        if do_unlike:
+            unlike(bot, id_property, type_property)
+        else:
+            print("The like has been left as it was\n")
+
+
+def likes_actions(bot, target = "comment", type_like = 'like') -> Exception or ClientError or None:
+    """
+    
+    :param type_like:
     :param bot:
     :param target:
     :return:
     """
     try:
-        show_search_users(bot, "Which user do you want to like the posts? ")
-        write_chat_bot("Which user do you want to like the posts? \n Enter username: ")
         if target != "comment":
+            show_search_users(bot, f"Which user do you want to {type_like} the {target}? ")
+            write_chat_bot(f"Which user do you want to {type_like} the {target}? \n Enter username: ")
             username = input("Enter username: ")
             can_get_feed = check_if_following(bot, username)
             if can_get_feed:
-                feed = bot.username_feed(username)
-                if feed['items'][0]:
-                    show_user_feed(feed)
-                    number_post = int(input("Which post would you like to post a like? enter the Nº: "))
-                    if number_post in [0, len(feed['items']) - 1]:
-                        id_post = feed['items'][number_post]['pk']
-                        result = bot.post_like(media_id = id_post)
-                        if result['status'] == 'ok':
-                            cprint("It has been liked correctly!", 'green', ['bold'])
+                feed = bot.username_feed(username)['items']
+                feed_not_empty = feed[0]
+                if feed_not_empty:
+                    show_user_feed(bot, feed, username = username, username_bot = bot.username)
+                    number_post = int(input(f"Which post would you {type_like} to post a like? enter the Nº: ")) - 1
+                    number_post = validate_number_post(number_post, len(feed['items']))
+                    id_post = feed['items'][number_post]['pk']
+                    if type_like == 'like':
+                        like(bot, id_post)
+                    else:
+                        unlike(bot, id_post)
                 else:
-                    cprint("The user has no posts", 'red', attrs = ['bold', 'underline'])
+                    cprint("The user has no posts\n", 'red', attrs = ['bold', 'underline'])
             else:
-                cprint(f"You cannot access the feed of the user {username} because it is a private account that you do not follow, or because it has blocked you", 'red', attrs = ['bold', 'underline'])
+                cprint(f"You cannot access the feed of the user {username} because it is a private account that you do not follow, or because it has blocked you\n", 'red',
+                       attrs = ['bold', 'underline'])
         else:
-            cprint("Your feeed: ", 'blue', attrs = ['bold'])
+            cprint("Your feed: ", 'blue', attrs = ['bold'])
             feed = bot.username_feed(bot.username)['items']
-            show_user_feed(bot, feed)
-            post_like_comment(bot, feed)
-            
+            show_user_feed(bot, feed, username = bot.username, username_bot = bot.username)
+            feed_not_empty = feed[0]
+            if feed_not_empty:
+                position_comment = input(f"Which comment would you like to post a {type_like}? enter the post number and comment number. Ej: 1, 2 : ").split(',')
+                position_comment = [int(x.strip()) for x in position_comment]
+                position_comment = validate_post_comment(feed, position_comment, bot)
+                post_id = feed[position_comment[0] - 1]['pk']
+                comments = bot.media_comments(post_id)['comments']
+                id_comment = comments[position_comment[1] - 1]['pk']
+                if type_like == 'like':
+                    like(bot, id_comment, type_property = 'comment', comment_text = comments[position_comment[1] - 1]['text'])
+                else:
+                    unlike(bot, id_comment, type_property = 'comment')
+            else:
+                cprint("Your feed is empty", 'red', attrs = ['bold'])
+    
+    
     except Exception as error:
         raise Exception(error)
 
@@ -222,7 +319,7 @@ def edit_profile(bot) -> Exception or ClientError or None:
     
     print(all_data)
     text_to_log += all_data
-    prepare_data(profile, attributes, data_change, genders)
+    prepare_profile(profile, attributes, data_change, genders)
     
     write_chat_bot(text_to_log)
     
@@ -250,7 +347,7 @@ def edit_profile(bot) -> Exception or ClientError or None:
         raise Exception(error)
 
 
-def prepare_data(profile, attributes, data_change, genders) -> None:
+def prepare_profile(profile, attributes, data_change, genders) -> None:
     """
     PRE:
     POST:

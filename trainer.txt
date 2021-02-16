@@ -2,11 +2,11 @@
 Hi
 Welcome!
 Hello
-Greetings!
-Hello There
-General Kenobi
 Crux
 At your service!
+You
+Hola! I’m the friendly chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
+
 <-----------FACEBOOK------------>
 I want to upload a photo
 facebook.upload_photo(graph)
@@ -56,10 +56,16 @@ instagram.follow_actions(insta_bot, 'unfollow')
 edit profile
 instagram.edit_profile(insta_bot)
 like post
-instagram.like_actions(insta_bot, 'post')
+instagram.likes_actions(insta_bot, 'post')
+like comment
+instagram.likes_actions(insta_bot, 'comment')
+unlike comment
+instagram.likes_actions(insta_bot, 'comment', 'unlike')
+unlike post
+instagram.likes_actions(insta_bot, type_like = 'unlike')
 <-----------PROBLEMS------------>
 sdgsdgsdf
-Im sorry, i couldn't get that
+Sorry, I don't speak in hexadecimal
 haha
 What did you mean?
 "#$%$&#
