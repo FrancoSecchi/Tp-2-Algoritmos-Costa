@@ -40,7 +40,13 @@ How many followers do i have?
 facebook.follower_count(graph)
 How much people follow me?
 facebook.follower_count(graph)
-follow
+People follow me?
+facebook.follower_count(graph)
+follow me?
+facebook.follower_count(graph)
+follow me
+facebook.follower_count(graph)
+followers
 facebook.follower_count(graph)
 <-----------INSTAGRAM----------->
 follow person
@@ -49,6 +55,8 @@ unfollow person
 instagram.follow_actions(insta_bot, 'unfollow')
 edit profile
 instagram.edit_profile(insta_bot)
+like post
+instagram.like_actions(insta_bot, 'post')
 <-----------PROBLEMS------------>
 sdgsdgsdf
 Im sorry, i couldn't get that
