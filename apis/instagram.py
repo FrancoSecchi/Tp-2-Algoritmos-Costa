@@ -218,7 +218,15 @@ def post_comment(bot) -> None:
         if can_get_feed:
             feed = bot.username_feed(username)
             show_user_feed(bot, feed['items'], own_feed)
-            id_post = get_id_post(feed, "Which post would you like to comment on?")
+            comment_block = True
+            id_post, number_post = get_id_post(feed, "Which post would you like to comment on?", edit = True)
+            while comment_block:
+                if 'comments_disabled' in feed['items'][number_post]:
+                    comment_block = False
+                else:
+                    cprint("The post has the comments blocked, please choose another post", 'red', attrs = ['bold'])
+                    id_post, number_post = get_id_post(feed, "Which post would you like to comment on?", edit = True)
+                    
             message = input("Message: ")
             write_chat_bot("Message:")
             write_chat_bot(message, name)
@@ -226,7 +234,8 @@ def post_comment(bot) -> None:
             if result['status'] == 'ok':
                 cprint("The comment has been posted correctly!\n", 'green', attrs = ['bold'])
                 write_chat_bot("The comment has been posted correctly!")
-                
+        else:
+            cprint("You cant get the feed", 'red')
     except Exception as error:
         write_chat_bot(error, 'Failed')
         raise Exception(error)

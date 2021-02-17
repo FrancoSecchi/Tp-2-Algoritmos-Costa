@@ -72,8 +72,8 @@ def main():
     bot = ChatBot(name = 'Crux')
     trainer = ListTrainer(bot)
     list_trainer = []
-    remove_file('status.txt')
-    remove_file('chat.txt')
+    remove_file('logs/status.txt')
+    remove_file('logs/chat.txt')
     try:
         with open("trainer.txt") as file:
             lines = file.readlines()
