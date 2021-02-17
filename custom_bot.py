@@ -10,6 +10,7 @@ import sys
 def animation(text, time = 0.025):
     """
     
+    :param time:
     :param text:
     :return:
     """
