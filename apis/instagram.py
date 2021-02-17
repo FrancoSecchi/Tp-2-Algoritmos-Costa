@@ -554,19 +554,19 @@ def messages(bot, type_action = 'send'):
            attrs = ['bold', 'underline'])
     cprint("Please wait a few seconds\n", 'blue', attrs = ['bold'])
     try:
-        aux_api = connection_aux_api(bot.username, bot.password)
         if type_action != 'send':
-            last_messages = aux_api.get_messages()['inbox']
+            last_messages = bot.direct_v2_inbox()['inbox']
             show_last_messages(last_messages, bot.authenticated_user_id)
         else:
+            aux_api = connection_aux_api(bot.username, bot.password)
             show_search_users(bot, "Who do you want to send a message to? ")
             username = input("Please enter username: ")
+            user_info = bot.username_info(username)
+            result = aux_api.send_message()
     
     except Exception as error:
         raise Exception(error)
     
-    # ------------ CONNECTION AND CREDENTIALS ---------------#
-
 
 # ------------ CONNECTION AND CREDENTIALS ---------------#
 

@@ -155,7 +155,7 @@ def like_post(graph):
             print(f"{counter} -", info["created_time"][0:10])
     
     while option > counter or option < 1:
-        option = int(input("Seleccione el post a likear: "))
+        option = int(input("Select the post to like: "))
     
     graph.put_like(object_id = posts_id[option - 1])
 
