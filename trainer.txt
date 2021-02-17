@@ -71,6 +71,8 @@ edit comment insta
 instagram.edit_post_actions(insta_bot, edit_type = 'edit' , target_type = 'comment')
 delete comment insta
 instagram.edit_post_actions(insta_bot, edit_type = 'delete' , target_type = 'comment')
+post comment insta
+instagram.post_comment(insta_bot)
 sdgsdgsdf
 I'm sorry, I don't understand what you said
 haha
