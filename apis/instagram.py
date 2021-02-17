@@ -23,9 +23,10 @@ except ImportError:
 
 def check_if_following(bot, username) -> bool:
     """
-    
-    :param bot:
-    :param username:
+    PRE: All parameters are required
+    POST: Check if the current user follows the searched user. It is also used to know if I can access the user's feed
+    :param bot: :type object
+    :param username: :type string
     :return:
     """
     following = get_follows(bot, False)
@@ -43,7 +44,8 @@ def check_if_following(bot, username) -> bool:
 
 def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple:
     """
-
+    PRE: All parameter are required
+    POST: A string is formatted which will contain the visual structure of each post
     :param comments:
     :param post:
     :param post_to_show:
@@ -54,7 +56,7 @@ def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple
     post_to_show += title
     if attribute == "likers":
         count_likes = int(post['like_count'])
-        if extra_data['username'] == extra_data['username_bot']:
+        if extra_data['own_feed']:
             if count_likes <= 5:
                 for users in post[attribute]:
                     name = users['full_name'] if len(users['full_name']) else users['username']
@@ -76,26 +78,33 @@ def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple
 
 def validate_number_post(number, max_number) -> int:
     """
-
-    :param number:
-    :param max_number:
+    PRE: All parameters are required
+    POST: It is validated that the position of the post within a dictionary exists. And this validated position is returned
+    :param number: :type int
+    :param max_number: :type int
     :return:
     """
     correct = False
+    name = user_options(GET_NAME)
     while not correct:
         if number < 0 or number >= max_number:
             cprint("Number post incorrect", 'red', attrs = ['bold'])
-            number = int(input("Enter a valid posting number"))
+            write_chat_bot("Number post incorrect")
+            number = int(input("Enter a valid posting number: "))
+            write_chat_bot(number, name)
+            write_chat_bot("Enter a valid posting number: ")
         else:
             correct = True
     return number
 
 
-def show_user_feed(bot, feed, **data_usernames) -> None:
+def show_user_feed(bot, feed, own_feed = False) -> None:
     """
-    
-    :param bot:
-    :param feed:
+    PRE: All the parameters are required
+    POST: The feed of a user chosen by the current user is printed. And it is verified if the feed that is being printed is that of the current user.
+    :param bot: :type object
+    :param feed: :type dict
+    :param own_feed: :type bool
     :return:
     """
     number_post = 1
@@ -119,8 +128,7 @@ def show_user_feed(bot, feed, **data_usernames) -> None:
                 post_to_show,
                 attr,
                 comments,
-                username = data_usernames['username'],
-                username_bot = data_usernames['username_bot'],
+                own_feed = own_feed,
                 text = text)
         
         number_post += 1
@@ -129,20 +137,24 @@ def show_user_feed(bot, feed, **data_usernames) -> None:
         post_to_show = ''
 
 
-def validate_post_comment(feed, position_comment, bot) -> list:
+def validate_post_comment(bot, feed, position_comment) -> list:
     """
-    
+    PRE: All the parameters cant be null
+    POST: The position of the comment x and the post y is validated, and a list with the validated coordinates is returned.
     :param bot:
-    :param position_comment:
     :param feed:
-    :param comment_post:
+    :param position_comment:
     :return:
     """
     correct_post = False
+    name = user_options(GET_NAME)
     while not correct_post:
         if not feed[position_comment[0] - 1]:
-            cprint("The post doesnt exist, please enter a correct post number", 'red', attrs = ['bold'])
+            text = "The post doesnt exist, please enter a correct post number"
+            cprint(text, 'red', attrs = ['bold'])
+            write_chat_bot(text)
             position_comment[0] = int(input("Number post: "))
+            write_chat_bot(position_comment[0], name)
         else:
             correct_post = True
     
@@ -152,27 +164,70 @@ def validate_post_comment(feed, position_comment, bot) -> list:
     
     while not correct_comment:
         if not comments['comments'][position_comment[1] - 1]:
-            cprint("The comment doesnt exist, please enter a correct comment number", 'red', attrs = ['bold'])
+            text = "The comment doesnt exist, please enter a correct comment number"
+            cprint(text, 'red', attrs = ['bold'])
+            write_chat_bot(text)
             position_comment[1] = int(input("Number comment: "))
+            write_chat_bot(position_comment[1], name)
         else:
             correct_comment = True
     
     return position_comment
 
 
-def already_liked(bot, id_property, type_like = 'post') -> bool:
+def my_feed(bot) -> None:
     """
+    PRE: The parameter can't be null
+    POST: Print current user's feed
+    :param bot: :type object
+    :return:
+    """
+    feed = bot.self_feed()['items']
+    show_user_feed(bot, feed, own_feed = True)
+
+
+def post_comment(bot) -> None:
+    """
+    PRE: The parameter can't be null
+    POST: Post a comment on a post from a user chosen by the current user
+    :param bot: :type object
+    :return:
+    """
+    name = user_options(GET_NAME)
+    are_users = show_search_users(bot, text = 'Who do you want to find to post a comment on his post?')
+
+    while not are_users:
+        are_users = show_search_users(bot, "No users with that name were found, please enter a correct name: ")
+        write_chat_bot("No users with that name were found, please enter a correct name: ")
+        
+    username = input("Enter a username: ")
     
-    :param id_property:
-    :param bot:
-    :param type_like:
+    write_chat_bot("Enter a username: ")
+    write_chat_bot(username, name)
+    
+    if bot.username != username:
+        can_get_feed = check_if_following(bot, username)
+    else:
+        can_get_feed = True
+    
+    if can_get_feed:
+        print()
+
+
+def already_liked(bot, target_id, type_like = 'post') -> bool:
+    """
+    PRE: The bot and target_id parameter cant be null
+    POST: Check if the post / comment is already liked by the current user
+    :param bot: :type object
+    :param target_id: :type str
+    :param type_like: :type str
     :return:
     """
     is_liked = False
     if type_like == 'post':
-        likes = bot.media_likers(id_property)['users']
+        likes = bot.media_likers(target_id)['users']
     else:
-        likes = bot.comment_likers(id_property)
+        likes = bot.comment_likers(target_id)
     
     bot_id = int(bot.authenticated_user_id)
     for likers in likes['users']:
@@ -182,29 +237,55 @@ def already_liked(bot, id_property, type_like = 'post') -> bool:
     return is_liked
 
 
-def likes_actions(bot, target = "comment", type_like = 'like') -> Exception or ClientError or None:
+def get_id_post(feed, text, edit = False) -> str or int or tuple:
     """
-    
-    :param type_like:
-    :param bot:
-    :param target:
+    PRE: The feed and text parameter, cant be null
+    POST: Returns the id of the post if the post / comment is not being edited, otherwise, the id of the post and its position in the dictionary will be returned
+    :param edit:
+    :param text:
+    :param feed:
     :return:
     """
+    name = user_options(GET_NAME)
+    number_post = int(input(f"{text} enter the Nº: ")) - 1
+    write_chat_bot(f"{text} enter the Nº: ")
+    write_chat_bot(number_post, name)
+    number_post = validate_number_post(number_post, len(feed['items']))
+    id_post = feed['items'][number_post]['pk']
+    
+    return id_post if not edit else id_post, number_post
+
+
+def likes_actions(bot, target_type = "comment", like_type = 'like') -> Exception or ClientError or None:
+    """
+    PRE: All parameters are required
+    POST: Depending on the type of target and type of like, a post or a comment will be liked or unlike
+    :param bot: :type object
+    :param target_type: :type str
+    :param like_type: :type str
+    :return:
+    """
+    name = user_options(GET_NAME)
     try:
-        if target != "comment":
-            show_search_users(bot, f"Which user do you want to {type_like} the {target}? ")
-            write_chat_bot(f"Which user do you want to {type_like} the {target}? \n Enter username: ")
+        if target_type != "comment":
+            are_users = show_search_users(bot, f"Which user do you want to {like_type} the {target_type}? ")
+            while not are_users:
+                are_users = show_search_users(bot, "No users with that name were found, please enter a correct name: ")
+                write_chat_bot("No users with that name were found, please enter a correct name: ")
+
+            write_chat_bot(f"Which user do you want to {like_type} the {target_type}? \n Enter username: ")
             username = input("Enter username: ")
+            write_chat_bot(username, name)
+            
             can_get_feed = check_if_following(bot, username)
             if can_get_feed:
                 feed = bot.username_feed(username)['items']
                 feed_not_empty = feed[0]
                 if feed_not_empty:
-                    show_user_feed(bot, feed, username = username, username_bot = bot.username)
-                    number_post = int(input(f"Which post would you {type_like} to post a like? enter the Nº: ")) - 1
-                    number_post = validate_number_post(number_post, len(feed['items']))
-                    id_post = feed['items'][number_post]['pk']
-                    if type_like == 'like':
+                    own_feed = username == bot.username
+                    show_user_feed(bot, feed, own_feed = own_feed)
+                    id_post = get_id_post(feed = feed, text = f"Which post would you {like_type} to post a like?")
+                    if like_type == 'like':
                         like(bot, id_post)
                     else:
                         unlike(bot, id_post)
@@ -215,20 +296,16 @@ def likes_actions(bot, target = "comment", type_like = 'like') -> Exception or C
                        attrs = ['bold', 'underline'])
         else:
             cprint("Your feed: ", 'blue', attrs = ['bold'])
-            feed = bot.username_feed(bot.username)['items']
-            show_user_feed(bot, feed, username = bot.username, username_bot = bot.username)
-            feed_not_empty = feed[0]
+            feed = bot.self_feed()
+            show_user_feed(bot, feed['items'], own_feed = True)
+            feed_not_empty = feed['items'][0]
             if feed_not_empty:
-                position_comment = input(f"Which comment would you like to post a {type_like}? enter the post number and comment number. Ej: 1, 2 : ").split(',')
-                position_comment = [int(x.strip()) for x in position_comment]
-                position_comment = validate_post_comment(feed, position_comment, bot)
-                post_id = feed[position_comment[0] - 1]['pk']
-                comments = bot.media_comments(post_id)['comments']
-                id_comment = comments[position_comment[1] - 1]['pk']
-                if type_like == 'like':
-                    like(bot, id_comment, type_property = 'comment', comment_text = comments[position_comment[1] - 1]['text'])
+                text = f"Which comment would you like to post a {like_type}?"
+                comment_data = prepare_comment(bot = bot, feed = feed['items'], text = text)
+                if like_type == 'like':
+                    like(bot, comment_data["comment_id"], target_type = 'comment', comment_text = comment_data['comment_text'])
                 else:
-                    unlike(bot, id_comment, type_property = 'comment')
+                    unlike(bot, comment_data["comment_id"], target_type = 'comment')
             else:
                 cprint("Your feed is empty", 'red', attrs = ['bold'])
     
@@ -236,61 +313,93 @@ def likes_actions(bot, target = "comment", type_like = 'like') -> Exception or C
         raise Exception(error)
 
 
-def unlike(bot, id_property, type_property = 'post'):
+def prepare_comment(bot, feed, text) -> dict or ClientError:
     """
-    
+    PRE: All the parameters are required
+    POST: The position of x comment is validated and a dictionary is prepared containing the id of the post, the id of the comment, and the comment text
     :param bot:
-    :param id_property:
-    :param type_property:
+    :param feed:
+    :param text:
+    :return: :type dict or ClientError
+    """
+    name = user_options(GET_NAME)
+    position_comment = input(f"{text} enter the post number and comment number. Ej: 1, 2 : ").split(',')
+    position_comment = [int(x.strip()) for x in position_comment]
+    
+    write_chat_bot(f"{text} enter the post number and comment number. Ej: 1, 2 : ")
+    write_chat_bot(position_comment, name)
+    
+    position_comment = validate_post_comment(bot, feed, position_comment)
+    post_id = feed[position_comment[0] - 1]['pk']
+    comments = bot.media_comments(post_id)['comments']
+    comment_id = comments[position_comment[1] - 1]['pk']
+    comment_text = comments[position_comment[1] - 1]['text']
+    
+    return {'post_id': post_id, 'comment_id': comment_id, 'comment_text': comment_text}
+
+
+def unlike(bot, target_id, target_type = 'post') -> None or ClientError:
+    """
+    PRE: Bot parameters and target_id can't be null
+    POST: Depending on the type of target, a post or a comment is unliked. The target_id corresponds to the id of a comment or a post.
+    :param bot:
+    :param target_id:
+    :param target_type:
     :return:
     """
     
-    if type_property == 'post':
-        result = bot.delete_like(id_property)
+    if target_type == 'post':
+        result = bot.delete_like(target_id)
     else:
-        result = bot.comment_unlike(id_property)
+        result = bot.comment_unlike(target_id)
     
     if result['status'] == 'ok':
-        cprint(f"The {type_property} is unliked correctly!\n", 'green', attrs = ['bold'])
+        cprint(f"The {target_type} is unliked correctly!\n", 'green', attrs = ['bold'])
     else:
-        cprint(f"There was a problem disliking the {type_property}, please try again later!\n", 'red', attrs = ['bold'])
+        cprint(f"There was a problem disliking the {target_type}, please try again later!\n", 'red', attrs = ['bold'])
 
 
-def like(bot, id_property, type_property = 'post', comment_text = ''):
+def like(bot, target_id, target_type = 'post', comment_text = '') -> None or ClientError:
     """
-    
-    :param id_property:
-    :param comment_text:
-    :param type_property:
-    :param bot:
-    :param id_post:
+    PRE: Bot parameters and target_id can't be null
+    POST: Depending on the type of target, a post or a comment is liked. The target_id corresponds to the id of a comment or a post.
+    :param bot: :type object
+    :param target_id: :type str
+    :param target_type: :type str
+    :param comment_text: :type str
     :return:
     """
-    
-    if not already_liked(bot, id_property, type_property):
-        if type_property == 'post':
-            result = bot.post_like(media_id = id_property)
+    name = user_options(GET_NAME)
+    if not already_liked(bot, target_id, target_type):
+        if target_type == 'post':
+            result = bot.post_like(media_id = target_id)
         else:
-            result = bot.comment_like(comment_id = id_property)
+            result = bot.comment_like(comment_id = target_id)
         
         if result['status'] == 'ok':
-            text = "It has been liked correctly!\n" if type_property == 'post' else f"The comment '{comment_text}' has been liked correctly"
+            text = "It has been liked correctly!\n" if target_type == 'post' else f"The comment '{comment_text}' has been liked correctly"
             cprint(text, 'green', attrs = ['bold'])
+            write_chat_bot(text)
         else:
-            cprint(f"There was a problem liking the {type_property}, try again later!\n", 'red', attrs = ['bold', 'underline'])
+            cprint(f"There was a problem liking the {target_type}, try again later!\n", 'red', attrs = ['bold', 'underline'])
+            write_chat_bot(f"There was a problem liking the {target_type}, try again later!")
     else:
-        do_unlike = input(f"The {type_property} is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
+        do_unlike = input(f"The {target_type} is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
+        write_chat_bot(f"The {target_type} is already liked by you, you want to unliked? (yes/no): ")
+        write_chat_bot(do_unlike, name)
         if do_unlike:
-            unlike(bot, id_property, type_property)
+            unlike(bot, target_id, target_type)
         else:
             print("The like has been left as it was\n")
+            write_chat_bot("The like has been left as it was")
 
 
 def edit_profile(bot) -> Exception or ClientError or None:
     """
-    PRE:
-    POST:
-    :param bot:
+    PRE: The parameter can't be null
+    POST: The attributes available to change from the user's profile are printed,
+          a dictionary will be prepared with the data to be changed, and the change will be made in the profile
+    :param bot: :type object
     :return:
     """
     my_profile = bot._call_api('accounts/current_user/', query = {'edit': 'true'})
@@ -333,7 +442,7 @@ def edit_profile(bot) -> Exception or ClientError or None:
             gender = int(data_change['gender']),
             phone_number = data_change['phone_number']
         )
-        if result and status_account['status'] == 'ok':
+        if result['result'] == 'ok' and status_account['status'] == 'ok':
             text = "Profile has been modified successfully!"
             write_chat_bot(text)
             cprint(text, 'green', attrs = ['bold'])
@@ -349,14 +458,15 @@ def edit_profile(bot) -> Exception or ClientError or None:
 
 def prepare_profile(profile, attributes, data_change, genders) -> None:
     """
-    PRE:
-    POST:
-    :param profile:
-    :param attributes:
-    :param data_change:
-    :param genders:
+    PRE: All parameters are required
+    POST: The "data_change" dictionary is prepared with the information to change or maintain, of the current user's profile
+    :param profile: :type dict
+    :param attributes: :type dict
+    :param data_change: :type dict
+    :param genders: :type list
     :return:
     """
+    name = user_options(GET_NAME)
     for key, attribute in attributes.items():
         if attribute == 'full_name':
             cprint("IMPORTANT!", 'red', attrs = ['bold', 'blink'])
@@ -364,15 +474,31 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
                 "If you have changed the full name 2 times within a period of 14 days, you will not be able to modify your full name, just leave it empty, the program will not be able to change the full name.\n Be aware of your decision",
                 'red',
                 attrs = ['bold'])
+            write_chat_bot(
+                "IMPORTANT! \n If you have changed the full name 2 times within a period of 14 days, you will not be able to modify your full name, just leave it empty, the program will not be able to change the full name.\n Be aware of your decision")
+        
         change_attribute = input(f"Do you want to change {key}? yes/no: ".lower()) in ['yes', 'y', 'ye']
+        
+        write_chat_bot(f"Do you want to change {key}? yes/no: ")
+        write_chat_bot(change_attribute, name)
+        
         if change_attribute:
             if attribute == 'is_private':
                 print("To change your account from private to public or vice versa, enter public/private")
+                write_chat_bot(f"To change your account from private to public or vice versa, enter public/private")
             elif attribute == 'gender':
                 print("To change your gender, enter male/female/unspecified")
+                write_chat_bot(f"To change your gender, enter male/female/unspecified")
             
             new_data = input(f"Enter the new value for {key}: ")
+            
+            write_chat_bot(f"Enter the new value for {key}: ")
+            write_chat_bot(new_data, name)
+            
             secure = input(f"Are you sure to change {key} to '{new_data}'? yes/no: ".lower()) in ['yes', 'y', 'ye']
+            
+            write_chat_bot(f"Are you sure to change {key} to '{new_data}'? yes/no: ")
+            write_chat_bot(secure, name)
             
             if secure:
                 if attribute == 'is_private':
@@ -383,38 +509,135 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
                     else:
                         while new_data not in genders:
                             new_data = input("The gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
+                            
+                            write_chat_bot("The gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
+                            write_chat_bot(new_data, name)
+                        
                         else:
                             new_data = int(genders.index(new_data)) + 1
                 
                 data_change[attribute] = new_data
             else:
                 print(f"No changes have been made to the {key}")
+                write_chat_bot(f"No changes have been made to the {key}")
         else:
             data_change[attribute] = profile[attribute]
 
 
-def follow_actions(bot, follow_type = 'follow') -> Exception or ClientError or None:
+def delete(bot, target_id, target_type, parent_id = '') -> None or Exception:
     """
-    PRE: The parameter can't be null
-    POST:
-    :param follow_type:
-    :param bot:
+    PRE: Bot parameters, target_id, and target type cannot be null
+    POST: Depending on the type of target, a post or a comment is deleted. The target_id corresponds to the id of a comment or a post.
+          The parent_id is only used if the target type is a comment and its value refers to the id of the post in which the comment is found.
+    :param bot: :type object
+    :param target_id: :type str
+    :param target_type: :type str
+    :param parent_id: :type str
+    :return: None or Exception
+    """
+    
+    if target_type == 'post':
+        result = bot.delete_media(media_id = str(target_id))
+    else:
+        result = bot.delete_comment(post_id = str(parent_id), comment_id = str(target_id))
+    
+    if result['status'] == 'ok':
+        cprint(f"The {target_type} has been successfully removed!\n", 'green', attrs = ['bold'])
+        write_chat_bot(f"The {target_type} has been successfully removed!")
+    else:
+        cprint(f"The {target_type} could not be removed. Please try again later\n", 'red', attrs = ['bold'])
+        write_chat_bot(f"The {target_type} could not be removed. Please try again later")
+
+
+def edit_post_actions(bot, edit_type, target_type = 'post'):
+    """
+    PRE: Bot parameters and type_edit cannot be null
+    POST: A user post will be edited or deleted. As you can also delete a comment from said post
+    :param bot: :type object
+    :param edit_type: :type str
+    :param target_type: :type str
     :return:
     """
-    if follow_type != 'follow':
-        results = get_follows(bot)
-        username = input(f"Who do you want to {follow_type}? ")
-        for user in results['users']:
-            if user['username'] == username:
-                if bot.friendships_destroy(user['pk']):
-                    text = f"{username} has been successfully unfollowed!"
-                    cprint(text, 'green', attrs = ['bold'])
-                    write_chat_bot(text)
-    
+    feed = bot.self_feed()
+    is_feed_empty = feed['items'][0]
+    name = user_options(GET_NAME)
+    if is_feed_empty:
+        show_user_feed(bot, feed['items'], own_feed = True)
+        if target_type == 'post':
+            id_post, number_post = get_id_post(feed, text = f"Which post would you {edit_type}?", edit = True)
+            if edit_type == 'edit':
+                cprint("You can only edit the caption!\n", 'blue', attrs = ['bold', 'blink'])
+                write_chat_bot("You can only edit the caption!")
+                
+                old_caption = feed['items'][number_post]['caption']['text']
+                new_caption = input("Enter the new caption: ")
+                secure = input(f"\nAre you sure to change '{old_caption}' to '{new_caption}'? (yes/no): ") in ['yes', 'ye', 'y']
+                
+                write_chat_bot(f"Are you sure to change '{old_caption}' to '{new_caption}'? (yes/no): ")
+                write_chat_bot(secure, name)
+                
+                if secure:
+                    id_post = feed['items'][number_post]['pk']
+                    result = bot.edit_media(media_id = id_post, caption = new_caption)
+                    if result['status'] == 'ok':
+                        cprint("It has been edited successfully!\n", 'green', attrs = ['bold'])
+                        write_chat_bot("It has been edited successfully!")
+                    
+                    else:
+                        cprint("An error occurred while changing it, please try again later\n", 'red', attrs = ['bold'])
+                        write_chat_bot("An error occurred while changing it, please try again later")
+                else:
+                    cprint("The post has not been modified\n", 'blue', attrs = ['bold'])
+                    write_chat_bot("The post has not been modified")
+            
+            else:
+                secure = input(f"Are you sure to {edit_type} the post? (yes/no): \n") in ['yes', 'ye', 'y']
+                write_chat_bot(f"Are you sure to {edit_type} the post? (yes/no): ")
+                write_chat_bot(secure, name)
+                
+                if secure:
+                    id_post = feed['items'][number_post]['pk']
+                    delete(bot, id_post, 'post')
+        else:
+            if edit_type == 'edit':
+                cprint("You cannot edit a comment, only delete it\n", 'blue', attrs = ['bold', 'underline'])
+                write_chat_bot(f"You cannot edit a comment, only delete it")
+            
+            secure_delete = input("Do you want to delete a comment from a post? (yes/no): \n") in ['yes', 'ye', 'y']
+            write_chat_bot("Do you want to delete a comment from a post? (yes/no):")
+            write_chat_bot(secure_delete, name)
+            
+            if secure_delete:
+                text = "Which comment would you delete?"
+                comment_data = prepare_comment(bot = bot, feed = feed['items'], text = text)
+                delete(bot, comment_data['comment_id'], 'comment', comment_data['post_id'])
     else:
-        show_search_users(bot)
-        username = input(f"Who do you want to {follow_type}? ")
-        try:
+        cprint("Your feed is empty", 'red', attrs = ['bold'])
+        write_chat_bot("Your feed is empty")
+
+
+def follow_actions(bot, follow_type = 'follow') -> Exception or ClientError or None:
+    """
+    PRE: The bot parameter can't be null
+    POST: If the type of follow is "unfollow", the user's current followers are printed, and they are given to choose who they want to unfollow.
+          Otherwise, let the type be "follow", a query is made based on a name entered by the user, and will choose who to follow
+    :param bot: :type object
+    :param follow_type: :type str
+    :return:
+    """
+    try:
+        if follow_type != 'follow':
+            results = get_follows(bot)
+            username = input(f"Who do you want to {follow_type}? ")
+            for user in results['users']:
+                if user['username'] == username:
+                    if bot.friendships_destroy(user['pk']):
+                        text = f"{username} has been successfully unfollowed!"
+                        cprint(text, 'green', attrs = ['bold'])
+                        write_chat_bot(text)
+        else:
+            show_search_users(bot)
+            username = input(f"Who do you want to {follow_type}? ")
             user = bot.username_info(username)['user']
             user_id = user['pk']
             if bot.friendships_create(user_id = user_id):
@@ -425,24 +648,25 @@ def follow_actions(bot, follow_type = 'follow') -> Exception or ClientError or N
                 text = "There was a problem performing the action, please try again"
                 cprint(text, 'red', attrs = ['bold'])
                 write_chat_bot(text)
-        
-        except Exception as error:
-            write_status_log(error, 'Internal server error')
-            raise Exception(error)
+    
+    except Exception as error:
+        write_status_log(error, 'Internal server error')
+        raise Exception(error)
 
 
-def get_follows(bot, show = True, type_show = 'following') -> dict or list:
+def get_follows(bot, show = True, follow_type = 'following') -> dict or list:
     """
-    PRE:
-    POST:
-    :param show:
-    :param type_show:
+    PRE: The bot parameter can't be null
+    POST: If the show parameter is true the followers of the current user are printed or the users followed by the current user are printed,
+          depending on the value of the type_show parameter which can be "following" or "followers"
     :param bot:
+    :param show:
+    :param follow_type:
     :return:
     """
     rank = bot.generate_uuid()
     user_id = bot.authenticated_user_id
-    if type_show == 'following':
+    if follow_type == 'following':
         results = bot.user_following(user_id, rank)
         text = "You are following: \n"
     else:
@@ -457,18 +681,18 @@ def get_follows(bot, show = True, type_show = 'following') -> dict or list:
     return results
 
 
-def show_search_users(bot, text = 'Who do you want to search?') -> None:
+def show_search_users(bot, text = 'Who do you want to search?') -> None or ClientError:
     """
-    PRE: The parameter can't be null
-    POST:
-    :param text:
-    :param bot:
+    PRE: The bot parameter can't be null
+    POST: Found users based on a name are printed. And the text parameter varies because different texts are used to search, like, follow, etc.
+    :param bot: :type object
+    :param text: :type str
     :return:
     """
-    user_name = user_options(GET_NAME)
+    name = user_options(GET_NAME)
     query = input(text)
     write_chat_bot(text)
-    write_chat_bot(query, user_name)
+    write_chat_bot(query, name)
     
     results = bot.search_users(query = query)
     text_to_log = "The users found are \n"
@@ -479,20 +703,28 @@ def show_search_users(bot, text = 'Who do you want to search?') -> None:
             full_data += f"{user['username']} {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
             if 'social_context' in user.keys():
                 full_data += f" Someone you know follows this account: {user['social_context']}"
+            if user['friendship_status']['following']:
+                full_data += colored(f" You are currently following it", 'green')
+            
             print(full_data + "\n")
             text_to_log += full_data + '\n'
         write_chat_bot(text_to_log)
-    
+        are_users = True
     else:
+        are_users = False
         print("No user with that name was found \n")
-        write_chat_bot("No user with that name was found \n")
+        write_chat_bot("No user with that name was found")
+    
+    return are_users
 
 
 def show_last_messages(last_messages, bot_id) -> None:
     """
-    
-    :param bot_id:
-    :param last_messages:
+    PRE: Both parameters are required and cannot be empty
+    POST: If the user has chats with other users, the last event of each chat will be printed.
+          And the bot_id is used to know if the current user was the one who made the last chat event
+    :param bot_id: :type str
+    :param last_messages: :type dict
     :return:
     """
     text_show = ''
@@ -500,75 +732,104 @@ def show_last_messages(last_messages, bot_id) -> None:
     title = colored('Messages: \n', 'white', attrs = ['bold'])
     text_show += title
     message = ''
-    for conversations in last_messages['threads']:
-        user = conversations['users'][0]['full_name']
-        text_show += colored(f"\t-Nº{message_number} - {user}: \n", 'white', attrs = ['bold'])
-        i_sent = conversations['items'][0]['user_id'] == bot_id
-        
-        if conversations['items'][0]['item_type'] == 'media':
+    text_to_bot = 'Messages: \n'
+    empty_messages = last_messages['threads']
+    if not empty_messages:
+        for conversations in last_messages['threads']:
+            user = conversations['users'][0]['full_name']
+            text_show += colored(f"\t-Nº{message_number} - {user}: \n", 'white', attrs = ['bold'])
+            text_to_bot += f"\t-Nº{message_number} - {user}: \n"
+            i_sent = conversations['items'][0]['user_id'] == int(bot_id)
             its_me = "You sent" if i_sent else "He sent"
-            message += f"\t\t-{its_me}. Its a image, url: " + colored(f"{conversations['items'][0]['media']['image_versions2']['candidates'][0]['url']} \n", 'white', attrs = ['bold'])
+            
+            if conversations['items'][0]['item_type'] == 'media':
+                message += f"\t\t-({its_me}) Its a image, url: " + f"{conversations['items'][0]['media']['image_versions2']['candidates'][0]['url']} \n"
+            
+            elif conversations['items'][0]['item_type'] == 'text':
+                message += f"\t\t-({its_me}) Text: {conversations['items'][0]['text']}\n"
+            
+            elif conversations['items'][0]['item_type'] == 'media_share':
+                image = conversations['items'][0]['media_share']['image_versions2']['candidates'][0]['url']
+                user_post = conversations['items'][0]['media_share']['users']['username']
+                caption = conversations['items'][0]['media_share']['caption']['text']
+                url_post = f"https://instagram.com/p/{conversations['items'][0]['media_share']['code']}/"
+                message += f"\t\t-({its_me}) It is a publication \n From :{user_post} \n Url: {url_post} \n Image: {image} \n Caption: '{caption}' \n"
+            
+            elif conversations['items'][0]['item_type'] == 'profile':
+                username = conversations['items'][0]['media_share']['users'][0]['username']
+                url_post = f"https://instagram.com/{username}/"
+                message += f"\t\t-({its_me}) It is a profile \n Url: {url_post} \n"
+            
+            elif conversations['items'][0]['item_type'] == 'placeholder':
+                message += f"\t\t-({its_me}) It is a reel, please open it on the cell phone\n"
+            
+            elif conversations['items'][0]['item_type'] == 'action_log':
+                message += f"\t\t-({its_me}) It is a action, {conversations['items'][0]['action_log']['description']} \n"
+            
+            text_show += message
+            text_to_bot += message
+            write_chat_bot(text_to_bot)
+            
+            message = ''
+            message_number += 1
         
-        elif conversations['items'][0]['item_type'] == 'text':
-            its_me = "You sent" if i_sent else "He sent"
-            message += f"\t\t-{its_me}-Text: {conversations['items'][0]['text']}\n"
-        
-        elif conversations['items'][0]['item_type'] == 'media_share':
-            its_me = "You sent" if i_sent else "He sent"
-            image = conversations['items'][0]['media_share']['image_versions2']['candidates'][0]['url']
-            user_post = conversations['items'][0]['media_share']['users']['username']
-            caption = conversations['items'][0]['media_share']['caption']['text']
-            url_post = f"https://instagram.com/p/{conversations['items'][0]['media_share']['code']}/"
-            message += f"\t\t-{its_me}. It is a publication \n From :{user_post} \n Url: {url_post} \n Image: {image} \n Caption: '{caption}' \n"
-        
-        elif conversations['items'][0]['item_type'] == 'profile':
-            its_me = "You sent" if i_sent else "He sent"
-            username = conversations['items'][0]['media_share']['users'][0]['username']
-            url_post = f"https://instagram.com/{username}/"
-            message += f"\t\t-{its_me}. It is a profile \n Url: {url_post} \n"
-        
-        elif conversations['items'][0]['item_type'] == 'placeholder':
-            its_me = "You sent" if i_sent else "He sent"
-            message += f"\t\t-{its_me}. It is a reel, please open it on the cell phone\n"
-        
-        elif conversations['items'][0]['item_type'] == 'action_log':
-            its_me = "You sent" if i_sent else "He sent"
-            message += f"\t\t-{its_me}. It is a action, {conversations['items'][0]['action_log']['description']} \n"
-        
-        text_show += message
-        message = ''
-        message_number += 1
-    
-    print(text_show)
+        print(text_show)
+    else:
+        cprint("You don't have any chat\n", 'red', ['bold'])
+        write_chat_bot("You don't have any chat")
 
 
-def messages(bot, type_action = 'send'):
+def message_actions(bot, action_type = 'send') -> None or Exception or ClientError:
     """
-    
-    :param bot:
-    :param type_action:
+    PRE: The parameters are required
+    POST: If the action type is "send", a message will be sent to a user determined by the current user.
+          In the opposite case that the action is not "send" which would be "get", the last events of each chat will be shown
+    :param bot: :type Object
+    :param action_type: :type str
     :return:
     """
+    name = user_options(GET_NAME)
     cprint("IMPORTANT!!\n", 'red', attrs = ['bold', 'blink', 'underline'])
     cprint("Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message\n", 'red',
            attrs = ['bold', 'underline'])
-    cprint("Please wait a few seconds\n", 'blue', attrs = ['bold'])
+    write_chat_bot("IMPORTANT!!\n Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message")
     try:
-        if type_action != 'send':
+        if action_type != 'send':
             last_messages = bot.direct_v2_inbox()['inbox']
             show_last_messages(last_messages, bot.authenticated_user_id)
         else:
+            cprint("Please wait a few seconds\n", 'blue', attrs = ['bold'])
+            write_chat_bot("Please wait a few seconds")
+            
             aux_api = connection_aux_api(bot.username, bot.password)
-            show_search_users(bot, "Who do you want to send a message to? ")
+            are_users = show_search_users(bot, "Who do you want to send a message to? ")
+            
+            while not are_users:
+                are_users = show_search_users(bot, "No users with that name were found, please enter a correct name: ")
+                write_chat_bot("No users with that name were found, please enter a correct name: ")
+                
             username = input("Please enter username: ")
+            text = input("Message: ")
+            
+            write_chat_bot("Please enter username: ")
+            write_chat_bot(username, name)
+            write_chat_bot("Message: ")
+            write_chat_bot(text, name)
+            
             user_info = bot.username_info(username)
-            result = aux_api.send_message()
+            result = aux_api.send_message(text, str(user_info['user']['pk']))
+            if result:
+                cprint(f"The message has been sent to {username} correctly!\n", 'green', attrs = ['bold'])
+                write_chat_bot(f"The message has been sent to {username} correctly!")
+            else:
+                cprint(f"The message was not sent to {username} correctly, please try again later\n", 'red', attrs = ['bold'])
+                write_chat_bot(f"The message was not sent to {username} correctly, please try again later")
     
     except Exception as error:
         raise Exception(error)
-    
 
-# ------------ CONNECTION AND CREDENTIALS ---------------#
+
+# ------------ CONNECTIONS AND CREDENTIALS ---------------#
 
 def to_json(python_object) -> dict:
     """
@@ -595,6 +856,8 @@ def from_json(json_object):
 
 def on_login_callback(api, new_settings_file) -> None:
     """
+    PRE: The api and the file that saves the settings cannot be empty
+    POST: Write, in a json, the cookies and settings to avoid re-login
     :param api: the actual Client object
     :param new_settings_file: The json file where the credentials will be saved
     :return:
@@ -612,9 +875,9 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
     """
     PRE: If the user does not give us the credentials of their instagram user, we will use the crux data
     POST: Credentials are created to avoid re-logging, and the connection with the api is created
-    :param username:
-    :param password:
-    :return:
+    :param username: :type str
+    :param password: :type str
+    :return: object
     """
     device_id = None
     try:
@@ -642,7 +905,7 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
     
     except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
         # Credentials expired
-        # It does a relogin but using ua, keys and such
+        # It does a re login but using ua, keys and such
         insta_bot = Client(
             username, password,
             device_id = device_id,
@@ -667,9 +930,11 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
 
 def connection_aux_api(username, password) -> object:
     """
-    
-    :param username:
-    :param password:
+    This connection is made specifically for sending messages
+    PRE: The username and password must not be empty, and represent the username and password of the current user
+    POST: Generates the connection with the api, and returns its object
+    :param username: :type: str
+    :param password: :type: str
     :return:
     """
     aux_api = ''
@@ -684,6 +949,6 @@ def connection_aux_api(username, password) -> object:
     except Exception as error:
         raise Exception(error)
     
-    write_status_log('You have successfully connected with the auxiliar api!')
+    write_status_log('You have successfully connected with the aux api')
     
     return aux_api
