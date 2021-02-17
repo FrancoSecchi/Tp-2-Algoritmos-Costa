@@ -1,10 +1,12 @@
+Crux
 Hi
 Welcome!
 Hello
-Crux
 At your service!
 You
 Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
+like a post facebook
+facebook.like_post(graph)
 I want to upload a photo
 facebook.upload_photo(graph)
 upload pic
@@ -28,50 +30,50 @@ facebook.edit_post(graph)
 edit
 facebook.edit_post(graph)
 I want to read a post
-facebook.read_post(graph)
+facebook.read_posts(graph)
 read
-facebook.read_post(graph)
-I want to know my follower count
+facebook.read_posts(graph)
+I want to know my follower count on facebook
 facebook.follower_count(graph)
-How many followers do i have?
+How many followers do i have on facebook?
 facebook.follower_count(graph)
-How much people follow me?
+How much people follow me on facebook?
 facebook.follower_count(graph)
-People follow me?
+People follow me facebook?
 facebook.follower_count(graph)
-follow me?
+follow me facebook?
 facebook.follower_count(graph)
-follow me
+follow me facebook
 facebook.follower_count(graph)
-followers
+followers facebook
 facebook.follower_count(graph)
-follow person
+follow person instagram
 instagram.follow_actions(insta_bot)
-unfollow person
+unfollow person instagram
 instagram.follow_actions(insta_bot, follow_type = 'unfollow')
-edit profile
+edit profile instagram
 instagram.edit_profile(insta_bot)
-like post
+like post instagram
 instagram.likes_actions(insta_bot, target_type = 'post')
-like comment
+like comment instagram
 instagram.likes_actions(insta_bot, target_type = 'comment')
-unlike comment
+unlike comment instagram
 instagram.likes_actions(insta_bot, target_type = 'comment', like_type = 'unlike')
-unlike post
+unlike post instagram
 instagram.likes_actions(insta_bot, target_type = 'post', type_like = 'unlike')
-send message
+send message instagram
 instagram.message_actions(insta_bot, action_type = 'send')
-get messages
+get messages instagram
 instagram.message_actions(insta_bot, action_type = 'show')
-messages
+messages instagram
 instagram.message_actions(insta_bot, action_type = 'show')
-delete post insta
+delete post instagram
 instagram.edit_post_actions(insta_bot, edit_type = 'delete', target_type = 'post')
-edit comment insta
+edit comment instagram
 instagram.edit_post_actions(insta_bot, edit_type = 'edit' , target_type = 'comment')
-delete comment insta
+delete comment instagram
 instagram.edit_post_actions(insta_bot, edit_type = 'delete' , target_type = 'comment')
-post comment insta
+post comment instagram
 instagram.post_comment(insta_bot)
 sdgsdgsdf
 I'm sorry, I don't understand what you said
