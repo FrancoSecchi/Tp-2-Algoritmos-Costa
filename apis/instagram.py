@@ -67,11 +67,13 @@ def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple
             post_to_show += f"\t- total likes: {count_likes} \n"
     else:
         comment_number = 1
-        for comment in comments[attribute]:
-            text_comment = f"\tNº{comment_number} - " + f"'{comment['text']}'"
-            name = comment['user']['full_name'] if len(comment['user']['full_name']) else comment['user']['username']
-            post_to_show += text_comment + f" by {name} with {comment['comment_like_count']} likes \n"
-            comment_number += 1
+        if attribute in comments.keys():
+            if comments[attribute]:
+                for comment in comments[attribute]:
+                    text_comment = f"\tNº{comment_number} - " + f"'{comment['text']}'"
+                    name = comment['user']['full_name'] if len(comment['user']['full_name']) else comment['user']['username']
+                    post_to_show += text_comment + f" by {name} with {comment['comment_like_count']} likes \n"
+                    comment_number += 1
     
     return post_to_show, title
 
@@ -194,33 +196,50 @@ def post_comment(bot) -> None:
     :return:
     """
     name = user_options(GET_NAME)
-    are_users = show_search_users(bot, text = 'Who do you want to find to post a comment on his post?')
-
-    while not are_users:
-        are_users = show_search_users(bot, "No users with that name were found, please enter a correct name: ")
-        write_chat_bot("No users with that name were found, please enter a correct name: ")
+    try:
+        are_users = show_search_users(bot, text = 'Who do you want to find to post a comment on his post?')
+    
+        while not are_users:
+            are_users = show_search_users(bot, "No users with that name were found, please enter a correct name: ")
+            write_chat_bot("No users with that name were found, please enter a correct name: ")
+            
+        username = input("Enter a username: ")
         
-    username = input("Enter a username: ")
-    
-    write_chat_bot("Enter a username: ")
-    write_chat_bot(username, name)
-    
-    if bot.username != username:
-        can_get_feed = check_if_following(bot, username)
-    else:
-        can_get_feed = True
-    
-    if can_get_feed:
-        print()
+        write_chat_bot("Enter a username: ")
+        write_chat_bot(username, name)
+        
+        if bot.username != username:
+            can_get_feed = check_if_following(bot, username)
+            own_feed = False
+        else:
+            can_get_feed = True
+            own_feed = True
+        
+        if can_get_feed:
+            feed = bot.username_feed(username)
+            show_user_feed(bot, feed['items'], own_feed)
+            id_post = get_id_post(feed, "Which post would you like to comment on?")
+            message = input("Message: ")
+            write_chat_bot("Message:")
+            write_chat_bot(message, name)
+            result = bot.post_comment(media_id = id_post, comment_text = message)
+            if result['status'] == 'ok':
+                cprint("The comment has been posted correctly!\n", 'green', attrs = ['bold'])
+                write_chat_bot("The comment has been posted correctly!")
+                
+    except Exception as error:
+        write_chat_bot(error, 'Failed')
+        raise Exception(error)
 
 
-def already_liked(bot, target_id, type_like = 'post') -> bool:
+def already_liked(bot, target_id, type_like = 'post', own_feed = False) -> bool:
     """
     PRE: The bot and target_id parameter cant be null
     POST: Check if the post / comment is already liked by the current user
     :param bot: :type object
     :param target_id: :type str
     :param type_like: :type str
+    :param own_feed: :type bool
     :return:
     """
     is_liked = False
@@ -230,10 +249,14 @@ def already_liked(bot, target_id, type_like = 'post') -> bool:
         likes = bot.comment_likers(target_id)
     
     bot_id = int(bot.authenticated_user_id)
-    for likers in likes['users']:
-        if bot_id == likers['pk']:
-            is_liked = True
     
+    if likes:
+        collection_likes = likes['users'] if own_feed else likes
+        
+        for likers in collection_likes:
+            if bot_id == likers['pk']:
+                is_liked = True
+        
     return is_liked
 
 
@@ -249,11 +272,13 @@ def get_id_post(feed, text, edit = False) -> str or int or tuple:
     name = user_options(GET_NAME)
     number_post = int(input(f"{text} enter the Nº: ")) - 1
     write_chat_bot(f"{text} enter the Nº: ")
-    write_chat_bot(number_post, name)
+    write_chat_bot(number_post + 1, name)
     number_post = validate_number_post(number_post, len(feed['items']))
     id_post = feed['items'][number_post]['pk']
-    
-    return id_post if not edit else id_post, number_post
+    if edit:
+        return id_post, number_post
+    else:
+        return id_post
 
 
 def likes_actions(bot, target_type = "comment", like_type = 'like') -> Exception or ClientError or None:
@@ -279,14 +304,14 @@ def likes_actions(bot, target_type = "comment", like_type = 'like') -> Exception
             
             can_get_feed = check_if_following(bot, username)
             if can_get_feed:
-                feed = bot.username_feed(username)['items']
-                feed_not_empty = feed[0]
+                feed = bot.username_feed(username)
+                feed_not_empty = feed['items'][0]
                 if feed_not_empty:
                     own_feed = username == bot.username
-                    show_user_feed(bot, feed, own_feed = own_feed)
+                    show_user_feed(bot, feed['items'], own_feed = own_feed)
                     id_post = get_id_post(feed = feed, text = f"Which post would you {like_type} to post a like?")
                     if like_type == 'like':
-                        like(bot, id_post)
+                        like(bot, id_post, own_feed = own_feed)
                     else:
                         unlike(bot, id_post)
                 else:
@@ -303,7 +328,7 @@ def likes_actions(bot, target_type = "comment", like_type = 'like') -> Exception
                 text = f"Which comment would you like to post a {like_type}?"
                 comment_data = prepare_comment(bot = bot, feed = feed['items'], text = text)
                 if like_type == 'like':
-                    like(bot, comment_data["comment_id"], target_type = 'comment', comment_text = comment_data['comment_text'])
+                    like(bot, comment_data["comment_id"], target_type = 'comment', comment_text = comment_data['comment_text'], own_feed = True)
                 else:
                     unlike(bot, comment_data["comment_id"], target_type = 'comment')
             else:
@@ -342,9 +367,9 @@ def unlike(bot, target_id, target_type = 'post') -> None or ClientError:
     """
     PRE: Bot parameters and target_id can't be null
     POST: Depending on the type of target, a post or a comment is unliked. The target_id corresponds to the id of a comment or a post.
-    :param bot:
-    :param target_id:
-    :param target_type:
+    :param bot: :type object
+    :param target_id: :type str
+    :param target_type: :type str
     :return:
     """
     
@@ -359,7 +384,7 @@ def unlike(bot, target_id, target_type = 'post') -> None or ClientError:
         cprint(f"There was a problem disliking the {target_type}, please try again later!\n", 'red', attrs = ['bold'])
 
 
-def like(bot, target_id, target_type = 'post', comment_text = '') -> None or ClientError:
+def like(bot, target_id, target_type = 'post', comment_text = '', own_feed = False) -> None or ClientError:
     """
     PRE: Bot parameters and target_id can't be null
     POST: Depending on the type of target, a post or a comment is liked. The target_id corresponds to the id of a comment or a post.
@@ -367,10 +392,11 @@ def like(bot, target_id, target_type = 'post', comment_text = '') -> None or Cli
     :param target_id: :type str
     :param target_type: :type str
     :param comment_text: :type str
+    :param own_feed: :type bool
     :return:
     """
     name = user_options(GET_NAME)
-    if not already_liked(bot, target_id, target_type):
+    if not already_liked(bot, target_id, target_type, own_feed = own_feed):
         if target_type == 'post':
             result = bot.post_like(media_id = target_id)
         else:
@@ -387,6 +413,7 @@ def like(bot, target_id, target_type = 'post', comment_text = '') -> None or Cli
         do_unlike = input(f"The {target_type} is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
         write_chat_bot(f"The {target_type} is already liked by you, you want to unliked? (yes/no): ")
         write_chat_bot(do_unlike, name)
+        
         if do_unlike:
             unlike(bot, target_id, target_type)
         else:
@@ -562,7 +589,6 @@ def edit_post_actions(bot, edit_type, target_type = 'post'):
     is_feed_empty = feed['items'][0]
     name = user_options(GET_NAME)
     if is_feed_empty:
-        show_user_feed(bot, feed['items'], own_feed = True)
         if target_type == 'post':
             id_post, number_post = get_id_post(feed, text = f"Which post would you {edit_type}?", edit = True)
             if edit_type == 'edit':
@@ -895,9 +921,7 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
             except Exception as error:
                 write_status_log(error, 'failed')
                 raise Exception(error)
-            
-            print('Reusing settings: {0!s} \n'.format(settings_file))
-            
+                
             device_id = cached_settings.get('device_id')
             insta_bot = Client(
                 username, password,
