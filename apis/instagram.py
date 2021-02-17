@@ -30,15 +30,15 @@ def check_if_following(bot, username) -> bool:
     """
     following = get_follows(bot, False)
     user_info = bot.username_info(username)
-    can_get_feed = False
+    i_following = False
     if user_info['user']['is_private']:
         for users in following['users']:
             if user_info['user']['pk'] in users:
-                can_get_feed = True
+                i_following = True
     else:
-        can_get_feed = True
+        i_following = True
     
-    return can_get_feed
+    return i_following
 
 
 def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple:
@@ -231,7 +231,6 @@ def likes_actions(bot, target = "comment", type_like = 'like') -> Exception or C
                     unlike(bot, id_comment, type_property = 'comment')
             else:
                 cprint("Your feed is empty", 'red', attrs = ['bold'])
-    
     
     except Exception as error:
         raise Exception(error)
@@ -480,7 +479,7 @@ def show_search_users(bot, text = 'Who do you want to search?') -> None:
             full_data += f"{user['username']} {'Its a private profile' if user['is_private'] else 'Its a public profile'}"
             if 'social_context' in user.keys():
                 full_data += f" Someone you know follows this account: {user['social_context']}"
-            print(full_data)
+            print(full_data + "\n")
             text_to_log += full_data + '\n'
         write_chat_bot(text_to_log)
     
@@ -489,12 +488,87 @@ def show_search_users(bot, text = 'Who do you want to search?') -> None:
         write_chat_bot("No user with that name was found \n")
 
 
+def show_last_messages(last_messages, bot_id) -> None:
+    """
+    
+    :param bot_id:
+    :param last_messages:
+    :return:
+    """
+    text_show = ''
+    message_number = 1
+    title = colored('Messages: \n', 'white', attrs = ['bold'])
+    text_show += title
+    message = ''
+    for conversations in last_messages['threads']:
+        user = conversations['users'][0]['full_name']
+        text_show += colored(f"\t-Nº{message_number} - {user}: \n", 'white', attrs = ['bold'])
+        i_sent = conversations['items'][0]['user_id'] == bot_id
+        
+        if conversations['items'][0]['item_type'] == 'media':
+            its_me = "You sent" if i_sent else "He sent"
+            message += f"\t\t-{its_me}. Its a image, url: " + colored(f"{conversations['items'][0]['media']['image_versions2']['candidates'][0]['url']} \n", 'white', attrs = ['bold'])
+        
+        elif conversations['items'][0]['item_type'] == 'text':
+            its_me = "You sent" if i_sent else "He sent"
+            message += f"\t\t-{its_me}-Text: {conversations['items'][0]['text']}\n"
+        
+        elif conversations['items'][0]['item_type'] == 'media_share':
+            its_me = "You sent" if i_sent else "He sent"
+            image = conversations['items'][0]['media_share']['image_versions2']['candidates'][0]['url']
+            user_post = conversations['items'][0]['media_share']['users']['username']
+            caption = conversations['items'][0]['media_share']['caption']['text']
+            url_post = f"https://instagram.com/p/{conversations['items'][0]['media_share']['code']}/"
+            message += f"\t\t-{its_me}. It is a publication \n From :{user_post} \n Url: {url_post} \n Image: {image} \n Caption: '{caption}' \n"
+        
+        elif conversations['items'][0]['item_type'] == 'profile':
+            its_me = "You sent" if i_sent else "He sent"
+            username = conversations['items'][0]['media_share']['users'][0]['username']
+            url_post = f"https://instagram.com/{username}/"
+            message += f"\t\t-{its_me}. It is a profile \n Url: {url_post} \n"
+        
+        elif conversations['items'][0]['item_type'] == 'placeholder':
+            its_me = "You sent" if i_sent else "He sent"
+            message += f"\t\t-{its_me}. It is a reel, please open it on the cell phone\n"
+        
+        elif conversations['items'][0]['item_type'] == 'action_log':
+            its_me = "You sent" if i_sent else "He sent"
+            message += f"\t\t-{its_me}. It is a action, {conversations['items'][0]['action_log']['description']} \n"
+        
+        text_show += message
+        message = ''
+        message_number += 1
+    
+    print(text_show)
+
+
 def messages(bot, type_action = 'send'):
-    aux_bot = connection_aux_api(bot.username, bot.password)
+    """
+    
+    :param bot:
+    :param type_action:
+    :return:
+    """
+    cprint("IMPORTANT!!\n", 'red', attrs = ['bold', 'blink', 'underline'])
+    cprint("Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message\n", 'red',
+           attrs = ['bold', 'underline'])
+    cprint("Please wait a few seconds\n", 'blue', attrs = ['bold'])
+    try:
+        aux_api = connection_aux_api(bot.username, bot.password)
+        if type_action != 'send':
+            last_messages = aux_api.get_messages()['inbox']
+            show_last_messages(last_messages, bot.authenticated_user_id)
+        else:
+            show_search_users(bot, "Who do you want to send a message to? ")
+            username = input("Please enter username: ")
+    
+    except Exception as error:
+        raise Exception(error)
+    
+    # ------------ CONNECTION AND CREDENTIALS ---------------#
 
 
 # ------------ CONNECTION AND CREDENTIALS ---------------#
-
 
 def to_json(python_object) -> dict:
     """
@@ -519,7 +593,7 @@ def from_json(json_object):
     return json_object
 
 
-def onlogin_callback(api, new_settings_file) -> None:
+def on_login_callback(api, new_settings_file) -> None:
     """
     :param api: the actual Client object
     :param new_settings_file: The json file where the credentials will be saved
@@ -549,7 +623,7 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
             # If the credentials do not exist, do a new login
             insta_bot = Client(
                 username, password,
-                on_login = lambda x: onlogin_callback(x, settings_file))
+                on_login = lambda x: on_login_callback(x, settings_file))
         else:
             # If the credentials do not exist, do a new login
             try:
@@ -572,7 +646,7 @@ def connection_instagram(username = 'crux.bot', password = 'crux123') -> object:
         insta_bot = Client(
             username, password,
             device_id = device_id,
-            on_login = lambda x: onlogin_callback(x, settings_file))
+            on_login = lambda x: on_login_callback(x, settings_file))
     
     except ClientLoginError as e:
         write_status_log(e, 'ClientLoginError')
@@ -598,10 +672,15 @@ def connection_aux_api(username, password) -> object:
     :param password:
     :return:
     """
+    aux_api = ''
     try:
         logging.disable(logging.CRITICAL)
-        aux_api = Bot(base_path = "credentials")
-        aux_api.login(username = username, password = password)
+        aux_api = Bot()
+        aux_api.login(username = username, password = password, use_cookie = False)
+    
+    except (KeyboardInterrupt, EOFError, SystemExit):
+        aux_api.logout()
+    
     except Exception as error:
         raise Exception(error)
     
