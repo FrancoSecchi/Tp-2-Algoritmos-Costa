@@ -1,9 +1,9 @@
-from logs import write_status_log
+from logs import write_status_log, write_chat_bot, user_options, GET_NAME
 import facebook
 import os.path
 from termcolor import cprint
 
-USER_TOKEN = "EAAGJNkHBQZAEBAO73ZAGv7kK71OPd3a7TSmF17OxluZBkOLKgQ8GZAvPm4J5PWUzwKdZCHrSQE2SuNmFl2lTgPcSZCY5hPbV8ZBfPElL1hkIJC2Ra7tucOf3m2Y0Qo90X9ZAfYcZBfDOfaf46CbmXQ0usEmkmg3yF8Ywr134bVeMlpJ1tJm164AmNghli50YJULkZD"
+USER_TOKEN = "EAAGJNkHBQZAEBALHnRf3grXqjMdGG8denwyen9hvbCAYHRtsUdb315ZBUa5QvtdN3XkkyIRi3J2WZCp5zuYdlVdYOPgmbMGUc84D6S7MAw3E6qvUKZCL7UPvFaeZAGN3U06G5sJBTleNlQuFSFR1wzVSJLfpc2SyWxPI9nRFnYFb7RLhOdTYHfNti2NZCHx5wZD"
 
 
 # READ_POST = 0
@@ -26,16 +26,27 @@ def get_albums(graph, caption, path):
     albums_id = []
     albums = graph.get_connections(id = 'me', connection_name = 'albums')
     info_list = albums['data']
-    print("Sus albums son: ")
+    print("Your albums are: ")
+    write_chat_bot("Your albums are: ")
     for info in info_list[0:5]:
         print(f"{counter} -", info["name"])
         counter += 1
         albums_id.append(info["id"])
-    
+        write_chat_bot(f"{counter} -", info["name"])
+
     while select > counter or select < 1:
-        select = int(input("Seleccione el album: "))
-    
-    graph.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos", message = caption)
+        select = int(input("Select the album: "))
+        write_chat_bot("Select the album: ")
+    try:
+        graph.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos", message = caption)
+        cprint("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
+        write_chat_bot("The photo has been uploaded successfully!")
+    except FileNotFoundError:
+        write_status_log("The requested file cannot be found")
+        print("The requested file cannot be found")
+    except Exception as error:
+        write_status_log(f"There was a problem opening the file, error: {error}")
+        print(f"There was a problem opening the file, error: {error}")
 
 
 def search_file() -> str or bool:
@@ -46,12 +57,17 @@ def search_file() -> str or bool:
     """
     found_file = False
     path = ''
+    name = user_options(GET_NAME)
     while not found_file:
-        path = input("Enter the file path: ")
+        path = input("Enter the file path, the file must be .jpg: ")
+        write_chat_bot("Enter the file path, the file must be .jpg: ")
+        path = os.path.abspath(path)
+        write_chat_bot(path, name)
         if os.path.exists(path):
             found_file = True
         else:
-            print("The path doesnt exists, please enter a correct path \n")
+            cprint("The path doesnt exists, please enter a correct path \n", 'red', attrs = ['bold'])
+            write_chat_bot("The path doesnt exists, please enter a correct path")
     return path
 
 
@@ -63,6 +79,7 @@ def upload_to_albums(graph) -> None:
     :return:
     """
     path = search_file()
+    name = user_options(GET_NAME)
     if path:
         counter = 1
         select = 0
@@ -70,16 +87,30 @@ def upload_to_albums(graph) -> None:
         albums = graph.get_connections(id = 'me', connection_name = 'albums')
         info_list = albums['data']
         print("Your albums are: ")
+        write_chat_bot("Your albums are: ")
         for info in info_list[0:5]:
             print(f"{counter} -", info["name"])
             counter += 1
             albums_id.append(info["id"])
+            write_chat_bot(f"{counter} -", info["name"])
         
         while select > counter or select < 1:
-            select = int(input("Seleccione el album: "))
+            select = int(input("Select the album: "))
+            write_chat_bot("Select the album: ")
         
         caption = input("Caption: ")
-        graph.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos", message = caption)
+        write_chat_bot("Caption: ")
+        write_chat_bot(caption, name)
+        try:
+            graph.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos", message = caption)
+            cprint("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
+            write_chat_bot("The photo has been uploaded successfully!")
+        except FileNotFoundError:
+            write_status_log("The requested file cannot be found")
+            print("The requested file cannot be found")
+        except Exception as error:
+            write_status_log(f"There was a problem opening the file, error: {error}")
+            print(f"There was a problem opening the file, error: {error}")
 
 
 # TODO Refactorizar las funciones de posts y photos, son muy similares todas
@@ -92,15 +123,27 @@ def upload_photo(graph) -> None or Exception:
     """
     path = search_file()
     caption = input("Caption: ")
+    name = user_options(GET_NAME)
+    write_chat_bot("Caption: ")
+    write_chat_bot(caption, name)
     try:
         graph.put_photo(image = open(path, 'rb'), message = caption)
+        cprint("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
+        write_chat_bot("The photo has been uploaded successfully!")
     except FileNotFoundError:
+        write_status_log("The requested file cannot be found")
         print("The requested file cannot be found")
     except Exception as error:
+        write_status_log(f"There was a problem opening the file, error: {error}")
         print(f"There was a problem opening the file, error: {error}")
 
 
 def upload_post(graph) -> None or Exception:
+    """
+    
+    :param graph:
+    :return:
+    """
     user_message = input("What would you like to write?: ")
     try:
         graph.put_object(parent_object = 'me', connection_name = 'feed', message = user_message)
@@ -234,8 +277,8 @@ def connection_api(user_token = USER_TOKEN) -> object or Exception:
         write_status_log(error, 'Failed')
         raise Exception(error)
     else:
-        write_status_log('Successfully connected with the api')
-        cprint('You have successfully connected with the Facebook api!', 'green', attrs = ['bold'])
+        write_status_log('Successfully connected with Facebook the api')
+        cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
     
     return api
 
