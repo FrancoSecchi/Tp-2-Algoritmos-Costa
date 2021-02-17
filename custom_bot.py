@@ -19,6 +19,29 @@ def animation(text, time = 0.025):
         sys.stdout.write(letter)
         sys.stdout.flush()
 
+def access():
+    """
+    PRE:
+    POS: Returns the connections selected by the user
+    """
+    response = input("Would you like to connect to Facebook?(Yes or No): ").lower()
+    if response == "yes":
+        page_token = input("Please enter your page access token: ")
+        graph = facebook.connection_api(page_token)
+    else:
+        graph = facebook.connection_api()
+
+    ig_response = input("Would you like to connect to Instagram?(Yes or No): ").lower()
+    if ig_response == "yes":
+        username = input("Please enter your username: ")
+        password = input("Please enter your password: ")
+        insta_bot = instagram.connection_instagram(username,password)
+    else:
+        insta_bot = instagram.connection_instagram()    
+
+    return graph,insta_bot    
+
+
 
 def run_bot(bot):
     """
@@ -26,8 +49,7 @@ def run_bot(bot):
     :param bot:
     :return:
     """
-    graph = facebook.connection_api()
-    insta_bot = instagram.connection_instagram()
+    graph,insta_bot = access()
     running = True
     is_taken_name = False
     text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... I mean bot! Oh my, I'm damned if they find out I said that ... \nAh, well, before Elon Musk finds me and sends me to Mars.\n"

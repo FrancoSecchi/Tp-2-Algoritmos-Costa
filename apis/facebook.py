@@ -159,28 +159,16 @@ def like_post(graph):
     :param graph:
     :return:
     """
-    counter = 1
     option = 0
-    posts_id = []
-    posts = graph.get_connections(id = 'me', connection_name = 'posts')
-    info_list = posts['data']
-    print("Your posts are: ")
-    for info in info_list:
-        if 'message' in info:
-            print(f"{counter} -", info["created_time"][0:10] + ":" + info["message"])
-            counter += 1
-            posts_id.append(info["id"])
-        elif 'story' in info:
-            print(f"{counter} -", info["created_time"][0:10] + ":" + info["story"])
-            counter += 1
-            posts_id.append(info["id"])
-        elif 'story' or 'message' not in info:
-            print(f"{counter} -", info["created_time"][0:10])
+    posts_id,counter = read_posts(graph)
     
-    while option > counter or option < 1:
-        option = int(input("Select the post to like: "))
+    response = input("Do you want to like a post?(Yes or No): ").lower()
+    if response == "yes":
+        while option > counter or option < 1:
+            option = int(input("Select the post to like: "))
     
-    graph.put_like(object_id = posts_id[option - 1])
+        graph.put_like(object_id = posts_id[option - 1])
+
 
 
 def follower_count(graph) -> None:
@@ -202,20 +190,22 @@ def read_posts(graph) -> None:
     """
     counter = 1
     posts_id = []
-    posts = graph.get_connections(id = 'me', connection_name = 'posts')
+    posts = graph.get_connections(id = 'me', connection_name = 'visitor_posts')
     info_list = posts['data']
     print("The posts are: ")
     for info in info_list:
         if 'message' in info:
-            print(info["created_time"][0:10] + ":" + info["message"])
+            print(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
             counter += 1
             posts_id.append(info["id"])
         elif 'story' in info:
-            print(info["created_time"][0:10] + ":" + info["story"])
+            print(f"{counter}. " + info["created_time"][0:10] + ":" + info["story"])
             counter += 1
             posts_id.append(info["id"])
         elif 'story' or 'message' not in info:
-            print(info["created_time"][0:10])
+            print(f"{counter}. " + info["created_time"][0:10])
+
+    return posts_id,counter        
 
 
 def get_post_to_edit(graph) -> str or int:
