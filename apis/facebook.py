@@ -11,26 +11,6 @@ USER_TOKEN = "EAAGJNkHBQZAEBAO73ZAGv7kK71OPd3a7TSmF17OxluZBkOLKgQ8GZAvPm4J5PWUzw
 # GET_POST = 2
 
 
-def connection_api(user_token = USER_TOKEN) -> object or Exception:
-    """
-    Returns the GraphApi and checks if there was any error while connecting to Facebook
-    :return:
-    """
-    try:
-        api = facebook.GraphAPI(access_token = user_token, version = "2.12")
-    except ConnectionError as error:
-        write_status_log(error, 'Connection error')
-        raise ConnectionError(f'You dont have internet: {error}')
-    except Exception as error:
-        write_status_log(error, 'Failed')
-        raise Exception(error)
-    else:
-        write_status_log('Successfully connected with the api')
-        cprint('You have successfully connected with the Facebook api!', 'green', attrs = ['bold'])
-    
-    return api
-
-
 def get_albums(graph, caption, path):
     """
     
@@ -236,3 +216,26 @@ def edit_post(graph) -> None:
     elif option in ['edit', 'e', 'ed', 'edit post', 'edit the post']:
         text = input("What would you like to post?: ").capitalize()
         graph.put_object(parent_object = post, connection_name = '', message = text)
+
+
+# ------------ CONNECTION ---------------#
+
+def connection_api(user_token = USER_TOKEN) -> object or Exception:
+    """
+    Returns the GraphApi and checks if there was any error while connecting to Facebook
+    :return:
+    """
+    try:
+        api = facebook.GraphAPI(access_token = user_token, version = "2.12")
+    except ConnectionError as error:
+        write_status_log(error, 'Connection error')
+        raise ConnectionError(f'You dont have internet: {error}')
+    except Exception as error:
+        write_status_log(error, 'Failed')
+        raise Exception(error)
+    else:
+        write_status_log('Successfully connected with the api')
+        cprint('You have successfully connected with the Facebook api!', 'green', attrs = ['bold'])
+    
+    return api
+
