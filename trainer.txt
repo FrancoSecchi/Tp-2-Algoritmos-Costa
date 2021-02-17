@@ -1,62 +1,85 @@
------------GREETINGS------------
 Hi
 Welcome!
 Hello
-Greetings!
-Hello There
-General Kenobi
 Crux
 At your service!
------------FACEBOOK------------
+You
+Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
 I want to upload a photo
-facebook_bot.upload_photo(graph)
+facebook.upload_photo(graph)
 upload pic
-facebook_bot.upload_photo(graph)
+facebook.upload_photo(graph)
 photo
-facebook_bot.upload_photo(graph)
+facebook.upload_photo(graph)
 upload to an album
-facebook_bot.upload_to_albums(graph)
-
+facebook.upload_to_albums(graph)
 I want to upload a post
-facebook_bot.upload_post(graph)
+facebook.upload_post(graph)
 Post something
-facebook_bot.upload_post(graph)
+facebook.upload_post(graph)
 i want to write something
-facebook_bot.upload_post(graph)
-
+facebook.upload_post(graph)
 I want to edit a post
-facebook_bot.edit_post(graph)
+facebook.edit_post(graph)
 delete post
-facebook_bot.edit_post(graph)
+facebook.edit_post(graph)
 delete
-facebook_bot.edit_post(graph)
+facebook.edit_post(graph)
 edit
-facebook_bot.edit_post(graph)
-
+facebook.edit_post(graph)
 I want to read a post
-facebook_bot.read_post(graph)
+facebook.read_post(graph)
 read
-facebook_bot.read_post(graph)
-
+facebook.read_post(graph)
 I want to know my follower count
-facebook_bot.follower_count(graph)
+facebook.follower_count(graph)
 How many followers do i have?
-facebook_bot.follower_count(graph)
+facebook.follower_count(graph)
 How much people follow me?
-facebook_bot.follower_count(graph)
-follow
-facebook_bot.follower_count(graph)
-
------------PROBLEMS------------
+facebook.follower_count(graph)
+People follow me?
+facebook.follower_count(graph)
+follow me?
+facebook.follower_count(graph)
+follow me
+facebook.follower_count(graph)
+followers
+facebook.follower_count(graph)
+follow person
+instagram.follow_actions(insta_bot)
+unfollow person
+instagram.follow_actions(insta_bot, follow_type = 'unfollow')
+edit profile
+instagram.edit_profile(insta_bot)
+like post
+instagram.likes_actions(insta_bot, target_type = 'post')
+like comment
+instagram.likes_actions(insta_bot, target_type = 'comment')
+unlike comment
+instagram.likes_actions(insta_bot, target_type = 'comment', like_type = 'unlike')
+unlike post
+instagram.likes_actions(insta_bot, target_type = 'post', type_like = 'unlike')
+send message
+instagram.message_actions(insta_bot, action_type = 'send')
+get messages
+instagram.message_actions(insta_bot, action_type = 'show')
+messages
+instagram.message_actions(insta_bot, action_type = 'show')
+delete post insta
+instagram.edit_post_actions(insta_bot, edit_type = 'delete', target_type = 'post')
+edit comment insta
+instagram.edit_post_actions(insta_bot, edit_type = 'edit' , target_type = 'comment')
+delete comment insta
+instagram.edit_post_actions(insta_bot, edit_type = 'delete' , target_type = 'comment')
+post comment insta
+instagram.post_comment(insta_bot)
 sdgsdgsdf
-Im sorry, i couldn't get that
+I'm sorry, I don't understand what you said
 haha
 What did you mean?
 "#$%$&#
-I don't know which characters are that
-
------------JOKES------------
-Crux tell me a joke 
+Sorry, I don't speak in hexadecimal
+Crux tell me a joke
 I ate a clock yesterday, it was very time-consuming.
 Make me laugh
 I'm a big fan of whiteboards. I find them quite re-markable.
