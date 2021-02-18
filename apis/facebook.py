@@ -33,7 +33,7 @@ def get_albums(graph, caption, path):
         counter += 1
         albums_id.append(info["id"])
         write_chat_bot(f"{counter} -", info["name"])
-
+    
     while select > counter or select < 1:
         select = int(input("Select the album: "))
         write_chat_bot("Select the album: ")
@@ -144,6 +144,7 @@ def upload_post(graph) -> None or Exception:
     :param graph:
     :return:
     """
+    name = user_options(GET_NAME)
     user_message = input("What would you like to write?: ")
     write_chat_bot("What would you like to write?: ")
     write_chat_bot(user_message, name)
@@ -162,7 +163,8 @@ def like_post(graph):
     :return:
     """
     option = 0
-    posts_id,counter = read_posts(graph)
+    posts_id, counter = read_posts(graph)
+    name = user_options(GET_NAME)
     
     response = input("Do you want to like a post?(Yes or No): ").lower()
     write_chat_bot("Do you want to like a post?(Yes or No): ")
@@ -172,9 +174,8 @@ def like_post(graph):
             option = int(input("Select the post to like: "))
             write_chat_bot("Select the post to like: ")
             write_chat_bot(option, name)
-    
+        
         graph.put_like(object_id = posts_id[option - 1])
-
 
 
 def follower_count(graph) -> None:
@@ -189,7 +190,7 @@ def follower_count(graph) -> None:
     write_chat_bot(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def read_posts(graph) -> None:
+def read_posts(graph) -> tuple:
     """
     PRE: The parameter can't be null
     :param graph:
@@ -215,8 +216,8 @@ def read_posts(graph) -> None:
         elif 'story' or 'message' not in info:
             print(f"{counter}. " + info["created_time"][0:10])
             write_chat_bot(f"{counter}. " + info["created_time"][0:10])
-
-    return posts_id,counter        
+    
+    return posts_id, counter
 
 
 def get_post_to_edit(graph) -> str or int:
@@ -229,14 +230,16 @@ def get_post_to_edit(graph) -> str or int:
     counter = 1
     option = 0
     posts_id = []
+    name = user_options(GET_NAME)
     posts = graph.get_connections(id = 'me', connection_name = 'posts')
     info_list = posts['data']
     print("This are your last 5 posts: ")
     write_chat_bot("This are your last 5 posts: ")
     for info in info_list[0:5]:
         if 'message' in info:
-            print(f"{counter} -", info["message"])
-            write_chat_bot(f"{counter} -", info["message"])
+            text = f"{counter}º -\t" + info["message"]
+            print(text)
+            write_chat_bot(text)
             counter += 1
             posts_id.append(info["id"])
     
@@ -256,7 +259,8 @@ def edit_post(graph) -> None:
     :return:
     """
     post = get_post_to_edit(graph)
-    
+    name = user_options(GET_NAME)
+
     option = input("Do you want to delete the post or edit?: ").lower()
     write_chat_bot("Do you want to delete the post or edit?: ")
     write_chat_bot(option, name)
@@ -287,7 +291,6 @@ def connection_api(user_token = USER_TOKEN) -> object or Exception:
     else:
         write_status_log('Successfully connected with Facebook the api')
         cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
-        write_chat_bot('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
+        write_chat_bot('You have successfully connected with the Facebook api!')
     
     return api
-
