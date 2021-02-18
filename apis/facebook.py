@@ -68,6 +68,7 @@ def upload_photo(graph) -> None or Exception:
         write_status_log(f"There was a problem opening the file, error: {error}", 'Exception')
         raise Exception(error)
 
+
 def upload_post(graph) -> None or Exception:
     """
     PRE: The graph cant be null
