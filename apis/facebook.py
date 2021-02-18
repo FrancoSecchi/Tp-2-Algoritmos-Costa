@@ -145,6 +145,8 @@ def upload_post(graph) -> None or Exception:
     :return:
     """
     user_message = input("What would you like to write?: ")
+    write_chat_bot("What would you like to write?: ")
+    write_chat_bot(user_message, name)
     try:
         graph.put_object(parent_object = 'me', connection_name = 'feed', message = user_message)
     except Exception as error:
@@ -163,9 +165,13 @@ def like_post(graph):
     posts_id,counter = read_posts(graph)
     
     response = input("Do you want to like a post?(Yes or No): ").lower()
+    write_chat_bot("Do you want to like a post?(Yes or No): ")
+    write_chat_bot(response, name)
     if response == "yes":
         while option > counter or option < 1:
             option = int(input("Select the post to like: "))
+            write_chat_bot("Select the post to like: ")
+            write_chat_bot(option, name)
     
         graph.put_like(object_id = posts_id[option - 1])
 
@@ -180,6 +186,7 @@ def follower_count(graph) -> None:
     """
     followers = graph.get_object(id = 'me', fields = 'followers_count')
     print(f"Number of followers: {str(followers['followers_count'])}")
+    write_chat_bot(f"Number of followers: {str(followers['followers_count'])}")
 
 
 def read_posts(graph) -> None:
@@ -193,17 +200,21 @@ def read_posts(graph) -> None:
     posts = graph.get_connections(id = 'me', connection_name = 'visitor_posts')
     info_list = posts['data']
     print("The posts are: ")
+    write_chat_bot("The posts are: ")
     for info in info_list:
         if 'message' in info:
             print(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
+            write_chat_bot(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
             counter += 1
             posts_id.append(info["id"])
         elif 'story' in info:
             print(f"{counter}. " + info["created_time"][0:10] + ":" + info["story"])
+            write_chat_bot(f"{counter}. " + info["created_time"][0:10] + ":" + info["story"])
             counter += 1
             posts_id.append(info["id"])
         elif 'story' or 'message' not in info:
             print(f"{counter}. " + info["created_time"][0:10])
+            write_chat_bot(f"{counter}. " + info["created_time"][0:10])
 
     return posts_id,counter        
 
@@ -221,14 +232,18 @@ def get_post_to_edit(graph) -> str or int:
     posts = graph.get_connections(id = 'me', connection_name = 'posts')
     info_list = posts['data']
     print("This are your last 5 posts: ")
+    write_chat_bot("This are your last 5 posts: ")
     for info in info_list[0:5]:
         if 'message' in info:
             print(f"{counter} -", info["message"])
+            write_chat_bot(f"{counter} -", info["message"])
             counter += 1
             posts_id.append(info["id"])
     
     while option > counter or option < 1:
         option = int(input("Select one: "))
+        write_chat_bot("Select one: ")
+        write_chat_bot(option, name)
     
     return posts_id[option - 1]
 
@@ -243,11 +258,14 @@ def edit_post(graph) -> None:
     post = get_post_to_edit(graph)
     
     option = input("Do you want to delete the post or edit?: ").lower()
-    
+    write_chat_bot("Do you want to delete the post or edit?: ")
+    write_chat_bot(option, name)
     if option in ['delete', 'd', 'del', 'delete post', 'delete the post']:
         graph.delete_object(id = post)
     elif option in ['edit', 'e', 'ed', 'edit post', 'edit the post']:
         text = input("What would you like to post?: ").capitalize()
+        write_chat_bot("What would you like to post?: ")
+        write_chat_bot(text, name)
         graph.put_object(parent_object = post, connection_name = '', message = text)
 
 
@@ -269,6 +287,7 @@ def connection_api(user_token = USER_TOKEN) -> object or Exception:
     else:
         write_status_log('Successfully connected with Facebook the api')
         cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
+        write_chat_bot('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
     
     return api
 
