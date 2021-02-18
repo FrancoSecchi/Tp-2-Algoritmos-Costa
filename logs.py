@@ -1,28 +1,15 @@
-import sys
 from datetime import datetime
-from time import sleep
-
-from termcolor import cprint, colored
+import json
 import os
 
 GET_NAME = 0
 SAVE_USER = 1
 
 
-def animation(text, time = 0.025):
-    """
-
-    :param text:
-    :return:
-    """
-    for letter in text:
-        sleep(time)  # In seconds
-        sys.stdout.write(letter)
-        sys.stdout.flush()
-
-
 def get_formatted_time() -> str:
     """
+    PRE: -
+    POST: Returns a string formatted with the day and time
     :return
     """
     now = datetime.now()
@@ -42,7 +29,7 @@ def write_status_log(message, status_code = 'Success') -> None or Exception:
     format_date = get_formatted_time()
     string = f"{format_date} - status code with message: {status_code} => {str(message)} \n"
     try:
-        with open('status.txt', 'a') as file:
+        with open('logs/status.txt', 'a') as file:
             file.write(string + '\n')
     except Exception as error:
         print(error)
@@ -50,7 +37,8 @@ def write_status_log(message, status_code = 'Success') -> None or Exception:
 
 def write_chat_bot(message, user = 'Crux') -> None or Exception:
     """
-
+    PRE: The message can be a empty string
+    POST: A string is formatted to write the conversation in a txt
     :param message:
     :param user:
     :return:
@@ -58,10 +46,27 @@ def write_chat_bot(message, user = 'Crux') -> None or Exception:
     format_date = get_formatted_time()
     string = f"{format_date}, {user}, '{message}'"
     try:
-        with open('chat.txt', 'a') as file:
+        with open('logs/chat.txt', 'a') as file:
             file.write(string + '\n')
     except Exception as error:
         print(error)
+
+
+def get_credentials():
+    """
+    PRE: -
+    POST: Returns a json which contains the credentials of the Crux accounts
+    :return:
+    """
+    try:
+        with open("credentials/crux_credentials.json", 'r') as file:
+            return json.load(file)
+    except PermissionError as error:
+        write_status_log(error, "PermissionError")
+        raise PermissionError(error)
+    except Exception as e:
+        write_status_log(e, "Exception")
+        raise Exception(e)
 
 
 def user_options(action, **extra_data) -> str or None or Exception:
@@ -72,7 +77,7 @@ def user_options(action, **extra_data) -> str or None or Exception:
     """
     option_file = 'r' if action == GET_NAME else 'a'
     try:
-        with open('session.txt', option_file) as file:
+        with open('logs/session.txt', option_file) as file:
             if 'first_time' in extra_data.keys():
                 file.truncate(0)
                 file.write(extra_data['name'])
@@ -85,6 +90,11 @@ def user_options(action, **extra_data) -> str or None or Exception:
 
 
 def welcome_message():
+    """
+    PRE: -
+    POST: Read a txt file which contains a welcome message, which in turn explains what can and cannot be done with the bot
+    :return:
+    """
     try:
         with open('welcome_message.txt', 'r') as file:
             lines = file.readlines()
@@ -100,7 +110,9 @@ def welcome_message():
 
 def remove_file(file):
     """
-
+    PRE: The file can't be null
+    POST: It checks if the file exists in the system and if you have permission to remove the file, and if so, the file is deleted
+          It is used for when the bot is started, it deletes the previous chat and the session
     :param file:
     :return:
     """

@@ -5,6 +5,8 @@ Hello
 At your service!
 You
 Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
+Hey
+Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
 like a post facebook
 facebook.like_post(graph)
 I want to upload a photo
@@ -48,33 +50,45 @@ facebook.follower_count(graph)
 followers facebook
 facebook.follower_count(graph)
 follow person instagram
-instagram.follow_actions(insta_bot)
+instagram.follow_actions(insta_api)
 unfollow person instagram
-instagram.follow_actions(insta_bot, follow_type = 'unfollow')
+instagram.follow_actions(insta_api, follow_type = 'unfollow')
 edit profile instagram
-instagram.edit_profile(insta_bot)
+instagram.edit_profile(insta_api)
 like post instagram
-instagram.likes_actions(insta_bot, target_type = 'post')
+instagram.likes_actions(insta_api, target_type = 'post')
+i wanna like post instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+i want to put a like in the post instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+i like post instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+like post in instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+like post instagram
+instagram.likes_actions(insta_api, target_type = 'post')
 like comment instagram
-instagram.likes_actions(insta_bot, target_type = 'comment')
+instagram.likes_actions(insta_api, target_type = 'comment')
 unlike comment instagram
-instagram.likes_actions(insta_bot, target_type = 'comment', like_type = 'unlike')
+instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
 unlike post instagram
-instagram.likes_actions(insta_bot, target_type = 'post', type_like = 'unlike')
+instagram.likes_actions(insta_api, target_type = 'post', type_like = 'unlike')
 send message instagram
-instagram.message_actions(insta_bot, action_type = 'send')
+instagram.message_actions(insta_api, action_type = 'send')
 get messages instagram
-instagram.message_actions(insta_bot, action_type = 'show')
+instagram.message_actions(insta_api, action_type = 'show')
 messages instagram
-instagram.message_actions(insta_bot, action_type = 'show')
+instagram.message_actions(insta_api, action_type = 'show')
 delete post instagram
-instagram.edit_post_actions(insta_bot, edit_type = 'delete', target_type = 'post')
+instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'post')
 edit comment instagram
-instagram.edit_post_actions(insta_bot, edit_type = 'edit' , target_type = 'comment')
+instagram.edit_post_actions(insta_api, edit_type = 'edit' , target_type = 'comment')
 delete comment instagram
-instagram.edit_post_actions(insta_bot, edit_type = 'delete' , target_type = 'comment')
+instagram.edit_post_actions(insta_api, edit_type = 'delete' , target_type = 'comment')
 post comment instagram
-instagram.post_comment(insta_bot)
+instagram.post_comment(insta_api)
 sdgsdgsdf
 I'm sorry, I don't understand what you said
 haha
