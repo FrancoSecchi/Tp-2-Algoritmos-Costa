@@ -3,7 +3,7 @@ import facebook
 from termcolor import cprint
 
 
-def upload_to_albums(graph) -> None:
+def upload_to_albums(graph) -> None or Exception:
     """
     PRE: It needs the graph and can't be null
     POST: It uploads it to an album which the user specifies
@@ -102,7 +102,7 @@ def follower_count(graph) -> None:
     write_chat_bot(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def post_related(graph, action, selected) -> None:
+def post_related(graph, action, selected) -> None or Exception:
     """
     PRE: The function needs the purpose(action) of the call(Example: If it is for editing a post or liking a post) and
     the selected posts(If they are made by the user or visitors posts on the page)
