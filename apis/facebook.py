@@ -11,66 +11,6 @@ USER_TOKEN = "EAAGJNkHBQZAEBALHnRf3grXqjMdGG8denwyen9hvbCAYHRtsUdb315ZBUa5QvtdN3
 # GET_POST = 2
 
 
-def get_albums(graph, caption, path):
-    """
-    
-    :param graph:
-    :param caption:
-    :param path:
-    :return:
-    """
-    # It needs the graph, a caption for the photo, and the path for said photo
-    # It uploads it to an album which the user specifies
-    counter = 1
-    select = 0
-    albums_id = []
-    albums = graph.get_connections(id = 'me', connection_name = 'albums')
-    info_list = albums['data']
-    print("Your albums are: ")
-    write_chat_bot("Your albums are: ")
-    for info in info_list[0:5]:
-        print(f"{counter} -", info["name"])
-        counter += 1
-        albums_id.append(info["id"])
-        write_chat_bot(f"{counter} -", info["name"])
-
-    while select > counter or select < 1:
-        select = int(input("Select the album: "))
-        write_chat_bot("Select the album: ")
-    try:
-        graph.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos", message = caption)
-        cprint("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
-        write_chat_bot("The photo has been uploaded successfully!")
-    except FileNotFoundError:
-        write_status_log("The requested file cannot be found")
-        print("The requested file cannot be found")
-    except Exception as error:
-        write_status_log(f"There was a problem opening the file, error: {error}")
-        print(f"There was a problem opening the file, error: {error}")
-
-
-def search_file() -> str or bool:
-    """
-    PRE: -
-    POST: Searches for a photo in the user desktop. The file must be .jpg
-    :return:
-    """
-    found_file = False
-    path = ''
-    name = user_options(GET_NAME)
-    while not found_file:
-        path = input("Enter the file path, the file must be .jpg: ")
-        write_chat_bot("Enter the file path, the file must be .jpg: ")
-        path = os.path.abspath(path)
-        write_chat_bot(path, name)
-        if os.path.exists(path):
-            found_file = True
-        else:
-            cprint("The path doesnt exists, please enter a correct path \n", 'red', attrs = ['bold'])
-            write_chat_bot("The path doesnt exists, please enter a correct path")
-    return path
-
-
 def upload_to_albums(graph) -> None:
     """
     PRE: It needs the graph and can't be null
@@ -78,7 +18,7 @@ def upload_to_albums(graph) -> None:
     :param graph:
     :return:
     """
-    path = search_file()
+    path = input("Please enter the path of your picture: ")
     name = user_options(GET_NAME)
     if path:
         counter = 1
@@ -88,7 +28,7 @@ def upload_to_albums(graph) -> None:
         info_list = albums['data']
         print("Your albums are: ")
         write_chat_bot("Your albums are: ")
-        for info in info_list[0:5]:
+        for info in info_list:
             print(f"{counter} -", info["name"])
             counter += 1
             albums_id.append(info["id"])
@@ -112,8 +52,6 @@ def upload_to_albums(graph) -> None:
             write_status_log(f"There was a problem opening the file, error: {error}")
             print(f"There was a problem opening the file, error: {error}")
 
-
-# TODO Refactorizar las funciones de posts y photos, son muy similares todas
 def upload_photo(graph) -> None or Exception:
     """
     PRE: Needs the path of the picture and a caption and the parameter can't be null
@@ -121,7 +59,7 @@ def upload_photo(graph) -> None or Exception:
     :param graph:
     :return:
     """
-    path = search_file()
+    path = input("Please enter the path of your picture: ")
     caption = input("Caption: ")
     name = user_options(GET_NAME)
     write_chat_bot("Caption: ")
@@ -140,7 +78,7 @@ def upload_photo(graph) -> None or Exception:
 
 def upload_post(graph) -> None or Exception:
     """
-    
+ 
     :param graph:
     :return:
     """
@@ -151,24 +89,6 @@ def upload_post(graph) -> None or Exception:
         write_status_log('Failed', error)
         print(f"There was a problem uploading your post, error: {error}")
         raise Exception(error)
-
-
-def like_post(graph):
-    """
-    PRE: The parameter can't be null
-    :param graph:
-    :return:
-    """
-    option = 0
-    posts_id,counter = read_posts(graph)
-    
-    response = input("Do you want to like a post?(Yes or No): ").lower()
-    if response == "yes":
-        while option > counter or option < 1:
-            option = int(input("Select the post to like: "))
-    
-        graph.put_like(object_id = posts_id[option - 1])
-
 
 
 def follower_count(graph) -> None:
@@ -182,73 +102,54 @@ def follower_count(graph) -> None:
     print(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def read_posts(graph) -> None:
+def read_posts(graph,function,selected) -> None:
     """
     PRE: The parameter can't be null
     :param graph:
     :return:
     """
-    counter = 1
-    posts_id = []
-    posts = graph.get_connections(id = 'me', connection_name = 'visitor_posts')
-    info_list = posts['data']
-    print("The posts are: ")
-    for info in info_list:
-        if 'message' in info:
-            print(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
-            counter += 1
-            posts_id.append(info["id"])
-        elif 'story' in info:
-            print(f"{counter}. " + info["created_time"][0:10] + ":" + info["story"])
-            counter += 1
-            posts_id.append(info["id"])
-        elif 'story' or 'message' not in info:
-            print(f"{counter}. " + info["created_time"][0:10])
-
-    return posts_id,counter        
-
-
-def get_post_to_edit(graph) -> str or int:
-    """
-    PRE: The parameter can't be null
-    POST: Fetch the ids of the last 5 posts and display them in some sort of menu
-    :param graph:
-    :return:
-    """
-    counter = 1
     option = 0
+    counter = 1
     posts_id = []
-    posts = graph.get_connections(id = 'me', connection_name = 'posts')
-    info_list = posts['data']
-    print("This are your last 5 posts: ")
-    for info in info_list[0:5]:
-        if 'message' in info:
-            print(f"{counter} -", info["message"])
-            counter += 1
-            posts_id.append(info["id"])
-    
-    while option > counter or option < 1:
-        option = int(input("Select one: "))
-    
-    return posts_id[option - 1]
+    try:
+        posts = graph.get_connections(id = 'me', connection_name = selected)
+        info_list = posts['data']
+        print("The posts are: ")
+        for info in info_list:
+            if 'message' in info:
+                print(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
+                counter += 1
+                posts_id.append(info["id"])
+            elif 'story' in info:
+                print(f"{counter}. " + info["created_time"][0:10] + ":" + info["story"])
+                counter += 1
+                posts_id.append(info["id"])
+            elif 'story' or 'message' not in info:
+                print(f"{counter}. " + info["created_time"][0:10])
 
+        while option > counter or option < 1:
+                option = int(input("Select one: "))
+            
+        selection = posts_id[option - 1]
 
-def edit_post(graph) -> None:
-    """
-    PRE: The parameter can't be null
-    POST: The user can edit or delete a post made by them
-    :param graph:
-    :return:
-    """
-    post = get_post_to_edit(graph)
+        if function == "like":
+            graph.put_like(object_id = selection)
+
+        elif function == "comment":
+            text = input("What would you like to comment: ").capitalize()
+            graph.put_comment(object_id= selection, message=text)
+
+        elif function == "delete":
+            graph.delete_object(id = selection)
+
+        elif function == "edit":
+            text = input("What would you like to post?: ").capitalize()
+            graph.put_object(parent_object = selection, connection_name = '', message = text) 
     
-    option = input("Do you want to delete the post or edit?: ").lower()
-    
-    if option in ['delete', 'd', 'del', 'delete post', 'delete the post']:
-        graph.delete_object(id = post)
-    elif option in ['edit', 'e', 'ed', 'edit post', 'edit the post']:
-        text = input("What would you like to post?: ").capitalize()
-        graph.put_object(parent_object = post, connection_name = '', message = text)
+    except Exception as error:
+        write_status_log('Failed', error)
+        print(f"There was a problem with the operation : {error}")
+        raise Exception(error)           
 
 
 # ------------ CONNECTION ---------------#

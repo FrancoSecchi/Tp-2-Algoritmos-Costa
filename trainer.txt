@@ -6,8 +6,14 @@ At your service!
 You
 Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
 like a post facebook
-facebook.like_post(graph)
-I want to upload a photo
+facebook.read_posts(graph,"like",'visitor_posts')
+like facebook
+facebook.read_posts(graph,"like",'visitor_posts')
+i want to comment on a post
+facebook.read_posts(graph,"comment",'visitor_posts')
+comment facebook
+facebook.read_posts(graph,"comment",'visitor_posts')
+I want to upload a photo/pic
 facebook.upload_photo(graph)
 upload pic
 facebook.upload_photo(graph)
@@ -22,17 +28,19 @@ facebook.upload_post(graph)
 i want to write something
 facebook.upload_post(graph)
 I want to edit a post
-facebook.edit_post(graph)
+facebook.read_posts(graph,"edit",'posts')
 delete post
-facebook.edit_post(graph)
+facebook.read_posts(graph,"delete",'posts')
 delete
-facebook.edit_post(graph)
+facebook.read_posts(graph,"delete",'posts')
 edit
-facebook.edit_post(graph)
+facebook.read_posts(graph,"edit",'posts')
 I want to read a post
-facebook.read_posts(graph)
-read
-facebook.read_posts(graph)
+facebook.read_posts(graph,"read",'visitor_posts')
+read facebook
+facebook.read_posts(graph,"read",'visitor_posts')
+tell me my facebook posts
+facebook.read_posts(graph,"read",'visitor_posts')
 I want to know my follower count on facebook
 facebook.follower_count(graph)
 How many followers do i have on facebook?
