@@ -79,7 +79,7 @@ def upload_photo(graph) -> None or Exception:
 
 def upload_post(graph) -> None or Exception:
     """
- 
+    POS:Uploads the photo with caption 
     :param graph:
     :return:
     """
@@ -103,9 +103,11 @@ def follower_count(graph) -> None:
     print(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def read_posts(graph,function,selected) -> None:
+def post_related(graph,function,selected) -> None:
     """
-    PRE: The parameter can't be null
+    PRE: The function needs the purpose(function) of the call(Example: If it is for editing a post or liking a post) and 
+    the selected posts(If they are made by the user or visitors posts on the page)
+    POS: Executes the purpose specified
     :param graph:
     :return:
     """
