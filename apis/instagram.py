@@ -9,17 +9,13 @@ import time
 
 try:
     from instagram_private_api import (
-        Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError, ClientLoginRequiredError,
-        __version__ as client_version)
+        Client, ClientError, ClientLoginError, __version__ as client_version)
 except ImportError:
     import sys
     
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
-        Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError, ClientLoginRequiredError,
-        __version__ as client_version)
+        Client, ClientError, ClientLoginError, __version__ as client_version)
 
 
 def check_if_following(api, username) -> bool:
@@ -221,20 +217,34 @@ def post_comment(api) -> None:
             show_user_feed(api, feed['items'], own_feed)
             comment_block = True
             id_post, number_post = get_id_post(feed, "Which post would you like to comment on?", edit = True)
-            while comment_block:
+            want_put_comment = True
+            while comment_block and want_put_comment:
                 if 'comments_disabled' not in feed['items'][number_post]:
                     comment_block = False
                 else:
-                    cprint("The post has the comments blocked, please choose another post", 'red', attrs = ['bold'])
-                    id_post, number_post = get_id_post(feed, "Which post would you like to comment on?", edit = True)
-            
-            message = input("Message: ")
-            write_chat_bot("Message:")
-            write_chat_bot(message, name)
-            result = api.post_comment(media_id = id_post, comment_text = message)
-            if result['status'] == 'ok':
-                cprint("The comment has been posted correctly!\n", 'green', attrs = ['bold'])
-                write_chat_bot("The comment has been posted correctly!")
+                    cprint("The post has the comments blocked, please choose another post\n", 'red', attrs = ['bold'])
+                    write_chat_bot("The post has the comments blocked, please choose another post")
+                    another_try = input("Do you want to try another comment? (yes/no) ")
+                    
+                    write_chat_bot("Do you want to try another comment? (yes/no) ")
+                    write_chat_bot(another_try, name)
+
+                    if another_try.lower() in ['yes', 'y', 'ye']:
+                        id_post, number_post = get_id_post(feed, "Which post would you like to comment on?", edit = True)
+                    else:
+                        want_put_comment = False
+                        
+            if want_put_comment:
+                message = input("Message: ")
+                write_chat_bot("Message:")
+                write_chat_bot(message, name)
+                result = api.post_comment(media_id = id_post, comment_text = message)
+                if result['status'] == 'ok':
+                    cprint("The comment has been posted correctly!\n", 'green', attrs = ['bold'])
+                    write_chat_bot("The comment has been posted correctly!")
+            else:
+                cprint("It's okay if you couldn't leave a comment, there are many posts in the sea, go get them tiger!\n", 'blue', attrs = ['bold', 'underline'])
+                write_chat_bot("It's okay if you couldn't leave a comment, there are many posts in the sea, go get them tiger!")
         else:
             cprint("You cant get the feed", 'red')
             write_chat_bot("You cant get the feed")
@@ -264,7 +274,7 @@ def get_id_post(feed, text, edit = False) -> str or int or tuple:
         return id_post
 
 
-def likes_actions(api, target_type = "comment", like_type = 'like') -> Exception or ClientError or None:
+def likes_actions(api, target_type, like_type = 'like') -> Exception or ClientError or None:
     """
     PRE: All parameters are required
     POST: Depending on the type of target and type of like, a post or a comment will be liked or unlike
@@ -276,7 +286,7 @@ def likes_actions(api, target_type = "comment", like_type = 'like') -> Exception
     name = user_options(GET_NAME)
     try:
         if target_type != "comment":
-            are_users = show_search_users(api, f"Which user do you want to {like_type} the {target_type}? ")
+            are_users = show_search_users(api, f"\nWhich user do you want to {like_type} the {target_type}? ")
             while not are_users:
                 are_users = show_search_users(api, "No users with that name were found, please enter a correct name: ")
                 write_chat_bot("No users with that name were found, please enter a correct name: ")
@@ -490,12 +500,12 @@ def edit_profile(api) -> Exception or ClientError or None:
             write_chat_bot(text)
             cprint(text, 'green', attrs = ['bold'])
         else:
-            text = "There was a problem updating the profile, please try again"
+            text = "There was a problem updating the profile, please try again\n"
             write_chat_bot(text)
             cprint(text, 'red', attrs = ['bold'])
     
     except Exception as error:
-        write_status_log(error, 'Failed')
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -512,9 +522,9 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
     name = user_options(GET_NAME)
     for key, attribute in attributes.items():
         if attribute == 'full_name':
-            cprint("IMPORTANT!", 'red', attrs = ['bold', 'blink'])
+            cprint("IMPORTANT!\n", 'red', attrs = ['bold', 'blink'])
             cprint(
-                "If you have changed the full name 2 times within a period of 14 days, you will not be able to modify your full name, just leave it empty, the program will not be able to change the full name.\n Be aware of your decision",
+                "If you have changed the full name 2 times within a period of 14 days, you will not be able to modify your full name, just leave it empty, the program will not be able to change the full name.\n Be aware of your decision\n",
                 'red',
                 attrs = ['bold'])
             write_chat_bot(
@@ -527,10 +537,10 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
         
         if change_attribute:
             if attribute == 'is_private':
-                print("To change your account from private to public or vice versa, enter public/private")
+                print("\nTo change your account from private to public or vice versa, enter public/private")
                 write_chat_bot(f"To change your account from private to public or vice versa, enter public/private")
             elif attribute == 'gender':
-                print("To change your gender, enter male/female/unspecified")
+                print("\nTo change your gender, enter male/female/unspecified")
                 write_chat_bot(f"To change your gender, enter male/female/unspecified")
             
             new_data = input(f"Enter the new value for {key}: ")
@@ -538,7 +548,7 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
             write_chat_bot(f"Enter the new value for {key}: ")
             write_chat_bot(new_data, name)
             
-            secure = input(f"Are you sure to change {key} to '{new_data}'? yes/no: ").lower() in ['yes', 'y', 'ye']
+            secure = input(f"\nAre you sure to change {key} to '{new_data}'? yes/no: ").lower() in ['yes', 'y', 'ye']
             
             write_chat_bot(f"Are you sure to change {key} to '{new_data}'? yes/no: ")
             write_chat_bot(secure, name)
@@ -551,7 +561,7 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
                         new_data = int(genders.index(new_data)) + 1
                     else:
                         while new_data not in genders:
-                            new_data = input("The gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
+                            new_data = input("\nThe gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
                             
                             write_chat_bot("The gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
                             write_chat_bot(new_data, name)
@@ -561,7 +571,7 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
                 
                 data_change[attribute] = new_data
             else:
-                print(f"No changes have been made to the {key}")
+                print(f"\nNo changes have been made to the {key}")
                 write_chat_bot(f"No changes have been made to the {key}")
         else:
             data_change[attribute] = profile[attribute]
@@ -692,7 +702,7 @@ def follow_actions(api, follow_type = 'follow') -> Exception or ClientError or N
                 write_chat_bot(text)
     
     except Exception as error:
-        write_status_log(error, 'Internal server error')
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -710,10 +720,12 @@ def get_follows(api, show = True, follow_type = 'following') -> dict or list:
     user_id = api.authenticated_user_id
     if follow_type == 'following':
         results = api.user_following(user_id, rank)
-        text = "You are following: \n"
+        prefix = "You are"
     else:
         results = api.user_followers(user_id, rank)
-        text = "Your followers: \n"
+        prefix = "Your"
+    
+    text = f"{prefix} {follow_type}: \n"
     
     if show:
         cprint(text, 'blue', attrs = ['bold', 'underline'])
@@ -910,11 +922,17 @@ def on_login_callback(api, new_settings_file) -> None:
         with open(new_settings_file, 'w') as outfile:
             json.dump(cache_settings, outfile, default = to_json)
     except Exception as error:
-        write_status_log(error, 'failed')
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
 def delete_cookie(file):
+    """
+    PRE: The file cant be null
+    POST: If more than 1 hour has passed, the cookie will be deleted to avoid errors
+    :param file:
+    :return:
+    """
     try:
         with open(file, 'r') as f:
             data = json.load(f)
@@ -925,6 +943,7 @@ def delete_cookie(file):
             cprint("Cookie removed", 'yellow', attrs = ['bold'])
             write_chat_bot("Cookie removed")
     except Exception as error:
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -951,7 +970,7 @@ def connection_instagram(**user_data) -> object:
     try:
         if not os.path.isfile(settings_file):
             # If the credentials do not exist, do a new login
-            insta_bot = Client(
+            api = Client(
                 username, password,
                 on_login = lambda x: on_login_callback(x, settings_file))
         else:
@@ -960,22 +979,15 @@ def connection_instagram(**user_data) -> object:
                 with open(settings_file) as file_data:
                     cached_settings = json.load(file_data, object_hook = from_json)
             except Exception as error:
-                write_status_log(error, 'failed')
+                write_status_log(error, 'Exception')
                 raise Exception(error)
             
             device_id = cached_settings.get('device_id')
-            insta_bot = Client(
+            api = Client(
                 username, password,
+                device_id = device_id,
                 settings = cached_settings)
-    
-    except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
-        # Credentials expired
-        # It does a re login but using ua, keys and such
-        insta_bot = Client(
-            username, password,
-            device_id = device_id,
-            on_login = lambda x: on_login_callback(x, settings_file))
-    
+            
     except ClientLoginError as e:
         write_status_log(e, 'ClientLoginError')
         raise ClientLoginError(e)
@@ -990,7 +1002,7 @@ def connection_instagram(**user_data) -> object:
     write_chat_bot('You have successfully connected with the instagram!')
     cprint("You have successfully connected with the instagram! \n", 'green', attrs = ['bold'])
     
-    return insta_bot
+    return api
 
 
 def connection_aux_api(username, password) -> object:
@@ -1012,6 +1024,7 @@ def connection_aux_api(username, password) -> object:
         aux_api.logout()
     
     except Exception as error:
+        write_status_log(error, 'Exception')
         raise Exception(error)
     
     write_status_log('You have successfully connected with the aux api')

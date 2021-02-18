@@ -71,7 +71,8 @@ def get_credentials():
 
 def user_options(action, **extra_data) -> str or None or Exception:
     """
-
+    PRE: The action cant be null
+    POST: Depending on the action received, the name of the current user will be returned or registered
     :param action:
     :return:
     """
