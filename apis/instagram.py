@@ -9,17 +9,13 @@ import time
 
 try:
     from instagram_private_api import (
-        Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError,
-        __version__ as client_version)
+        Client, ClientError, ClientLoginError, __version__ as client_version)
 except ImportError:
     import sys
     
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
-        Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError,
-        __version__ as client_version)
+        Client, ClientError, ClientLoginError, __version__ as client_version)
 
 
 def check_if_following(api, username) -> bool:
@@ -915,6 +911,12 @@ def on_login_callback(api, new_settings_file) -> None:
 
 
 def delete_cookie(file):
+    """
+    PRE: The file cant be null
+    POST: If more than 1 hour has passed, the cookie will be deleted to avoid errors
+    :param file:
+    :return:
+    """
     try:
         with open(file, 'r') as f:
             data = json.load(f)
@@ -964,8 +966,9 @@ def connection_instagram(**user_data) -> object:
                 raise Exception(error)
             
             device_id = cached_settings.get('device_id')
-            insta_bot = Client(
+            api = Client(
                 username, password,
+                device_id = device_id,
                 settings = cached_settings)
             
     except ClientLoginError as e:
