@@ -1,6 +1,7 @@
-from logs import write_status_log, write_chat_bot, user_options, GET_NAME
+from logs import write_status_log, write_chat_bot, user_options, GET_NAME, get_credentials, remove_file
 import facebook
 import os.path
+import json
 from termcolor import cprint
 
 USER_TOKEN = "EAAGJNkHBQZAEBALHnRf3grXqjMdGG8denwyen9hvbCAYHRtsUdb315ZBUa5QvtdN3XkkyIRi3J2WZCp5zuYdlVdYOPgmbMGUc84D6S7MAw3E6qvUKZCL7UPvFaeZAGN3U06G5sJBTleNlQuFSFR1wzVSJLfpc2SyWxPI9nRFnYFb7RLhOdTYHfNti2NZCHx5wZD"
@@ -52,7 +53,6 @@ def upload_to_albums(graph) -> None:
             write_status_log(f"There was a problem opening the file, error: {error}")
             print(f"There was a problem opening the file, error: {error}")
 
-
 def upload_photo(graph) -> None or Exception:
     """
     PRE: Needs the path of the picture and a caption and the parameter can't be null
@@ -103,11 +103,9 @@ def follower_count(graph) -> None:
     print(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def read_posts(graph, function, selected) -> None:
+def read_posts(graph,function,selected) -> None:
     """
     PRE: The parameter can't be null
-    :param selected:
-    :param function:
     :param graph:
     :return:
     """
@@ -129,41 +127,46 @@ def read_posts(graph, function, selected) -> None:
                 posts_id.append(info["id"])
             elif 'story' or 'message' not in info:
                 print(f"{counter}. " + info["created_time"][0:10])
-        
+
         while option > counter or option < 1:
-            option = int(input("Select one: "))
-        
+                option = int(input("Select one: "))
+            
         selection = posts_id[option - 1]
-        
+
         if function == "like":
             graph.put_like(object_id = selection)
-        
+
         elif function == "comment":
             text = input("What would you like to comment: ").capitalize()
-            graph.put_comment(object_id = selection, message = text)
-        
+            graph.put_comment(object_id= selection, message=text)
+
         elif function == "delete":
             graph.delete_object(id = selection)
-        
+
         elif function == "edit":
-            text = input("What would you like to post?: ").capitalize()
-            graph.put_object(parent_object = selection, connection_name = '', message = text)
+            text = input("What would you like to change?: ").capitalize()
+            graph.put_object(parent_object = selection, connection_name = '', message = text) 
     
     except Exception as error:
         write_status_log('Failed', error)
         print(f"There was a problem with the operation : {error}")
-        raise Exception(error)
-    
-    # ------------ CONNECTION ---------------#
+        raise Exception(error)           
 
 
-def connection_api(user_token = USER_TOKEN) -> object or Exception:
+# ------------ CONNECTION ---------------#
+
+def connection_api(**user_token) -> object or Exception:
     """
     Returns the GraphApi and checks if there was any error while connecting to Facebook
     :return:
     """
+    if "token" not in user_token.keys():
+        credentials = get_credentials()
+        page_token = credentials['facebook']['token']
+    else:
+        page_token = user_token["token"]    
     try:
-        api = facebook.GraphAPI(access_token = user_token, version = "2.12")
+        api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
         write_status_log(error, 'Connection error')
         raise ConnectionError(f'You dont have internet: {error}')
@@ -175,3 +178,4 @@ def connection_api(user_token = USER_TOKEN) -> object or Exception:
         cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
     
     return api
+

@@ -30,13 +30,13 @@ facebook.upload_post(graph)
 i want to write something
 facebook.upload_post(graph)
 I want to edit a post
-facebook.read_posts(graph,"edit",'posts')
+facebook.read_posts(graph,"edit",'published_posts')
 delete post
-facebook.read_posts(graph,"delete",'posts')
+facebook.read_posts(graph,"delete",'published_posts')
 delete
-facebook.read_posts(graph,"delete",'posts')
-edit
-facebook.read_posts(graph,"edit",'posts')
+facebook.read_posts(graph,"delete",'published_posts')
+edit facebook
+facebook.read_posts(graph,"edit",'published_posts')
 I want to read a post
 facebook.read_posts(graph,"read",'visitor_posts')
 read facebook

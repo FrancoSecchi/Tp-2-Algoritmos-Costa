@@ -30,11 +30,11 @@ def access(name):
     POS: Returns the connections selected by the user
     """
     response = input("Would you like to connect to Facebook? (yes/no): ").lower()
-    if response == ["yes", 'ye', 'y']:
+    if response in ["yes", 'ye', 'y']:
         page_token = input("Please enter your page access token: ")
         write_chat_bot("Please enter your page access token: ")
         write_chat_bot(page_token, name)
-        graph = facebook.connection_api(page_token)
+        graph = facebook.connection_api(token = page_token)
     else:
         cprint("By not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz\n", 'blue', attrs = ['bold'])
         write_chat_bot("By not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz")
