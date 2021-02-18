@@ -505,7 +505,7 @@ def edit_profile(api) -> Exception or ClientError or None:
             cprint(text, 'red', attrs = ['bold'])
     
     except Exception as error:
-        write_status_log(error, 'Failed')
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -702,7 +702,7 @@ def follow_actions(api, follow_type = 'follow') -> Exception or ClientError or N
                 write_chat_bot(text)
     
     except Exception as error:
-        write_status_log(error, 'Internal server error')
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -922,7 +922,7 @@ def on_login_callback(api, new_settings_file) -> None:
         with open(new_settings_file, 'w') as outfile:
             json.dump(cache_settings, outfile, default = to_json)
     except Exception as error:
-        write_status_log(error, 'failed')
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -943,6 +943,7 @@ def delete_cookie(file):
             cprint("Cookie removed", 'yellow', attrs = ['bold'])
             write_chat_bot("Cookie removed")
     except Exception as error:
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -978,7 +979,7 @@ def connection_instagram(**user_data) -> object:
                 with open(settings_file) as file_data:
                     cached_settings = json.load(file_data, object_hook = from_json)
             except Exception as error:
-                write_status_log(error, 'failed')
+                write_status_log(error, 'Exception')
                 raise Exception(error)
             
             device_id = cached_settings.get('device_id')
@@ -1023,6 +1024,7 @@ def connection_aux_api(username, password) -> object:
         aux_api.logout()
     
     except Exception as error:
+        write_status_log(error, 'Exception')
         raise Exception(error)
     
     write_status_log('You have successfully connected with the aux api')

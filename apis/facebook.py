@@ -24,7 +24,7 @@ def upload_to_albums(graph) -> None:
             print(f"{counter} -", info["name"])
             counter += 1
             albums_id.append(info["id"])
-            write_chat_bot(f"{counter} -", info["name"])
+            write_chat_bot(f"{counter} - {info['name']}")
         
         while select > counter or select < 1:
             select = int(input("Select the album: "))
@@ -38,10 +38,10 @@ def upload_to_albums(graph) -> None:
             cprint("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
             write_chat_bot("The photo has been uploaded successfully!")
         except FileNotFoundError:
-            write_status_log("The requested file cannot be found")
+            write_status_log("The requested file cannot be found", "FileNotFoundError")
             print("The requested file cannot be found")
         except Exception as error:
-            write_status_log(f"There was a problem opening the file, error: {error}")
+            write_status_log(f"There was a problem opening the file, error: {error}", "Exception")
             print(f"There was a problem opening the file, error: {error}")
 
 
@@ -62,12 +62,11 @@ def upload_photo(graph) -> None or Exception:
         cprint("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
         write_chat_bot("The photo has been uploaded successfully!")
     except FileNotFoundError:
-        write_status_log("The requested file cannot be found")
+        write_status_log("The requested file cannot be found", 'FileNotFoundError')
         print("The requested file cannot be found")
     except Exception as error:
-        write_status_log(f"There was a problem opening the file, error: {error}")
-        print(f"There was a problem opening the file, error: {error}")
-
+        write_status_log(f"There was a problem opening the file, error: {error}", 'Exception')
+        raise Exception(error)
 
 def upload_post(graph) -> None or Exception:
     """
@@ -86,8 +85,7 @@ def upload_post(graph) -> None or Exception:
         cprint("Posting has been updated successfully!\n", 'green', attrs = ['bold'])
         write_chat_bot("Posting has been updated successfully!")
     except Exception as error:
-        write_status_log('Failed', error)
-        print(f"There was a problem uploading your post, error: {error}")
+        write_status_log(error, 'Exception')
         raise Exception(error)
 
 
@@ -103,11 +101,12 @@ def follower_count(graph) -> None:
     write_chat_bot(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def read_posts(graph, function, selected) -> None:
+def post_related(graph, action, selected) -> None:
     """
-    PRE: The parameter can't be null
+    PRE: The function needs the purpose(action) of the call(Example: If it is for editing a post or liking a post) and
+    the selected posts(If they are made by the user or visitors posts on the page)
     POST: The posts of the page are shown and depending on the action, it will be edited / likeara / deleted / commented
-    :param function:
+    :param action:
     :param selected:
     :param graph:
     :return:
@@ -143,12 +142,12 @@ def read_posts(graph, function, selected) -> None:
         
         selection = posts_id[option - 1]
         
-        if function == "like":
+        if action == "like":
             graph.put_like(object_id = selection)
             cprint("The post has been liked successfully!\n", 'green', attrs = ['bold'])
             write_chat_bot("The post has been liked successfully!")
         
-        elif function == "comment":
+        elif action == "comment":
             text = input("What would you like to comment: ").capitalize()
             write_chat_bot("What would you like to comment: ")
             write_chat_bot(text, name)
@@ -156,12 +155,12 @@ def read_posts(graph, function, selected) -> None:
             cprint("It has been successfully commented!\n", 'green', attrs = ['bold'])
             write_chat_bot("It has been successfully commented!")
         
-        elif function == "delete":
+        elif action == "delete":
             graph.delete_object(id = selection)
             cprint("The post has been successfully removed!\n", 'green', attrs = ['bold'])
             write_chat_bot("The post has been successfully removed!")
         
-        elif function == "edit":
+        elif action == "edit":
             text = input("What would you like to change?: ").capitalize()
             write_chat_bot("What would you like to change?: ")
             write_chat_bot(text, name)
@@ -170,7 +169,7 @@ def read_posts(graph, function, selected) -> None:
             write_chat_bot("Posting has been updated successfully!")
     
     except Exception as error:
-        write_status_log('Failed', error)
+        write_status_log(error, 'Exception')
         raise Exception(error)
     
     # ------------ CONNECTION ---------------#
@@ -191,10 +190,10 @@ def connection_api(**user_token) -> object or Exception:
     try:
         api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
-        write_status_log(error, 'Connection error')
+        write_status_log(error, 'ConnectionError')
         raise ConnectionError(f'You dont have internet: {error}')
     except Exception as error:
-        write_status_log(error, 'Failed')
+        write_status_log(error, 'Exception')
         raise Exception(error)
     else:
         write_status_log('Successfully connected with Facebook the api')

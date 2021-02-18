@@ -115,6 +115,7 @@ def run_bot(chat_bot):
         
         except (KeyboardInterrupt, EOFError, SystemExit):
             running = False
+            write_chat_bot("It's the end", 'SystemExit')
     else:
         animation("\nMay the Force be with you\n")
         write_chat_bot("May the Force be with you")
@@ -142,7 +143,7 @@ def main():
             lines = file.readlines()
     
     except Exception as error:
-        write_status_log('Failed', error)
+        write_status_log(error, 'Exception')
         raise Exception(error)
     
     for line in lines:
