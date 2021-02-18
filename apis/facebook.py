@@ -52,6 +52,7 @@ def upload_to_albums(graph) -> None:
             write_status_log(f"There was a problem opening the file, error: {error}")
             print(f"There was a problem opening the file, error: {error}")
 
+
 def upload_photo(graph) -> None or Exception:
     """
     PRE: Needs the path of the picture and a caption and the parameter can't be null
@@ -102,9 +103,11 @@ def follower_count(graph) -> None:
     print(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def read_posts(graph,function,selected) -> None:
+def read_posts(graph, function, selected) -> None:
     """
     PRE: The parameter can't be null
+    :param selected:
+    :param function:
     :param graph:
     :return:
     """
@@ -126,33 +129,33 @@ def read_posts(graph,function,selected) -> None:
                 posts_id.append(info["id"])
             elif 'story' or 'message' not in info:
                 print(f"{counter}. " + info["created_time"][0:10])
-
+        
         while option > counter or option < 1:
-                option = int(input("Select one: "))
-            
+            option = int(input("Select one: "))
+        
         selection = posts_id[option - 1]
-
+        
         if function == "like":
             graph.put_like(object_id = selection)
-
+        
         elif function == "comment":
             text = input("What would you like to comment: ").capitalize()
-            graph.put_comment(object_id= selection, message=text)
-
+            graph.put_comment(object_id = selection, message = text)
+        
         elif function == "delete":
             graph.delete_object(id = selection)
-
+        
         elif function == "edit":
             text = input("What would you like to post?: ").capitalize()
-            graph.put_object(parent_object = selection, connection_name = '', message = text) 
+            graph.put_object(parent_object = selection, connection_name = '', message = text)
     
     except Exception as error:
         write_status_log('Failed', error)
         print(f"There was a problem with the operation : {error}")
-        raise Exception(error)           
+        raise Exception(error)
+    
+    # ------------ CONNECTION ---------------#
 
-
-# ------------ CONNECTION ---------------#
 
 def connection_api(user_token = USER_TOKEN) -> object or Exception:
     """
@@ -172,4 +175,3 @@ def connection_api(user_token = USER_TOKEN) -> object or Exception:
         cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
     
     return api
-
