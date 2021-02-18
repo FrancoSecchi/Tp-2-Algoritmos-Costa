@@ -10,7 +10,7 @@ import time
 try:
     from instagram_private_api import (
         Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError, ClientLoginRequiredError,
+        ClientCookieExpiredError,
         __version__ as client_version)
 except ImportError:
     import sys
@@ -18,7 +18,7 @@ except ImportError:
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
     from instagram_private_api import (
         Client, ClientError, ClientLoginError,
-        ClientCookieExpiredError, ClientLoginRequiredError,
+        ClientCookieExpiredError,
         __version__ as client_version)
 
 
@@ -951,7 +951,7 @@ def connection_instagram(**user_data) -> object:
     try:
         if not os.path.isfile(settings_file):
             # If the credentials do not exist, do a new login
-            insta_bot = Client(
+            api = Client(
                 username, password,
                 on_login = lambda x: on_login_callback(x, settings_file))
         else:
@@ -967,15 +967,7 @@ def connection_instagram(**user_data) -> object:
             insta_bot = Client(
                 username, password,
                 settings = cached_settings)
-    
-    except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
-        # Credentials expired
-        # It does a re login but using ua, keys and such
-        insta_bot = Client(
-            username, password,
-            device_id = device_id,
-            on_login = lambda x: on_login_callback(x, settings_file))
-    
+            
     except ClientLoginError as e:
         write_status_log(e, 'ClientLoginError')
         raise ClientLoginError(e)
@@ -990,7 +982,7 @@ def connection_instagram(**user_data) -> object:
     write_chat_bot('You have successfully connected with the instagram!')
     cprint("You have successfully connected with the instagram! \n", 'green', attrs = ['bold'])
     
-    return insta_bot
+    return api
 
 
 def connection_aux_api(username, password) -> object:

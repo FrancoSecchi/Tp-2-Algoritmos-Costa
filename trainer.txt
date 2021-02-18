@@ -67,6 +67,10 @@ i like post instagram
 instagram.likes_actions(insta_api, target_type = 'post')
 like post in instagram
 instagram.likes_actions(insta_api, target_type = 'post')
+followers instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+following instagram
+instagram.get_follows(insta_api)
 like post instagram
 instagram.likes_actions(insta_api, target_type = 'post')
 like comment instagram
