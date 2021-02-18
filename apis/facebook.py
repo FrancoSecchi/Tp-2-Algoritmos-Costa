@@ -1,6 +1,7 @@
-from logs import write_status_log, write_chat_bot, user_options, GET_NAME
+from logs import write_status_log, write_chat_bot, user_options, GET_NAME, get_credentials, remove_file
 import facebook
 import os.path
+import json
 from termcolor import cprint
 
 USER_TOKEN = "EAAGJNkHBQZAEBALHnRf3grXqjMdGG8denwyen9hvbCAYHRtsUdb315ZBUa5QvtdN3XkkyIRi3J2WZCp5zuYdlVdYOPgmbMGUc84D6S7MAw3E6qvUKZCL7UPvFaeZAGN3U06G5sJBTleNlQuFSFR1wzVSJLfpc2SyWxPI9nRFnYFb7RLhOdTYHfNti2NZCHx5wZD"
@@ -143,7 +144,7 @@ def read_posts(graph,function,selected) -> None:
             graph.delete_object(id = selection)
 
         elif function == "edit":
-            text = input("What would you like to post?: ").capitalize()
+            text = input("What would you like to change?: ").capitalize()
             graph.put_object(parent_object = selection, connection_name = '', message = text) 
     
     except Exception as error:
@@ -154,13 +155,18 @@ def read_posts(graph,function,selected) -> None:
 
 # ------------ CONNECTION ---------------#
 
-def connection_api(user_token = USER_TOKEN) -> object or Exception:
+def connection_api(**user_token) -> object or Exception:
     """
     Returns the GraphApi and checks if there was any error while connecting to Facebook
     :return:
     """
+    if "token" not in user_token.keys():
+        credentials = get_credentials()
+        page_token = credentials['facebook']['token']
+    else:
+        page_token = user_token["token"]    
     try:
-        api = facebook.GraphAPI(access_token = user_token, version = "2.12")
+        api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
         write_status_log(error, 'Connection error')
         raise ConnectionError(f'You dont have internet: {error}')
