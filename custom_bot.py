@@ -1,15 +1,19 @@
+import os
+
 from apis import facebook, instagram
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 from logs import write_status_log, remove_file, write_chat_bot, user_options, SAVE_USER, welcome_message
 from termcolor import colored, cprint
 from time import sleep
+import json
 import sys
 
 
 def animation(text, time = 0.025):
     """
-    
+    PRE: the text parameter cant be null
+    POST: Make an animation by printing a text like a typewriter to give dynamism to the console
     :param time:
     :param text:
     :return:
@@ -19,37 +23,49 @@ def animation(text, time = 0.025):
         sys.stdout.write(letter)
         sys.stdout.flush()
 
-def access():
+
+def access(name):
     """
-    PRE:
+    PRE: The parameter cant be null, and its the user name
     POS: Returns the connections selected by the user
     """
-    response = input("Would you like to connect to Facebook?(Yes or No): ").lower()
-    if response == "yes":
+    response = input("Would you like to connect to Facebook? (yes/no): ").lower()
+    if response == ["yes", 'ye', 'y']:
         page_token = input("Please enter your page access token: ")
+        write_chat_bot("Please enter your page access token: ")
+        write_chat_bot(page_token, name)
         graph = facebook.connection_api(page_token)
     else:
+        cprint("By not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz\n", 'blue', attrs = ['bold'])
+        write_chat_bot("By not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz")
         graph = facebook.connection_api()
-
-    ig_response = input("Would you like to connect to Instagram?(Yes or No): ").lower()
-    if ig_response == "yes":
+    
+    ig_response = input("Would you like to connect to Instagram? (yes/no): ").lower()
+    write_chat_bot("Would you like to connect to Instagram? (yes/no): ")
+    write_chat_bot(ig_response, name)
+    if ig_response == ["yes", 'ye', 'y']:
         username = input("Please enter your username: ")
         password = input("Please enter your password: ")
-        insta_bot = instagram.connection_instagram(username,password)
+        write_chat_bot("Please enter your username: ")
+        write_chat_bot(username, name)
+        write_chat_bot("Please enter your password: ")
+        write_chat_bot(password, name)
+        insta_api = instagram.connection_instagram(username = username, password = password)
     else:
-        insta_bot = instagram.connection_instagram()    
+        insta_api = instagram.connection_instagram()
+        cprint("By not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot\n", 'blue', attrs = ['bold'])
+        write_chat_bot("By not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot\n")
+    
+    return graph, insta_api
 
-    return graph,insta_bot    
 
-
-
-def run_bot(bot):
+def run_bot(chat_bot):
     """
-
-    :param bot:
+    PRE: The chat_bot cant be null
+    POST: The conversation with the bot is executed
+    :param chat_bot:
     :return:
     """
-    graph,insta_bot = access()
     running = True
     is_taken_name = False
     text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... I mean bot! Oh my, I'm damned if they find out I said that ... \nAh, well, before Elon Musk finds me and sends me to Mars.\n"
@@ -59,8 +75,14 @@ def run_bot(bot):
     write_chat_bot(text + " " + "There's something I want to tell you.\n")
     
     welcome_message()
-    cprint("PLEASE READ ALL THE MESSAGE, thanks :D", 'blue', attrs=['bold', 'underline', 'blink'])
-    write_chat_bot("PLEASE READ ALL THE MESSAGE, thanks :D")
+    read = False
+    while not read:
+        cprint("PLEASE READ ALL THE MESSAGE", 'blue', attrs = ['bold', 'underline', 'blink'])
+        write_chat_bot("PLEASE READ ALL THE MESSAGE")
+        is_read = input("Did you read all the message? (yes/no) ")
+        write_chat_bot("Did you read all the message? (yes/no)")
+        write_chat_bot(is_read, 'Unknown')
+        read = is_read.lower() in ['yes', 'ye', 'y']
     
     name = ''
     while running:
@@ -73,16 +95,24 @@ def run_bot(bot):
                 print(f"\nHi {name}!")
                 write_chat_bot(f"Hi {name}!")
                 user_options(SAVE_USER, name = name, first_time = True)
+                graph, insta_api = access(name)
             
             user_input = input("\nYou: ")
             write_chat_bot(user_input, name)
             
-            bot_response = str(bot.get_response(user_input))
+            bot_response = str(chat_bot.get_response(user_input))
             if "_" in bot_response:
                 exec(bot_response)
             else:
                 print(bot_response)
                 write_chat_bot(bot_response)
+            
+            running = input("Would you like to carry out more actions? (yes/no) ").lower() in ['yes', 'ye', 'y']
+            write_chat_bot("Would you like to carry out more actions? (yes/no) ")
+            write_chat_bot(running, name)
+            if not running:
+                animation("\nMay the Force be with you\n")
+                write_chat_bot("May the Force be with you")
         
         except (KeyboardInterrupt, EOFError, SystemExit):
             animation("\nMay the Force be with you\n")
@@ -91,8 +121,17 @@ def run_bot(bot):
 
 
 def main():
-    bot = ChatBot(name = 'Crux')
-    trainer = ListTrainer(bot)
+    chat_bot = ChatBot(
+        name = 'Crux',
+        storage_adapter = 'chatterbot.storage.SQLStorageAdapter',
+        logic_adapters = [
+            'chatterbot.logic.MathematicalEvaluation',
+            'chatterbot.logic.TimeLogicAdapter',
+            'chatterbot.logic.BestMatch'
+             ],
+        database_uri = 'sqlite:///database.db'
+    )
+    trainer = ListTrainer(chat_bot)
     list_trainer = []
     remove_file('logs/status.txt')
     remove_file('logs/chat.txt')
@@ -108,7 +147,7 @@ def main():
         list_trainer.append(line.strip())
     
     trainer.train(list_trainer)
-    run_bot(bot)
+    run_bot(chat_bot)
 
 
 main()
