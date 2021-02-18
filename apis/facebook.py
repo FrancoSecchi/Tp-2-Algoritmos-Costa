@@ -1,15 +1,6 @@
-from logs import write_status_log, write_chat_bot, user_options, GET_NAME, get_credentials, remove_file
+from logs import write_status_log, write_chat_bot, user_options, GET_NAME, get_credentials
 import facebook
-import os.path
-import json
 from termcolor import cprint
-
-USER_TOKEN = "EAAGJNkHBQZAEBALHnRf3grXqjMdGG8denwyen9hvbCAYHRtsUdb315ZBUa5QvtdN3XkkyIRi3J2WZCp5zuYdlVdYOPgmbMGUc84D6S7MAw3E6qvUKZCL7UPvFaeZAGN3U06G5sJBTleNlQuFSFR1wzVSJLfpc2SyWxPI9nRFnYFb7RLhOdTYHfNti2NZCHx5wZD"
-
-
-# READ_POST = 0
-# UPDATE_POST = 1
-# GET_POST = 2
 
 
 def upload_to_albums(graph) -> None:
@@ -53,6 +44,7 @@ def upload_to_albums(graph) -> None:
             write_status_log(f"There was a problem opening the file, error: {error}")
             print(f"There was a problem opening the file, error: {error}")
 
+
 def upload_photo(graph) -> None or Exception:
     """
     PRE: Needs the path of the picture and a caption and the parameter can't be null
@@ -79,13 +71,20 @@ def upload_photo(graph) -> None or Exception:
 
 def upload_post(graph) -> None or Exception:
     """
- 
+    PRE: The graph cant be null
+    POST: Updates a post chosen by the user
     :param graph:
     :return:
     """
+    name = user_options(GET_NAME)
     user_message = input("What would you like to write?: ")
+    write_chat_bot("What would you like to write?: ")
+    write_chat_bot(user_message, name)
+    
     try:
         graph.put_object(parent_object = 'me', connection_name = 'feed', message = user_message)
+        cprint("Posting has been updated successfully!\n", 'green', attrs = ['bold'])
+        write_chat_bot("Posting has been updated successfully!")
     except Exception as error:
         write_status_log('Failed', error)
         print(f"There was a problem uploading your post, error: {error}")
@@ -100,71 +99,95 @@ def follower_count(graph) -> None:
     :return: None
     """
     followers = graph.get_object(id = 'me', fields = 'followers_count')
-    print(f"Number of followers: {str(followers['followers_count'])}")
+    print(f"Number of followers: {str(followers['followers_count'])}\n")
+    write_chat_bot(f"Number of followers: {str(followers['followers_count'])}")
 
 
-def read_posts(graph,function,selected) -> None:
+def read_posts(graph, function, selected) -> None:
     """
     PRE: The parameter can't be null
+    POST: The posts of the page are shown and depending on the action, it will be edited / likeara / deleted / commented
+    :param function:
+    :param selected:
     :param graph:
     :return:
     """
     option = 0
     counter = 1
     posts_id = []
+    name = user_options(GET_NAME)
     try:
         posts = graph.get_connections(id = 'me', connection_name = selected)
         info_list = posts['data']
         print("The posts are: ")
+        write_chat_bot("The posts are: ")
         for info in info_list:
             if 'message' in info:
                 print(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
+                write_chat_bot(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
                 counter += 1
                 posts_id.append(info["id"])
             elif 'story' in info:
                 print(f"{counter}. " + info["created_time"][0:10] + ":" + info["story"])
+                write_chat_bot(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
                 counter += 1
                 posts_id.append(info["id"])
             elif 'story' or 'message' not in info:
+                write_chat_bot(f"{counter}. " + info["created_time"][0:10] + ":" + info["message"])
                 print(f"{counter}. " + info["created_time"][0:10])
-
+        
         while option > counter or option < 1:
-                option = int(input("Select one: "))
-            
+            option = int(input("Select one: "))
+            write_chat_bot("Select one: ")
+            write_chat_bot(option, name)
+        
         selection = posts_id[option - 1]
-
+        
         if function == "like":
             graph.put_like(object_id = selection)
-
+            cprint("The post has been liked successfully!\n", 'green', attrs = ['bold'])
+            write_chat_bot("The post has been liked successfully!")
+        
         elif function == "comment":
             text = input("What would you like to comment: ").capitalize()
-            graph.put_comment(object_id= selection, message=text)
-
+            write_chat_bot("What would you like to comment: ")
+            write_chat_bot(text, name)
+            graph.put_comment(object_id = selection, message = text)
+            cprint("It has been successfully commented!\n", 'green', attrs = ['bold'])
+            write_chat_bot("It has been successfully commented!")
+        
         elif function == "delete":
             graph.delete_object(id = selection)
-
+            cprint("The post has been successfully removed!\n", 'green', attrs = ['bold'])
+            write_chat_bot("The post has been successfully removed!")
+        
         elif function == "edit":
             text = input("What would you like to change?: ").capitalize()
-            graph.put_object(parent_object = selection, connection_name = '', message = text) 
+            write_chat_bot("What would you like to change?: ")
+            write_chat_bot(text, name)
+            graph.put_object(parent_object = selection, connection_name = '', message = text)
+            cprint("Posting has been updated successfully!\n", 'green', attrs = ['bold'])
+            write_chat_bot("Posting has been updated successfully!")
     
     except Exception as error:
         write_status_log('Failed', error)
-        print(f"There was a problem with the operation : {error}")
-        raise Exception(error)           
+        raise Exception(error)
+    
+    # ------------ CONNECTION ---------------#
 
-
-# ------------ CONNECTION ---------------#
 
 def connection_api(**user_token) -> object or Exception:
     """
-    Returns the GraphApi and checks if there was any error while connecting to Facebook
+    PRE: The parameters can be null
+    PRE: If the user does not enter their credentials, those of crux are used.
+         Returns the GraphApi and checks if there was any error while connecting to Facebook
     :return:
     """
     if "token" not in user_token.keys():
         credentials = get_credentials()
         page_token = credentials['facebook']['token']
     else:
-        page_token = user_token["token"]    
+        page_token = user_token["token"]
     try:
         api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
@@ -178,4 +201,3 @@ def connection_api(**user_token) -> object or Exception:
         cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
     
     return api
-

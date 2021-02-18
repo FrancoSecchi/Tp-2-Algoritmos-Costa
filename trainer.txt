@@ -11,7 +11,7 @@ like a post facebook
 facebook.read_posts(graph,"like",'visitor_posts')
 like facebook
 facebook.read_posts(graph,"like",'visitor_posts')
-i want to comment on a post
+i want to comment on a post facebook
 facebook.read_posts(graph,"comment",'visitor_posts')
 comment facebook
 facebook.read_posts(graph,"comment",'visitor_posts')
@@ -29,18 +29,18 @@ Post something
 facebook.upload_post(graph)
 i want to write something
 facebook.upload_post(graph)
-I want to edit a post
-facebook.read_posts(graph,"edit",'published_posts')
-delete post
-facebook.read_posts(graph,"delete",'published_posts')
-delete
-facebook.read_posts(graph,"delete",'published_posts')
+I want to edit a post facebook
+facebook.read_posts(graph, "edit", 'published_posts')
+delete post facebook
+facebook.read_posts(graph, "delete", 'published_posts')
+delete facebook
+facebook.read_posts(graph, "delete", 'published_posts')
 edit facebook
-facebook.read_posts(graph,"edit",'published_posts')
+facebook.read_posts(graph, "edit", 'published_posts')
 I want to read a post
-facebook.read_posts(graph,"read",'visitor_posts')
+facebook.read_posts(graph, "read", 'visitor_posts')
 read facebook
-facebook.read_posts(graph,"read",'visitor_posts')
+facebook.read_posts(graph, "read", 'visitor_posts')
 tell me my facebook posts
 facebook.read_posts(graph,"read",'visitor_posts')
 I want to know my follower count on facebook
@@ -57,59 +57,171 @@ follow me facebook
 facebook.follower_count(graph)
 followers facebook
 facebook.follower_count(graph)
-follow person instagram
+I want to follow a user instagram
 instagram.follow_actions(insta_api)
-unfollow person instagram
+follow a user instagram
+instagram.follow_actions(insta_api)
+follow a user
+instagram.follow_actions(insta_api)
+unfollow a user instagram
 instagram.follow_actions(insta_api, follow_type = 'unfollow')
+unfollow
+instagram.follow_actions(insta_api, follow_type = 'unfollow')
+I want to unfollow a user instagram
+instagram.follow_actions(insta_api, follow_type = 'unfollow')
+show my followers instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+get my followers instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+get followers instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+my followers instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+I want to get the followers of my account instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+followers instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+follow me instagram
+instagram.get_follows(insta_api, follow_type = "followers")
+Show who I follow instagram
+instagram.get_follows(insta_api)
+who I follow instagram
+instagram.get_follows(insta_api)
+get following instagram
+instagram.get_follows(insta_api)
+my followings instagram
+instagram.get_follows(insta_api)
+I want to see who I am following on my account instagram
+instagram.get_follows(insta_api)
+following instagram
+instagram.get_follows(insta_api)
+i want edit my profile account
+instagram.edit_profile(insta_api)
+i want edit my profile account
+instagram.edit_profile(insta_api)
+edit my profile
+instagram.edit_profile(insta_api)
 edit profile instagram
 instagram.edit_profile(insta_api)
-like post instagram
+edit profile
+instagram.edit_profile(insta_api)
+profile account
+instagram.edit_profile(insta_api)
+edit account
+instagram.edit_profile(insta_api)
+like a post instagram
 instagram.likes_actions(insta_api, target_type = 'post')
-i wanna like post instagram
+I want to leave a like in a post instagram
 instagram.likes_actions(insta_api, target_type = 'post')
-i want to put a like in the post instagram
+I want to put a like in a post instagram
 instagram.likes_actions(insta_api, target_type = 'post')
-instagram
+leave a like in a post instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+put a like in a post instagram
 instagram.likes_actions(insta_api, target_type = 'post')
 i like post instagram
 instagram.likes_actions(insta_api, target_type = 'post')
-like post in instagram
+i want like comment instagram
 instagram.likes_actions(insta_api, target_type = 'post')
-followers instagram
-instagram.get_follows(insta_api, follow_type = "followers")
-following instagram
-instagram.get_follows(insta_api)
-like post instagram
+i want to put a like in the comment instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+i want to put a like in a comment instagram
 instagram.likes_actions(insta_api, target_type = 'post')
 like comment instagram
-instagram.likes_actions(insta_api, target_type = 'comment')
+instagram.likes_actions(insta_api, target_type = 'post')
+i like comment instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+like comment in instagram
+instagram.likes_actions(insta_api, target_type = 'post')
+unlike a post instagram
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+unlike post
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+I want to leave a unlike in a post instagram
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+I want to put a unlike in a post instagram
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+leave a unlike in a post instagram
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+put a unlike in a post instagram
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+unlike post instagram
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+unlike a post
+instagram.likes_actions(insta_api, target_type = 'post', like_type = 'unlike')
+I want to leave a unlike in a comment instagram
+instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
+I want to put a unlike in a comment instagram
+instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
+leave a unlike in a comment instagram
+instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
+put a unlike in a comment instagram
+instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
 unlike comment instagram
 instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
-unlike post instagram
-instagram.likes_actions(insta_api, target_type = 'post', type_like = 'unlike')
+unlike comment
+instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
+unlike a comment instagram
+instagram.likes_actions(insta_api, target_type = 'comment', like_type = 'unlike')
+I want to send a message to a user
+instagram.message_actions(insta_api, action_type = 'send')
+I want to send a message
+instagram.message_actions(insta_api, action_type = 'send')
+send a message instagram
+instagram.message_actions(insta_api, action_type = 'send')
 send message instagram
+instagram.message_actions(insta_api, action_type = 'send')
+send
 instagram.message_actions(insta_api, action_type = 'send')
 get messages instagram
 instagram.message_actions(insta_api, action_type = 'show')
+I want to see my messages
+instagram.message_actions(insta_api, action_type = 'show')
+I want to see a message instagram
+instagram.message_actions(insta_api, action_type = 'show')
+my messages instagram
+instagram.message_actions(insta_api, action_type = 'show')
 messages instagram
 instagram.message_actions(insta_api, action_type = 'show')
+I want to delete a post instagram
+instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'post')
+delete a post instagram
+instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'post')
 delete post instagram
 instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'post')
+I want to edit a post instagram
+instagram.edit_post_actions(insta_api, edit_type = 'edit', target_type = 'post')
+edit a post instagram
+instagram.edit_post_actions(insta_api, edit_type = 'edit', target_type = 'post')
+edit post instagram
+instagram.edit_post_actions(insta_api, edit_type = 'edit', target_type = 'post')
+I want to edit a comment instagram
+instagram.edit_post_actions(insta_api, edit_type = 'comment', target_type = 'comment')
+edit a comment instagram
+instagram.edit_post_actions(insta_api, edit_type = 'comment', target_type = 'comment')
 edit comment instagram
-instagram.edit_post_actions(insta_api, edit_type = 'edit' , target_type = 'comment')
+instagram.edit_post_actions(insta_api, edit_type = 'comment', target_type = 'comment')
+I want to comment a post instagram
+instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'comment')
+delete a comment instagram
+instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'comment')
 delete comment instagram
-instagram.edit_post_actions(insta_api, edit_type = 'delete' , target_type = 'comment')
-post comment instagram
+instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'comment')
+I want to leave a comment on a post
 instagram.post_comment(insta_api)
-sdgsdgsdf
-I'm sorry, I don't understand what you said
-haha
-What did you mean?
-"#$%$&#
-Sorry, I don't speak in hexadecimal
-Crux tell me a joke
+post a comment instagram
+instagram.post_comment(insta_api)
+I want to leave a comment in a post instagram
+instagram.post_comment(insta_api)
+I want to put a comment in a post instagram
+instagram.post_comment(insta_api)
+leave a comment in a post instagram
+instagram.post_comment(insta_api)
+put a comment in a post instagram
+instagram.post_comment(insta_api)
+jokes
 I ate a clock yesterday, it was very time-consuming.
 Make me laugh
-I'm a big fan of whiteboards. I find them quite re-markable.
+Why did the programmer quit his job? ... Because he didn't get arrays (a raise)
 Funny
-Did you hear about the crook who stole a calendar? He got twelve months.
+What do you call a programmer from Finland? ... Nerdic
