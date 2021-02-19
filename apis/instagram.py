@@ -18,7 +18,7 @@ except ImportError:
         Client, ClientError, ClientLoginError, __version__ as client_version)
 
 
-def check_if_following(api, username) -> bool:
+def check_if_following(api: Client, username: str) -> bool:
     """
     PRE: All parameters are required
     POST: Check if the current user follows the searched user. It is also used to know if I can access the user's feed
@@ -39,7 +39,7 @@ def check_if_following(api, username) -> bool:
     return i_following
 
 
-def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple:
+def prepare_text(post: dict, post_to_show: str, attribute: str, comments: dict, **extra_data) -> tuple:
     """
     PRE: All parameter are required
     POST: A string is formatted which will contain the visual structure of each post
@@ -75,7 +75,7 @@ def prepare_text(post, post_to_show, attribute, comments, **extra_data) -> tuple
     return post_to_show, title
 
 
-def validate_number_post(number, max_number) -> int:
+def validate_number_post(number: int, max_number: int) -> int:
     """
     PRE: All parameters are required
     POST: It is validated that the position of the post within a dictionary exists. And this validated position is returned
@@ -97,7 +97,7 @@ def validate_number_post(number, max_number) -> int:
     return number
 
 
-def show_user_feed(api, feed, own_feed = False) -> None:
+def show_user_feed(api: Client, feed: list, own_feed = False) -> None:
     """
     PRE: All the parameters are required
     POST: The feed of a user chosen by the current user is printed. And it is verified if the feed that is being printed is that of the current user.
@@ -136,7 +136,7 @@ def show_user_feed(api, feed, own_feed = False) -> None:
         post_to_show = ''
 
 
-def my_feed(api) -> None:
+def my_feed(api: Client) -> None:
     """
     PRE: The parameter can't be null
     POST: Print current user's feed
@@ -147,13 +147,13 @@ def my_feed(api) -> None:
     show_user_feed(api, feed, own_feed = True)
 
 
-def validate_post_comment(api, feed, position_comment) -> list:
+def validate_post_comment(api: Client, feed: dict, position_comment: list) -> list:
     """
     PRE: All the parameters cant be null
     POST: The position of the comment x and the post y is validated, and a list with the validated coordinates is returned.
-    :param api:
-    :param feed:
-    :param position_comment:
+    :param api: :type object
+    :param feed: :type dict
+    :param position_comment: :type list
     :return:
     """
     correct_post = False
@@ -185,7 +185,7 @@ def validate_post_comment(api, feed, position_comment) -> list:
     return position_comment
 
 
-def post_comment(api) -> None:
+def post_comment(api: Client) -> None:
     """
     PRE: The parameter can't be null
     POST: Post a comment on a post from a user chosen by the current user
@@ -228,12 +228,12 @@ def post_comment(api) -> None:
                     
                     write_chat_bot("Do you want to try another comment? (yes/no) ")
                     write_chat_bot(another_try, name)
-
+                    
                     if another_try.lower() in ['yes', 'y', 'ye']:
                         id_post, number_post = get_id_post(feed, "Which post would you like to comment on?", edit = True)
                     else:
                         want_put_comment = False
-                        
+            
             if want_put_comment:
                 message = input("Message: ")
                 write_chat_bot("Message:")
@@ -253,13 +253,13 @@ def post_comment(api) -> None:
         raise Exception(error)
 
 
-def get_id_post(feed, text, edit = False) -> str or int or tuple:
+def get_id_post(feed: dict, text: str, edit: bool = False) -> str or int or tuple:
     """
     PRE: The feed and text parameter, cant be null
     POST: Returns the id of the post if the post / comment is not being edited, otherwise, the id of the post and its position in the dictionary will be returned
-    :param edit:
-    :param text:
-    :param feed:
+    :param feed: :type dict
+    :param text: :type str
+    :param edit: :type bool
     :return:
     """
     name = user_options(GET_NAME)
@@ -274,7 +274,7 @@ def get_id_post(feed, text, edit = False) -> str or int or tuple:
         return id_post
 
 
-def likes_actions(api, target_type, like_type = 'like') -> Exception or ClientError or None:
+def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Exception or ClientError or None:
     """
     PRE: All parameters are required
     POST: Depending on the type of target and type of like, a post or a comment will be liked or unlike
@@ -332,7 +332,7 @@ def likes_actions(api, target_type, like_type = 'like') -> Exception or ClientEr
         raise Exception(error)
 
 
-def already_liked(api, target_id, type_like = 'post', own_feed = False) -> bool:
+def already_liked(api: Client, target_id: str, type_like: str = 'post', own_feed: bool = False) -> bool:
     """
     PRE: The api and target_id parameter cant be null
     POST: Check if the post / comment is already liked by the current user
@@ -360,7 +360,7 @@ def already_liked(api, target_id, type_like = 'post', own_feed = False) -> bool:
     return is_liked
 
 
-def unlike(api, target_id, target_type = 'post') -> None or ClientError:
+def unlike(api: Client, target_id: str, target_type: str = 'post') -> None or ClientError:
     """
     PRE: Bot parameters and target_id can't be null
     POST: Depending on the type of target, a post or a comment is unliked. The target_id corresponds to the id of a comment or a post.
@@ -383,7 +383,7 @@ def unlike(api, target_id, target_type = 'post') -> None or ClientError:
         write_chat_bot(f"There was a problem disliking the {target_type}, please try again later!")
 
 
-def like(api, target_id, target_type = 'post', comment_text = '', own_feed = False) -> None or ClientError:
+def like(api: Client, target_id: str, target_type: str = 'post', comment_text: str = '', own_feed: bool = False) -> None or ClientError:
     """
     PRE: Bot parameters and target_id can't be null
     POST: Depending on the type of target, a post or a comment is liked. The target_id corresponds to the id of a comment or a post.
@@ -420,7 +420,7 @@ def like(api, target_id, target_type = 'post', comment_text = '', own_feed = Fal
             write_chat_bot("The like has been left as it was")
 
 
-def prepare_comment(api, feed, text) -> dict or ClientError:
+def prepare_comment(api: Client, feed: dict, text: str) -> dict or ClientError:
     """
     PRE: All the parameters are required
     POST: The position of x comment is validated and a dictionary is prepared containing the id of the post, the id of the comment, and the comment text
@@ -437,15 +437,15 @@ def prepare_comment(api, feed, text) -> dict or ClientError:
     write_chat_bot(position_comment, name)
     
     position_comment = validate_post_comment(api, feed, position_comment)
-    post_id = feed[position_comment[0] - 1]['pk']
+    post_id = str(feed[position_comment[0] - 1]['pk'])
     comments = api.media_comments(post_id)['comments']
-    comment_id = comments[position_comment[1] - 1]['pk']
-    comment_text = comments[position_comment[1] - 1]['text']
+    comment_id = str(comments[position_comment[1] - 1]['pk'])
+    comment_text = str(comments[position_comment[1] - 1]['text'])
     
     return {'post_id': post_id, 'comment_id': comment_id, 'comment_text': comment_text}
 
 
-def edit_profile(api) -> Exception or ClientError or None:
+def edit_profile(api: Client) -> Exception or ClientError or None:
     """
     PRE: The parameter can't be null
     POST: The attributes available to change from the user's profile are printed,
@@ -509,7 +509,7 @@ def edit_profile(api) -> Exception or ClientError or None:
         raise Exception(error)
 
 
-def prepare_profile(profile, attributes, data_change, genders) -> None:
+def prepare_profile(profile: dict, attributes: dict, data_change: dict, genders: list) -> None:
     """
     PRE: All parameters are required
     POST: The "data_change" dictionary is prepared with the information to change or maintain, of the current user's profile
@@ -577,7 +577,7 @@ def prepare_profile(profile, attributes, data_change, genders) -> None:
             data_change[attribute] = profile[attribute]
 
 
-def delete(api, target_id, target_type, parent_id = '') -> None or Exception:
+def delete(api: Client, target_id: str, target_type: str, parent_id: str = '') -> None or Exception:
     """
     PRE: api parameters, target_id, and target type cannot be null
     POST: Depending on the type of target, a post or a comment is deleted. The target_id corresponds to the id of a comment or a post.
@@ -590,9 +590,9 @@ def delete(api, target_id, target_type, parent_id = '') -> None or Exception:
     """
     
     if target_type == 'post':
-        result = api.delete_media(media_id = str(target_id))
+        result = api.delete_media(media_id = target_id)
     else:
-        result = api.delete_comment(post_id = str(parent_id), comment_id = str(target_id))
+        result = api.delete_comment(media_id = parent_id, comment_id = target_id)
     
     if result['status'] == 'ok':
         cprint(f"The {target_type} has been successfully removed!\n", 'green', attrs = ['bold'])
@@ -602,7 +602,7 @@ def delete(api, target_id, target_type, parent_id = '') -> None or Exception:
         write_chat_bot(f"The {target_type} could not be removed. Please try again later")
 
 
-def edit_post_actions(api, edit_type, target_type = 'post'):
+def edit_post_actions(api: Client, edit_type: str, target_type: str = 'post'):
     """
     PRE: api parameters and type_edit cannot be null
     POST: A user post will be edited or deleted. As you can also delete a comment from said post
@@ -648,7 +648,7 @@ def edit_post_actions(api, edit_type, target_type = 'post'):
                 write_chat_bot(secure, name)
                 
                 if secure:
-                    id_post = feed['items'][number_post]['pk']
+                    id_post = str(feed['items'][number_post]['pk'])
                     delete(api, id_post, 'post')
         else:
             if edit_type == 'edit':
@@ -668,7 +668,7 @@ def edit_post_actions(api, edit_type, target_type = 'post'):
         write_chat_bot("Your feed is empty")
 
 
-def follow_actions(api, follow_type = 'follow') -> Exception or ClientError or None:
+def follow_actions(api: Client, follow_type: str = 'follow') -> Exception or ClientError or None:
     """
     PRE: The api parameter can't be null
     POST: If the type of follow is "unfollow", the user's current followers are printed, and they are given to choose who they want to unfollow.
@@ -706,7 +706,7 @@ def follow_actions(api, follow_type = 'follow') -> Exception or ClientError or N
         raise Exception(error)
 
 
-def get_follows(api, show = True, follow_type = 'following') -> dict or list:
+def get_follows(api: Client, show: bool = True, follow_type: str = 'following') -> dict or list:
     """
     PRE: The api parameter can't be null
     POST: If the show parameter is true the followers of the current user are printed or the users followed by the current user are printed,
@@ -735,8 +735,7 @@ def get_follows(api, show = True, follow_type = 'following') -> dict or list:
     return results
 
 
-def show_search_users(api, text = 'Who do you want to search?') -> None or ClientError:
-    
+def show_search_users(api: Client, text: str = 'Who do you want to search?') -> None or ClientError:
     """
     PRE: The api parameter can't be null
     POST: Found users based on a name are printed. And the text parameter varies because different texts are used to search, like, follow, etc.
@@ -760,7 +759,7 @@ def show_search_users(api, text = 'Who do you want to search?') -> None or Clien
                 full_data += f" Someone you know follows this account: {user['social_context']}"
             if user['friendship_status']['following']:
                 full_data += colored(f" You are currently following it", 'green')
-                
+            
             print(full_data + "\n")
             text_to_log += full_data + '\n'
         write_chat_bot(text_to_log)
@@ -773,7 +772,7 @@ def show_search_users(api, text = 'Who do you want to search?') -> None or Clien
     return are_users
 
 
-def show_last_messages(last_messages, bot_id) -> None:
+def show_last_messages(last_messages: dict, bot_id: str) -> None:
     """
     PRE: Both parameters are required and cannot be empty
     POST: If the user has chats with other users, the last event of each chat will be printed.
@@ -834,7 +833,7 @@ def show_last_messages(last_messages, bot_id) -> None:
         write_chat_bot("You don't have any chat")
 
 
-def message_actions(api, action_type = 'send') -> None or Exception or ClientError:
+def message_actions(api: Client, action_type: str = 'send') -> None or Exception or ClientError:
     """
     PRE: The parameters are required
     POST: If the action type is "send", a message will be sent to a user determined by the current user.
@@ -909,7 +908,7 @@ def from_json(json_object):
     return json_object
 
 
-def on_login_callback(api, new_settings_file) -> None:
+def on_login_callback(api: Client, new_settings_file: str) -> None:
     """
     PRE: The api and the file that saves the settings cannot be empty
     POST: Write, in a json, the cookies and settings to avoid re-login
@@ -926,7 +925,7 @@ def on_login_callback(api, new_settings_file) -> None:
         raise Exception(error)
 
 
-def delete_cookie(file):
+def delete_cookie(file: str) -> None or Exception:
     """
     PRE: The file cant be null
     POST: If more than 1 hour has passed, the cookie will be deleted to avoid errors
@@ -947,7 +946,7 @@ def delete_cookie(file):
         raise Exception(error)
 
 
-def connection_instagram(**user_data) -> object:
+def connection_instagram(**user_data: dict) -> object:
     """
     PRE: If the user does not give us the credentials of their instagram user, we will use the crux data
     POST: Credentials are created to avoid re-logging and check if I spend more than an hour to delete the cookies and the connection with the api is created
@@ -987,7 +986,7 @@ def connection_instagram(**user_data) -> object:
                 username, password,
                 device_id = device_id,
                 settings = cached_settings)
-            
+    
     except ClientLoginError as e:
         write_status_log(e, 'ClientLoginError')
         raise ClientLoginError(e)
@@ -1005,7 +1004,7 @@ def connection_instagram(**user_data) -> object:
     return api
 
 
-def connection_aux_api(username, password) -> object:
+def connection_aux_api(username: str, password: str) -> object:
     """
     This connection is made specifically for sending messages
     PRE: The username and password must not be empty, and represent the username and password of the current user
