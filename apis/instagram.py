@@ -735,7 +735,7 @@ def get_follows(api: Client, show: bool = True, follow_type: str = 'following') 
     return results
 
 
-def show_search_users(api: Client, text: str = 'Who do you want to search?') -> None or ClientError:
+def show_search_users(api, text: str = 'Who do you want to search?') -> None or ClientError:
     """
     PRE: The api parameter can't be null
     POST: Found users based on a name are printed. And the text parameter varies because different texts are used to search, like, follow, etc.
