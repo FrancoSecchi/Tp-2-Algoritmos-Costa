@@ -946,7 +946,7 @@ def delete_cookie(file: str) -> None or Exception:
         raise Exception(error)
 
 
-def connection_instagram(**user_data: dict) -> object:
+def connection_instagram(**user_data) -> object:
     """
     PRE: If the user does not give us the credentials of their instagram user, we will use the crux data
     POST: Credentials are created to avoid re-logging and check if I spend more than an hour to delete the cookies and the connection with the api is created
