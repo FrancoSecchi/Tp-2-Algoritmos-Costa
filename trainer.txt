@@ -219,6 +219,10 @@ leave a comment in a post instagram
 instagram.post_comment(insta_api)
 put a comment in a post instagram
 instagram.post_comment(insta_api)
+I want see my feed
+instagram.my_feed(insta_api)
+my feed
+instagram.my_feed(insta_api)
 jokes
 I ate a clock yesterday, it was very time-consuming.
 Make me laugh
