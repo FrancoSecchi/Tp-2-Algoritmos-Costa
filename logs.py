@@ -9,11 +9,11 @@ STATUS_FILE = "logs/status.txt"
 
 def format_string(text: str, name: str = 'Crux') -> str:
     """
-    
+    A text is constructed with the format of (time) (name): (text),  to save them in the logs
     
     Arguments:
-        text (str) :
-        name (str) :
+        text (str) : The user / bot generated text
+        name (str) : The name of the user who wrote the text
     
     Returns:
         str -
@@ -24,7 +24,8 @@ def format_string(text: str, name: str = 'Crux') -> str:
 
 def write_log(filename: str, text: str, username: str) -> None:
     """
-    Returns the credentials of the test accounts, and their credentials are stored in a json
+    Write or create a txt file that will save a specific text for a user,
+    and the txt will be saved in the carpet logs/
     
     Arguments:
         filename (str) : The relative path of the file to update
@@ -65,6 +66,7 @@ def get_credentials():
 def print_write_chat(message: str, print_text: bool = True, color: str = 'white',
                      attrs_color: list = []) -> None:
     """
+    A text is printed on the screen and that same text will be saved in the chat log
     
     Arguments:
         message (str) : Message to display
@@ -86,11 +88,13 @@ def print_write_chat(message: str, print_text: bool = True, color: str = 'white'
 
 def input_user_chat(text: str) -> str:
     """
+    The user is asked for a specific input, the input is recorded in the logs, and the input value is returned
+    
     Arguments:
-        text (str) :
+        text (str) : Text that will indicate what value the user must enter
         
     Returns:
-        str -
+        str - The value of the input given by the user
     """
     user_name = get_username()
     user_input = input(text)
@@ -151,7 +155,6 @@ def welcome_message() -> None:
     Returns:
         None
     """
-    
     try:
         with open('welcome_message.txt', 'r') as file:
             lines = file.readlines()
@@ -173,8 +176,7 @@ def delete_file(file: str) -> None:
         file (str): The relative path of the file to delete
     
     Returns:
-        bool -
-    
+        None
     """
     basedir = os.path.abspath(file)
     if os.path.isfile(basedir):
