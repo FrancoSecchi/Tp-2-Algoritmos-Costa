@@ -1,21 +1,6 @@
-from logs import get_credentials
+from logs import get_credentials, print_write_chat, input_user_chat
 import facebook
 from termcolor import cprint
-
-
-def print_write_chatbot(text):
-    print(text)
-    write_chat_bot(text)
-
-
-def cprint_write_chatbot(text, color, attrs):
-    cprint(text, color, attrs)
-    write_chat_bot(text)
-
-
-def input_write_chatbot(text):
-    input(text)
-    write_chat_bot(text)
 
 
 def show_albums(albums_id):
@@ -196,21 +181,20 @@ def connection_api(user_credentials: dict = {}) -> object:
     PRE: If the user does not enter their credentials, those of crux are used.
          Returns the facebook_apiApi and checks if there was any error while connecting to Facebook
     """
+    
     if "token" not in user_credentials.keys():
         credentials = get_credentials()
         page_token = credentials['facebook']['token']
     else:
         page_token = user_credentials["token"]
+    
+    api = ''
     try:
         api = facebook.GraphAPI(access_token = page_token, version = "2.12")
-    except ConnectionError as error:
-        write_status_log(error, 'ConnectionError')
-        return print(f'You dont have internet: {error}')
+        print_write_chat('You have successfully connected with the Facebook api!\n',
+                         color = 'green',
+                         attrs_color = ['bold'])
     except Exception as error:
-        write_status_log(error, 'Exception')
-        return print("Error")
-    else:
-        write_status_log('Successfully connected with Facebook the api')
-        cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
+        print_write_chat(f"Error to connect facebook_api: {str(error)}")
     
     return api
