@@ -9,9 +9,14 @@ STATUS_FILE = "logs/status.txt"
 
 def format_string(text: str, name: str = 'Crux') -> str:
     """
-    PRE: -
-    POST: Returns a string formatted with the day and time
-    :return
+    
+    
+    Arguments:
+        text (str) :
+        name (str) :
+    
+    Returns:
+        str -
     """
     time = datetime.now().strftime("%m/%d/%y %H:%M:%S")
     return f"{time} {name}: {text} \n"
@@ -19,7 +24,6 @@ def format_string(text: str, name: str = 'Crux') -> str:
 
 def write_log(filename: str, text: str, username: str) -> None:
     """
-    
     Returns the credentials of the test accounts, and their credentials are stored in a json
     
     Arguments:
@@ -35,17 +39,12 @@ def write_log(filename: str, text: str, username: str) -> None:
         with open(filename, 'a') as file:
             file.write(string_formatted)
             
-    except PermissionError as error:
-        write_log(filename= filename, text = error.strerror, username = 'Crux')
-        print_write_chat(error.strerror, color = "red")
     except Exception as e:
-        write_log(filename = filename, text = str(e), username = 'Crux')
         print_write_chat(message = str(e), color = "red")
 
 
 def get_credentials():
     """
-    
     Returns the credentials of the test accounts, and their credentials are stored in a json
     
     Arguments:
@@ -57,9 +56,7 @@ def get_credentials():
     try:
         with open("credentials/crux_credentials.json", 'r') as file:
             return json.load(file)
-    except PermissionError as error:
-        write_log(filename = STATUS_FILE, text = error.strerror, username = 'Crux')
-        print_write_chat(error.strerror, color = "red")
+        
     except Exception as e:
         write_log(filename = STATUS_FILE, text = str(e), username = 'Crux')
         print_write_chat(message = str(e), color = "red")
@@ -89,9 +86,11 @@ def print_write_chat(message: str, print_text: bool = True, color: str = 'white'
 
 def input_user_chat(text: str) -> str:
     """
-    
-    :param text:
-    :return:
+    Arguments:
+        text (str) :
+        
+    Returns:
+        str -
     """
     user_name = get_username()
     user_input = input(text)
@@ -115,6 +114,7 @@ def get_username() -> str:
     try:
         with open('logs/session.txt', 'r') as file:
             return file.readline()
+        
     except Exception as error:
         write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
         print_write_chat(message = str(error), color = "red")
@@ -184,4 +184,3 @@ def delete_file(file: str) -> None:
         except Exception as error:
             write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
             print_write_chat(message = str(error), color = "red")
-
