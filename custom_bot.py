@@ -24,9 +24,6 @@ def animation(text: str) -> None:
         sys.stdout.flush()
 
 
-
-
-
 def facebook_credentials():
     """
     The user is asked if he has an facebook page to connect,
@@ -111,7 +108,7 @@ def run_bot(bot) -> None:
         
         is_read = input_user_chat("Did you read all the message? (yes/no) ")
         read = user_answer_is_yes(is_read)
-        
+    
     while running:
         try:
             if not is_taken_name:
