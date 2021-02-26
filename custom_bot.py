@@ -3,13 +3,12 @@ from datetime import datetime
 from apis import facebook, instagram
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-from logs import  delete_file, save_username, welcome_message, print_write_chat
+from logs import delete_file, save_username, welcome_message, print_write_chat
 from utils.utils import user_answer_is_yes
 from time import sleep
 import os
 import sys
 from termcolor import colored, cprint
-
 
 
 def animation(text: str) -> None:
@@ -192,7 +191,7 @@ def main():
     )
     if not is_already_trained():
         train_bot(bot)
-
+    
     exit()
     run_bot(bot)
 
