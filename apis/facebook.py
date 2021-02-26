@@ -202,7 +202,7 @@ def connection_api(user_credentials: dict = {}) -> object:
     else:
         page_token = user_credentials["token"]
     try:
-        api = facebook.facebook_apiAPI(access_token = page_token, version = "2.12")
+        api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
         write_status_log(error, 'ConnectionError')
         return print(f'You dont have internet: {error}')
