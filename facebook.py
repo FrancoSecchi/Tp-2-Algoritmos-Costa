@@ -66,7 +66,7 @@ def upload_photo(facebook_api) -> None or Exception:
         print("The requested file cannot be found")
     except Exception as error:
         write_status_log(f"There was a problem opening the file, error: {error}", 'Exception')
-        return print("Error")
+        print("Error")
 
 
 def upload_post(facebook_api) -> None or Exception:
@@ -81,7 +81,7 @@ def upload_post(facebook_api) -> None or Exception:
         cprint("Posting has been updated successfully!\n", 'green', attrs = ['bold'])
     except Exception as error:
         write_status_log(error, 'Exception')
-        return print("Error")
+        print("Error")
 
 def follower_count(facebook_api) -> None:
     """
@@ -91,7 +91,7 @@ def follower_count(facebook_api) -> None:
     followers = facebook_api.get_object(id = 'me', fields = 'followers_count')
     print_write_chatbot(f"Number of followers: {str(followers['followers_count'])}\n")
 
-def if_text_in_info(text, info, post_id, count):
+def if_text_in_info(text, info, posts_id, count):
     """
     PRE: The parameter can't be null
     POST: Make an print of the number of followers of the page  
@@ -149,10 +149,10 @@ def post_related(facebook_api, action, selected) -> None or Exception:
     try:
         posts = facebook_api.get_connections(id = 'me', connection_name = selected)
         info_list = posts['data']
-        cprint_write_chatbot("The posts are: ")
+        print_write_chatbot("The posts are: ")
         for count, info in enumerate(info_list, start=1):
-            if_text_in_info("message", info, post_id, count)
-            if_text_in_info("story", info, post_id, count)
+            if_text_in_info("message", info, posts_id, count)
+            if_text_in_info("story", info, posts_id, count)
             elif 'story' or 'message' not in info:
                 print_write_chatbot(count, info["created_time"][0:10])
                 posts_id.append(info["id"])
@@ -170,7 +170,7 @@ def post_related(facebook_api, action, selected) -> None or Exception:
     
     except Exception as error:
         write_status_log(error, 'Exception')
-        return print("Error")
+        print("Error")
     
     # ------------ CONNECTION ---------------#
 
@@ -190,10 +190,10 @@ def connection_api(**user_token) -> object or Exception:
         api = facebook.facebook_apiAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
         write_status_log(error, 'ConnectionError')
-        return print(f'You dont have internet: {error}')
+        print(f'You dont have internet: {error}')
     except Exception as error:
         write_status_log(error, 'Exception')
-        return print ("Error")
+        print ("Error")
     else:
         write_status_log('Successfully connected with Facebook the api')
         cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
