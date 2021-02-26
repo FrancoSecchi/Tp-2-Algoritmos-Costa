@@ -1,5 +1,5 @@
 from instabot import Bot
-from logs import write_status_log, write_chat_bot, user_options, GET_NAME, get_credentials, remove_file
+from logs import get_credentials, delete_file, get_username
 from termcolor import cprint, colored
 import codecs
 import json
@@ -84,7 +84,7 @@ def validate_number_post(number: int, max_number: int) -> int:
     :return:
     """
     correct = False
-    name = user_options(GET_NAME)
+    username = get_username()
     while not correct:
         if number < 0 or number >= max_number:
             cprint("Number post incorrect", 'red', attrs = ['bold'])
@@ -157,7 +157,7 @@ def validate_post_comment(api: Client, feed: dict, position_comment: list) -> li
     :return:
     """
     correct_post = False
-    name = user_options(GET_NAME)
+    username = get_username()
     while not correct_post:
         if not feed[position_comment[0] - 1]:
             text = "The post doesnt exist, please enter a correct post number"
@@ -192,7 +192,7 @@ def post_comment(api: Client) -> None:
     :param api: :type object
     :return:
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     try:
         are_users = show_search_users(api, text = 'Who do you want to find to post a comment on his post?')
         
@@ -262,10 +262,10 @@ def get_id_post(feed: dict, text: str, edit: bool = False) -> str or int or tupl
     :param edit: :type bool
     :return:
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     number_post = int(input(f"{text} enter the Nº: ")) - 1
     write_chat_bot(f"{text} enter the Nº: ")
-    write_chat_bot(number_post + 1, name)
+    write_chat_bot(number_post + 1, username)
     number_post = validate_number_post(number_post, len(feed['items']))
     id_post = feed['items'][number_post]['pk']
     if edit:
@@ -283,7 +283,7 @@ def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Exc
     :param like_type: :type str
     :return:
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     try:
         if target_type != "comment":
             are_users = show_search_users(api, f"\nWhich user do you want to {like_type} the {target_type}? ")
@@ -394,7 +394,7 @@ def like(api: Client, target_id: str, target_type: str = 'post', comment_text: s
     :param own_feed: We check if it is from our feed, since if it is our feed, the feed dict has a different distribution than if it is not from our feed  :type bool
     :return:
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     if not already_liked(api, target_id, target_type, own_feed = own_feed):
         if target_type == 'post':
             result = api.post_like(media_id = target_id)
@@ -429,7 +429,7 @@ def prepare_comment(api: Client, feed: dict, text: str) -> dict or ClientError:
     :param text:
     :return: :type dict or ClientError
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     position_comment = input(f"{text} enter the post number and comment number. Ej: 1, 2 : ").split(',')
     position_comment = [int(x.strip()) for x in position_comment]
     
@@ -519,7 +519,7 @@ def prepare_profile(profile: dict, attributes: dict, data_change: dict, genders:
     :param genders: :type list
     :return:
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     for key, attribute in attributes.items():
         if attribute == 'full_name':
             cprint("IMPORTANT!\n", 'red', attrs = ['bold', 'blink'])
@@ -613,7 +613,7 @@ def edit_post_actions(api: Client, edit_type: str, target_type: str = 'post'):
     """
     feed = api.self_feed()
     is_feed_empty = feed['items'][0]
-    name = user_options(GET_NAME)
+    username = get_username()
     if is_feed_empty:
         if target_type == 'post':
             id_post, number_post = get_id_post(feed, text = f"Which post would you {edit_type}?", edit = True)
@@ -743,7 +743,7 @@ def show_search_users(api, text: str = 'Who do you want to search?') -> None or 
     :param text: :type str
     :return:
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     query = input(text)
     write_chat_bot(text)
     write_chat_bot(query, name)
@@ -842,7 +842,7 @@ def message_actions(api: Client, action_type: str = 'send') -> None or Exception
     :param action_type: :type str
     :return:
     """
-    name = user_options(GET_NAME)
+    username = get_username()
     cprint("IMPORTANT!!\n", 'red', attrs = ['bold', 'blink', 'underline'])
     cprint("Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message\n", 'red',
            attrs = ['bold', 'underline'])
@@ -938,7 +938,7 @@ def delete_cookie(file: str) -> None or Exception:
         create_time = data['created_ts']
         now = time.time()
         if (create_time + 3600) <= round(now):
-            remove_file(file)
+            delete_file(file)
             cprint("Cookie removed", 'yellow', attrs = ['bold'])
             write_chat_bot("Cookie removed")
     except Exception as error:
@@ -946,21 +946,24 @@ def delete_cookie(file: str) -> None or Exception:
         raise Exception(error)
 
 
-def connection_instagram(**user_data: dict) -> object:
+def connection_instagram(user_credentials: dict = {}) -> object:
     """
-    PRE: If the user does not give us the credentials of their instagram user, we will use the crux data
-    POST: Credentials are created to avoid re-logging and check if I spend more than an hour to delete the cookies and the connection with the api is created
-    :return: object
+    The connection with the instagram api is generated (instagram_private_api module)
+    Arguments:
+        user_credentials (dict) = Dictionary in which the credentials of the user's instagram
+                                  account are stored (default {})
+    Returns:
+            object - The Client object
     """
-    device_id = None
-    
-    if 'username' not in user_data.keys() and 'password' not in user_data.keys():
+
+    api = ''
+    if not user_credentials:
         credentials = get_credentials()
         username = credentials['instagram']['username']
         password = credentials['instagram']['password']
     else:
-        username = user_data['username']
-        password = user_data['password']
+        username = user_credentials['username']
+        password = user_credentials['password']
     
     settings_file = os.path.abspath('credentials/instagram_api.json')
     
@@ -995,7 +998,7 @@ def connection_instagram(**user_data: dict) -> object:
         raise ClientError('ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
     except Exception as e:
         write_status_log('Unexpected Exception: {0!s}'.format(e), 'Exception')
-        raise Exception('Unexpected Exception: {0!s}'.format(e))
+        print('Unexpected Exception: {0!s}'.format(e))
     
     write_status_log('You have successfully connected with the instagram!')
     write_chat_bot('You have successfully connected with the instagram!')
