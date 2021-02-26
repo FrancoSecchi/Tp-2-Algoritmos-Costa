@@ -184,29 +184,29 @@ instagram.message_actions(insta_api, action_type = 'show')
 messages instagram
 instagram.message_actions(insta_api, action_type = 'show')
 I want to delete a post instagram
-instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'post')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'post')
 delete a post instagram
-instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'post')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'post')
 delete post instagram
-instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'post')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'post')
 I want to edit a post instagram
-instagram.edit_post_actions(insta_api, edit_type = 'edit', target_type = 'post')
+instagram.edit_actions(insta_api, edit_type = 'edit', target_type = 'post')
 edit a post instagram
-instagram.edit_post_actions(insta_api, edit_type = 'edit', target_type = 'post')
+instagram.edit_actions(insta_api, edit_type = 'edit', target_type = 'post')
 edit post instagram
-instagram.edit_post_actions(insta_api, edit_type = 'edit', target_type = 'post')
+instagram.edit_actions(insta_api, edit_type = 'edit', target_type = 'post')
 I want to edit a comment instagram
-instagram.edit_post_actions(insta_api, edit_type = 'comment', target_type = 'comment')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'comment')
 edit a comment instagram
-instagram.edit_post_actions(insta_api, edit_type = 'comment', target_type = 'comment')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'comment')
 edit comment instagram
-instagram.edit_post_actions(insta_api, edit_type = 'comment', target_type = 'comment')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'comment')
 I want to comment a post instagram
-instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'comment')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'comment')
 delete a comment instagram
-instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'comment')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'comment')
 delete comment instagram
-instagram.edit_post_actions(insta_api, edit_type = 'delete', target_type = 'comment')
+instagram.edit_actions(insta_api, edit_type = 'delete', target_type = 'comment')
 I want to leave a comment on a post
 instagram.post_comment(insta_api)
 post a comment instagram
