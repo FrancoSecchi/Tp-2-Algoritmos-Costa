@@ -1,78 +1,110 @@
-import os
+from datetime import datetime
 
 from apis import facebook, instagram
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-from logs import write_status_log, remove_file, write_chat_bot, user_options, SAVE_USER, welcome_message
-from termcolor import colored, cprint
+from logs import  delete_file, save_username, welcome_message, print_write_chat
+from utils.utils import user_answer_is_yes
 from time import sleep
-import json
+import os
 import sys
+from termcolor import colored, cprint
 
 
-def animation(text, time = 0.025):
+
+def animation(text: str) -> None:
     """
-    PRE: the text parameter cant be null
-    POST: Make an animation by printing a text like a typewriter to give dynamism to the console
-    :param time:
-    :param text:
-    :return:
+        Make an animation by printing a text like a typewriter to give dynamism to the console
+    Arguments:
+        text (str) = Text to animate
+    Returns:
+        None
     """
     for letter in text:
-        sleep(time)  # In seconds
+        sleep(0.025)  # In seconds
         sys.stdout.write(letter)
         sys.stdout.flush()
 
 
-def access(name):
+def is_already_trained():
+    """
+    
+    :return:
+    """
+    path_file = os.path.abspath("db.sqlite3")
+    return True if os.path.isfile(path_file) else False
+
+
+def facebook_credentials():
+    """
+    
+    :return:
+    """
+    response = input("\nWould you like to connect to Facebook? (yes/no): ").lower()
+    if user_answer_is_yes(response):
+        page_token = input("\nPlease enter your page access token: ")
+        write_chat_bot("Please enter your page access token: ")
+        write_chat_bot(page_token, name)
+        facebook_api = facebook.connection_api(
+            user_credentials = {
+                'token': page_token
+            }
+        )
+    else:
+        cprint(
+            "\nBy not using the facebook tool with your personal page, we will provide the service with our "
+            "Facebook page Crux.cruz",
+            'blue', attrs = ['bold'])
+        write_chat_bot(
+            "By not using the facebook tool with your personal page, we will provide the service with our Facebook "
+            "page Crux.cruz")
+        facebook_api = facebook.connection_api()
+    return facebook_api
+
+
+def instagram_credentials():
     """
     PRE: The parameter cant be null, and its the user name
     POS: Returns the connections selected by the user
     """
-    response = input("\nWould you like to connect to Facebook? (yes/no): ").lower()
-    if response in ["yes", 'ye', 'y']:
-        page_token = input("\nPlease enter your page access token: ")
-        write_chat_bot("Please enter your page access token: ")
-        write_chat_bot(page_token, name)
-        graph = facebook.connection_api(token = page_token)
-    else:
-        cprint("\nBy not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz", 'blue', attrs = ['bold'])
-        write_chat_bot("By not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz")
-        graph = facebook.connection_api()
+    response = input("Would you like to connect to Instagram? (yes/no): ").lower()
     
-    ig_response = input("Would you like to connect to Instagram? (yes/no): ").lower()
-    write_chat_bot("Would you like to connect to Instagram? (yes/no): ")
-    write_chat_bot(ig_response, name)
-    if ig_response == ["yes", 'ye', 'y']:
+    if user_answer_is_yes(response):
         username = input("\nPlease enter your username: ")
         password = input("\nPlease enter your password: ")
-        write_chat_bot("Please enter your username: ")
-        write_chat_bot(username, name)
-        write_chat_bot("Please enter your password: ")
-        write_chat_bot(password, name)
-        insta_api = instagram.connection_instagram(username = username, password = password)
+        
+        instagram_api = instagram.connection_instagram(
+            user_credentials = {
+                'username': username,
+                'password': password
+            }
+        )
     else:
-        insta_api = instagram.connection_instagram()
-        cprint("\nBy not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot", 'blue', attrs = ['bold'])
-        write_chat_bot("By not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot")
+        instagram_api = instagram.connection_instagram()
+        cprint(
+            "\nBy not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot",
+            'blue', attrs = ['bold'])
+        write_chat_bot(
+            "By not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot")
     
-    return graph, insta_api
+    return instagram_api
 
 
-def run_bot(chat_bot):
+def run_bot(bot):
     """
     PRE: The chat_bot cant be null
     POST: The conversation with the bot is executed
-    :param chat_bot:
+    :param bot:
     :return:
     """
     running = True
     is_taken_name = False
-    text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... I mean bot! Oh my, I'm damned if they find out I said that ... \nAh, well, before Elon Musk finds me and sends me to Mars.\n"
+    text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... I mean bot! Oh my, I'm damned if they find out" \
+           " I said that ... \nAh, well, before Elon Musk finds me and sends me to Mars.\n"
     animation(text)
-    subtitle = colored("There's something I want to tell you.\n", 'blue', attrs = ['bold', 'underline'])
+    subtitle = colored("There's something I want to tell you.\n", 'blue',
+                       attrs = ['bold', 'underline'])
     animation(subtitle)
-    write_chat_bot(text + " " + "There's something I want to tell you.\n")
     
     welcome_message()
     read = False
@@ -94,13 +126,13 @@ def run_bot(chat_bot):
                 is_taken_name = True
                 print(f"\nHi {name}!")
                 write_chat_bot(f"Hi {name}!")
-                user_options(SAVE_USER, name = name, first_time = True)
-                graph, insta_api = access(name)
+                save_username(name)
+                graph, instagram_api = facebook_credentials(), instagram_credentials()
             
             user_input = input("\nYou: ")
             write_chat_bot(user_input, name)
             
-            bot_response = str(chat_bot.get_response(user_input))
+            bot_response = str(bot.get_response(user_input))
             if "_" in bot_response:
                 exec(bot_response)
             else:
@@ -121,23 +153,15 @@ def run_bot(chat_bot):
         write_chat_bot("May the Force be with you")
 
 
-def main():
-    chat_bot = ChatBot(
-        name = 'Crux',
-        storage_adapter = 'chatterbot.storage.SQLStorageAdapter',
-        logic_adapters = [
-            {
-                'import_path': 'chatterbot.logic.BestMatch',
-                'default_response': 'I am sorry, but I do not understand.',
-                'maximum_similarity_threshold': 0.90
-            }
-        ],
-        database_uri = 'sqlite:///database.db'
-    )
-    trainer = ListTrainer(chat_bot)
+def train_bot(bot):
+    """
+    
+    :param bot:
+    :return:
+    """
+    
+    trainer = ListTrainer(bot)
     list_trainer = []
-    remove_file('logs/status.txt')
-    remove_file('logs/chat.txt')
     try:
         with open("trainer.txt") as file:
             lines = file.readlines()
@@ -150,7 +174,27 @@ def main():
         list_trainer.append(line.strip())
     
     trainer.train(list_trainer)
-    run_bot(chat_bot)
+
+
+def main():
+    delete_file('logs/status.txt')
+    delete_file('logs/chat.txt')
+    bot = ChatBot(
+        name = 'Crux',
+        storage_adapter = 'chatterbot.storage.SQLStorageAdapter',
+        logic_adapters = [
+            {
+                'import_path': 'chatterbot.logic.BestMatch',
+                'default_response': 'I am sorry, but I do not understand.',
+                'maximum_similarity_threshold': 0.80
+            }
+        ],
+    )
+    if not is_already_trained():
+        train_bot(bot)
+
+    exit()
+    run_bot(bot)
 
 
 main()
