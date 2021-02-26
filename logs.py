@@ -1,7 +1,7 @@
-from datetime import datetime
-from termcolor import cprint
 import json
 import os
+from datetime import datetime
+from termcolor import cprint
 
 CHAT_FILE = "logs/chat.txt"
 STATUS_FILE = "logs/status.txt"
@@ -16,7 +16,7 @@ def format_string(text: str, name: str = 'Crux') -> str:
         name (str) : The name of the user who wrote the text
     
     Returns:
-        str -
+        str - Formatted string (time) (name): (text)
     """
     time = datetime.now().strftime("%m/%d/%y %H:%M:%S")
     return f"{time} {name}: {text} \n"
@@ -39,7 +39,6 @@ def write_log(filename: str, text: str, username: str) -> None:
     try:
         with open(filename, 'a') as file:
             file.write(string_formatted)
-            
     except Exception as e:
         print_write_chat(message = str(e), color = "red")
 
@@ -57,7 +56,6 @@ def get_credentials():
     try:
         with open("credentials/crux_credentials.json", 'r') as file:
             return json.load(file)
-        
     except Exception as e:
         write_log(filename = STATUS_FILE, text = str(e), username = 'Crux')
         print_write_chat(message = str(e), color = "red")
@@ -82,7 +80,6 @@ def print_write_chat(message: str, print_text: bool = True, color: str = 'white'
     """
     if print_text:
         cprint(message, color = color, attrs = attrs_color)
-        
     write_log(filename = CHAT_FILE, text = message, username = 'Crux')
 
 
@@ -100,7 +97,6 @@ def input_user_chat(text: str) -> str:
     user_input = input(text)
     write_log(CHAT_FILE, text = user_input, username = user_name)
     print_write_chat(message = text, print_text = False)
-    
     return user_input
 
 
@@ -113,12 +109,11 @@ def get_username() -> str:
     
     Returns:
         str - The current user name
-    :return:
     """
     try:
         with open('logs/session.txt', 'r') as file:
-            return file.readline()
-        
+            lines = file.readline()
+        return lines[0] if lines else 'Unknown'
     except Exception as error:
         write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
         print_write_chat(message = str(error), color = "red")
@@ -138,7 +133,6 @@ def save_username(username) -> None:
         with open('logs/session.txt', 'a') as file:
             file.truncate(0)
             file.write(username)
-    
     except Exception as error:
         write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
         print_write_chat(message = str(error), color = "red")
@@ -162,7 +156,6 @@ def welcome_message() -> None:
         for line in lines:
             text += line.strip('\n') + "\n"
         print_write_chat(text)
-        
     except Exception as error:
         write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
         print_write_chat(message = str(error), color = "red")
