@@ -79,44 +79,49 @@ def print_write_chat(message: str, print_text: bool = True, color: str = 'white'
         None
     """
     if print_text:
-        cprint(message, color = color, attrs = attrs_color)
+        cprint("\n" + message, color = color, attrs = attrs_color)
+    
     write_log(filename = CHAT_FILE, text = message, username = 'Crux')
 
 
-def input_user_chat(text: str) -> str:
+def input_user_chat(text: str, first_time = False) -> str:
     """
     The user is asked for a specific input, the input is recorded in the logs, and the input value is returned
     
     Arguments:
         text (str) : Text that will indicate what value the user must enter
-        
+        first_time (bool) : This indicates if the first time the user is asked for input
+                            (This is done exclusively before asking for the name)
     Returns:
         str - The value of the input given by the user
     """
-    user_name = get_username()
-    user_input = input(text)
+    user_name = get_username(first_time)
+    user_input = input("\n" + text)
     write_log(CHAT_FILE, text = user_input, username = user_name)
     print_write_chat(message = text, print_text = False)
     return user_input
 
 
-def get_username() -> str:
+def get_username(first_time = False) -> str:
     """
     Returns the current username
     
     Arguments:
-        -
+        first_time (bool) : This indicates if the first time the user is asked for input
+                            (This is done exclusively before asking for the name)
     
     Returns:
         str - The current user name
     """
-    try:
-        with open('logs/session.txt', 'r') as file:
-            lines = file.readline()
-        return lines[0] if lines else 'Unknown'
-    except Exception as error:
-        write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
-        print_write_chat(message = str(error), color = "red")
+    if not first_time:
+        try:
+            with open('logs/session.txt', 'r') as file:
+                return file.readline()
+        except Exception as error:
+            write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+            print_write_chat(message = str(error), color = "red")
+    else:
+        return 'Unknown'
 
 
 def save_username(username) -> None:
@@ -130,12 +135,12 @@ def save_username(username) -> None:
         None
     """
     try:
-        with open('logs/session.txt', 'a') as file:
+        with open('logs/session.txt', 'w') as file:
             file.truncate(0)
             file.write(username)
     except Exception as error:
         write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
-        print_write_chat(message = str(error), color = "red")
+        print_write_chat(message = str(error), color = "red", attrs_color = ['bold'])
 
 
 def welcome_message() -> None:
@@ -172,10 +177,12 @@ def delete_file(file: str) -> None:
         None
     """
     basedir = os.path.abspath(file)
-    if os.path.isfile(basedir):
+    
+    if os.path.exists(basedir):
         try:
             os.remove(basedir)
 
         except Exception as error:
             write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
             print_write_chat(message = str(error), color = "red")
+    

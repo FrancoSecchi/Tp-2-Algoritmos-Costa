@@ -144,7 +144,6 @@ def post_related(facebook_api, action, selected) -> None:
     POST: The posts of the page are shown and depending on the action, it will be edited / liked/ deleted / commented
     """
     posts_id = []
-    username = get_username()
     try:
         posts = facebook_api.get_connections(id = 'me', connection_name = selected)
         info_list = posts['data']
