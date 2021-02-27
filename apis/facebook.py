@@ -1,7 +1,8 @@
 from logs import write_log, print_write_chat, input_user_chat, get_username, get_credentials
 import facebook
 from termcolor import cprint  
-    
+
+
 def show_albums(albums_id):
     """ 
     Prints a list of albums of the user
@@ -31,8 +32,9 @@ def validate(number, list_):
     Returns:
         int - The value of the input given by the user
     """
-    while select in range(len(albums_id)):
-        select = int(input_user_chat("Select the album: "))
+    while number in range(len(list_)):
+        number = int(input_user_chat("re select: "))
+
 
 def upload_to_albums(facebook_api) -> None or Exception:
     """
@@ -44,14 +46,15 @@ def upload_to_albums(facebook_api) -> None or Exception:
     Returns:
         None
     """
-    path = input_user_chat("Please enter the path of your picture: ")
-    name = get_username()
+
+    path = input_write_chatbot("Please enter the path of your picture: ")
+    username = get_username()
     if path:
         albums_id = []
         show_albums(albums_id)
-        select = int(input_user_chat("Select the album: "))
-        validate(select, albums_id)
-        caption = input_user_chat("Caption: ")
+        select = int(input_write_chatbot("Select the album: "))
+        validate_select(select, albums_id)
+        caption = input_write_chatbot("Caption: ")
         try:
             facebook_api.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos", message = caption)
             print_write_chat("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
@@ -86,7 +89,6 @@ def upload_photo(facebook_api) -> None or Exception:
         write_log(f"There was a problem opening the file, error: {error}", 'Exception')
         print("Error")
 
-
 def upload_post(facebook_api) -> None or Exception:
     """
     Uploads the post written by the user and prints the success of the action if there are no errors 
@@ -116,10 +118,12 @@ def follower_count(facebook_api) -> None:
     Returns:
         None
     """
+
     followers = facebook_api.get_object(id = 'me', fields = 'followers_count')
     print_write_chat(f"Number of followers: {str(followers['followers_count'])}\n")
 
-def if_text_in_info(text, info, posts_id, count):
+
+def if_text_in_info(text, info, post_id, count):
     """
     Prints the number, the created time and the contend of the post,
     and appends its id in the post_id list
@@ -137,7 +141,9 @@ def if_text_in_info(text, info, posts_id, count):
         print_write_chat(count, info["created_time"][0:10] + ":" + info[text])
         posts_id.append(info["id"])
 
+
 def like(facebook_api, selection):
+
     """
     Likes the selection and prints the success of the action
     
@@ -195,7 +201,8 @@ def edit_post(facebook_api, selection):
     facebook_api.put_object(parent_object = selection, connection_name = '', message = text)
     print_write_chat("Posting has been updated successfully!\n", 'green', attrs = ['bold'])
 
-def post_related(facebook_api, action, selected) -> None or Exception:
+
+def post_related(facebook_api, action, selected) -> None:
     """
     The posts of the page are shown and depending on the action, it will be edited / liked/ deleted / commented
     
@@ -221,6 +228,7 @@ def post_related(facebook_api, action, selected) -> None or Exception:
         option = int(input_user_chat("Select one: "))
         validate(option, posts_id)
         selection = posts_id[option - 1]
+        
         if action == "like":
             like(facebook_api, selection)
         elif action == "comment":
@@ -233,11 +241,12 @@ def post_related(facebook_api, action, selected) -> None or Exception:
     except Exception as error:
         write_log(error, 'Exception')
         print("Error")
-    
-    # ------------ CONNECTION ---------------#
 
 
-def connection_api(**user_token) -> object or Exception:
+# ------------ CONNECTION ---------------#
+
+
+def connection_api(user_credentials: dict = {}) -> object:
     """
     If the user does not enter their credentials, those of crux are used.
     Returns the facebook Api and checks if there was any error while connecting to Facebook
@@ -248,11 +257,13 @@ def connection_api(**user_token) -> object or Exception:
     Returns:
         object - (facebook_api)
     """
-    if "token" not in user_token.keys():
+    
+    if "token" not in user_credentials.keys():
         credentials = get_credentials()
         page_token = credentials['facebook']['token']
     else:
-        page_token = user_token["token"]
+        page_token = user_credentials["token"]
+    
     try:
         facebook_api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
@@ -263,6 +274,9 @@ def connection_api(**user_token) -> object or Exception:
         print ("Error")
     else:
         write_log('Successfully connected with Facebook the api')
-        cprint('\nYou have successfully connected with the Facebook api!\n', 'green', attrs = ['bold'])
+        api = facebook.GraphAPI(access_token = page_token, version = "2.12")
+        print_write_chat('You have successfully connected with the Facebook api!\n', color = 'green', attrs_color = ['bold'])
+    except Exception as error:
+        print_write_chat(f"Error to connect facebook_api: {str(error)}")
     
     return api

@@ -1,127 +1,188 @@
-from datetime import datetime
 import json
 import os
+from datetime import datetime
+from termcolor import cprint
 
-GET_NAME = 0
-SAVE_USER = 1
+CHAT_FILE = "logs/chat.txt"
+STATUS_FILE = "logs/status.txt"
 
 
-def get_formatted_time() -> str:
+def format_string(text: str, name: str = 'Crux') -> str:
     """
-    PRE: -
-    POST: Returns a string formatted with the day and time
-    :return
+    A text is constructed with the format of (time) (name): (text),  to save them in the logs
+    
+    Arguments:
+        text (str) : The user / bot generated text
+        name (str) : The name of the user who wrote the text
+    
+    Returns:
+        str - Formatted string (time) (name): (text)
     """
-    now = datetime.now()
-    hours = now.strftime("%H:%M:%S")
-    today = datetime.today().strftime("%m/%d/%y")
-    return f"{today}, {hours}"
+    time = datetime.now().strftime("%m/%d/%y %H:%M:%S")
+    return f"{time} {name}: {text} \n"
 
 
-def write_status_log(message, status_code = 'Success') -> None or Exception:
+def write_log(filename: str, text: str, username: str) -> None:
     """
-    PRE: message cannot be empty
-    POST: Write a api call file
-    :param message: str
-    :param status_code: str|int
-    :return:
+    Write or create a txt file that will save a specific text for a user,
+    and the txt will be saved in the carpet logs/
+    
+    Arguments:
+        filename (str) : The relative path of the file to update
+        text (str) :  Text to be written to the file
+        username (str) :
+    
+    Returns:
+        Dict - Dictionary in which the credentials are found
     """
-    format_date = get_formatted_time()
-    string = f"{format_date} - status code with message: {status_code} => {str(message)} \n"
+    string_formatted = format_string(text, username)
     try:
-        with open('logs/status.txt', 'a') as file:
-            file.write(string + '\n')
-    except Exception as error:
-        print(error)
-
-
-def write_chat_bot(message, user = 'Crux') -> None or Exception:
-    """
-    PRE: The message can be a empty string
-    POST: A string is formatted to write the conversation in a txt
-    :param message:
-    :param user:
-    :return:
-    """
-    format_date = get_formatted_time()
-    string = f"{format_date}, {user}, '{message}'"
-    try:
-        with open('logs/chat.txt', 'a') as file:
-            file.write(string + '\n')
-    except Exception as error:
-        print(error)
+        with open(filename, 'a') as file:
+            file.write(string_formatted)
+    except Exception as e:
+        print_write_chat(message = str(e), color = "red")
 
 
 def get_credentials():
     """
-    PRE: -
-    POST: Returns a json which contains the credentials of the Crux accounts
-    :return:
+    Returns the credentials of the test accounts, and their credentials are stored in a json
+    
+    Arguments:
+        -
+    
+    Returns:
+        Dict - Dictionary in which the credentials are found
     """
     try:
         with open("credentials/crux_credentials.json", 'r') as file:
             return json.load(file)
-    except PermissionError as error:
-        write_status_log(error, "PermissionError")
-        raise PermissionError(error)
     except Exception as e:
-        write_status_log(e, "Exception")
-        raise Exception(e)
+        write_log(filename = STATUS_FILE, text = str(e), username = 'Crux')
+        print_write_chat(message = str(e), color = "red")
 
 
-def user_options(action, **extra_data) -> str or None or Exception:
+def print_write_chat(message: str, print_text: bool = True, color: str = 'white',
+                     attrs_color: list = []) -> None:
     """
-    PRE: The action cant be null
-    POST: Depending on the action received, the name of the current user will be returned or registered
-    :param action:
-    :return:
-    """
-    option_file = 'r' if action == GET_NAME else 'a'
-    try:
-        with open('logs/session.txt', option_file) as file:
-            if 'first_time' in extra_data.keys():
-                file.truncate(0)
-                file.write(extra_data['name'])
-            else:
-                return file.readline()
+    A text is printed on the screen and that same text will be saved in the chat log
     
-    except Exception as error:
-        write_status_log(error, 'Failed')
-        raise Exception(error)
-
-
-def welcome_message():
+    Arguments:
+        message (str) : Message to display
+        print_text (bool) : Indicates if the text has to be printed,
+                            it is used in the case that a text is being printed through the input_user_chat function
+                            (default True)
+        color (str) : The color of the text to display (default "white")
+        attrs_color (list) : Contains the available attributes for the text style.
+                            Eg ['bold', 'blink' 'underline', etc] (default [])
+        
+    Returns:
+        None
     """
-    PRE: -
-    POST: Read a txt file which contains a welcome message, which in turn explains what can and cannot be done with the bot
-    :return:
+    if print_text:
+        cprint("\n" + message, color = color, attrs = attrs_color)
+    
+    write_log(filename = CHAT_FILE, text = message, username = 'Crux')
+
+
+def input_user_chat(text: str, first_time = False) -> str:
+    """
+    The user is asked for a specific input, the input is recorded in the logs, and the input value is returned
+    
+    Arguments:
+        text (str) : Text that will indicate what value the user must enter
+        first_time (bool) : This indicates if the first time the user is asked for input
+                            (This is done exclusively before asking for the name)
+    Returns:
+        str - The value of the input given by the user
+    """
+    user_name = get_username(first_time)
+    user_input = input("\n" + text)
+    write_log(CHAT_FILE, text = user_input, username = user_name)
+    print_write_chat(message = text, print_text = False)
+    return user_input
+
+
+def get_username(first_time = False) -> str:
+    """
+    Returns the current username
+    
+    Arguments:
+        first_time (bool) : This indicates if the first time the user is asked for input
+                            (This is done exclusively before asking for the name)
+    
+    Returns:
+        str - The current user name
+    """
+    if not first_time:
+        try:
+            with open('logs/session.txt', 'r') as file:
+                return file.readline()
+        except Exception as error:
+            write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+            print_write_chat(message = str(error), color = "red")
+    else:
+        return 'Unknown'
+
+
+def save_username(username) -> None:
+    """
+    The name of the current user will be registered
+    
+    Arguments:
+        username (str) : The name of the current user
+    
+    Returns:
+        None
+    """
+    try:
+        with open('logs/session.txt', 'w') as file:
+            file.truncate(0)
+            file.write(username)
+    except Exception as error:
+        write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+        print_write_chat(message = str(error), color = "red", attrs_color = ['bold'])
+
+
+def welcome_message() -> None:
+    """
+    Print by console the welcome message to the user,
+     which informs which are the available functionalities of the bot
+    
+    Arguments:
+        -
+        
+    Returns:
+        None
     """
     try:
         with open('welcome_message.txt', 'r') as file:
             lines = file.readlines()
         text = ''
         for line in lines:
-            print(line.strip('\n'))
-            text += line + "\n"
-        write_chat_bot(text)
+            text += line.strip('\n') + "\n"
+        print_write_chat(text)
     except Exception as error:
-        write_status_log(error, 'Failed')
-        raise Exception(error)
+        write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+        print_write_chat(message = str(error), color = "red")
 
 
-def remove_file(file):
+def delete_file(file: str) -> None:
     """
-    PRE: The file can't be null
-    POST: It checks if the file exists in the system and if you have permission to remove the file, and if so, the file is deleted
-          It is used for when the bot is started, it deletes the previous chat and the session
-    :param file:
-    :return:
+    Delete the file that is passed by parameter
+    
+    Arguments:
+        file (str): The relative path of the file to delete
+    
+    Returns:
+        None
     """
-    file = os.path.abspath(file)
-    if os.path.exists(file):
-        if os.access(file, os.W_OK):
-            try:
-                os.remove(file)
-            except Exception as error:
-                write_status_log(error, 'Error')
-                raise Exception(error)
+    basedir = os.path.abspath(file)
+    
+    if os.path.exists(basedir):
+        try:
+            os.remove(basedir)
+
+        except Exception as error:
+            write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+            print_write_chat(message = str(error), color = "red")
+    
