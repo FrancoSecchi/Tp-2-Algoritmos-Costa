@@ -947,21 +947,25 @@ def delete_cookie(file: str) -> None or Exception:
         write_status_log(error, 'Exception')
         print(f"There was an error:{error}")
 
-def connection_instagram(**user_data) -> object:
+
+def connection_instagram(user_credentials: dict = {}) -> object:
     """
-    PRE: If the user does not give us the credentials of their instagram user, we will use the crux data
-    POST: Credentials are created to avoid re-logging and check if I spend more than an hour to delete the cookies and the connection with the api is created
-    :return: object
+    The connection with the instagram api is generated (instagram_private_api module)
+    Arguments:
+        user_credentials (dict) = Dictionary in which the credentials of the user's instagram
+                                  account are stored (default {})
+    Returns:
+            object - The Client object
     """
-    device_id = None
     
-    if 'username' not in user_data.keys() and 'password' not in user_data.keys():
+    api = ''
+    if not user_credentials:
         credentials = get_credentials()
         username = credentials['instagram']['username']
         password = credentials['instagram']['password']
     else:
-        username = user_data['username']
-        password = user_data['password']
+        username = user_credentials['username']
+        password = user_credentials['password']
     
     settings_file = os.path.abspath('credentials/instagram_api.json')
     
