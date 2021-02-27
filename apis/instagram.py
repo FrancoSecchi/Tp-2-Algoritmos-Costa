@@ -1,5 +1,5 @@
 from instabot import Bot
-from logs import write_status_log, write_chat_bot, user_options, GET_NAME, get_credentials, remove_file
+from logs import get_credentials, delete_file, STATUS_FILE, print_write_chatbot, input_user_chat
 from termcolor import cprint, colored
 import codecs
 import json
@@ -17,9 +17,6 @@ except ImportError:
     from instagram_private_api import (
         Client, ClientError, ClientLoginError, __version__ as client_version)
 
-def print_write_chatbot(text):
-    print(text)
-    write_chat_bot(text)
 
 def check_if_following(api: Client, username: str) -> bool:
     """
@@ -62,7 +59,8 @@ def prepare_text(post: dict, post_to_show: str, attribute: str, comments: dict, 
                     name = users['full_name'] if len(users['full_name']) else users['username']
                     post_to_show += "\t- " + name + '\n'
             else:
-                post_to_show += "\t- " + post[attribute][0]['full_name'] + " +{} users \n".format(int(count_likes) - 1)
+                post_to_show += "\t- " + post[attribute][0]['full_name'] + " +{} users \n".format(
+                    int(count_likes) - 1)
         else:
             post_to_show += f"\t- total likes: {count_likes} \n"
     else:
@@ -71,7 +69,8 @@ def prepare_text(post: dict, post_to_show: str, attribute: str, comments: dict, 
             if comments[attribute]:
                 for comment in comments[attribute]:
                     text_comment = f"\tNº{comment_number} - " + f"'{comment['text']}'"
-                    name = comment['user']['full_name'] if len(comment['user']['full_name']) else comment['user']['username']
+                    name = comment['user']['full_name'] if len(comment['user']['full_name']) else comment['user'][
+                        'username']
                     post_to_show += text_comment + f" by {name} with {comment['comment_like_count']} likes \n"
                     comment_number += 1
     
@@ -91,7 +90,7 @@ def validate_number_post(number: int, max_number: int) -> int:
     while not correct:
         if number < 0 or number >= max_number:
             cprint("Number post incorrect", 'red', attrs = ['bold'])
-            write_chat_bot("Number post incorrect")   
+            write_chat_bot("Number post incorrect")
             number = int(input("Enter a valid posting number: "))
             write_chat_bot(number, name)
             write_chat_bot("Enter a valid posting number: ")
@@ -184,7 +183,8 @@ def validate_post_comment(api: Client, feed: dict, position_comment: list) -> li
     
     return position_comment
 
-def get_username(api,name,like_type,target_type) -> str :
+
+def get_username(api, name, like_type, target_type) -> str:
     are_users = show_search_users(api, f"\nWhich user do you want to {like_type} the {target_type}? ")
     while not are_users:
         are_users = show_search_users(api, "No users with that name were found, please enter a correct name: ")
@@ -195,6 +195,7 @@ def get_username(api,name,like_type,target_type) -> str :
     write_chat_bot(username, name)
     return username
 
+
 def post_comment(api: Client) -> None:
     """
     PRE: The parameter can't be null
@@ -204,7 +205,7 @@ def post_comment(api: Client) -> None:
     """
     name = user_options(GET_NAME)
     try:
-        username = get_username(api,name,"comment","post")
+        username = get_username(api, name, "comment", "post")
         
         if api.username != username:
             can_get_feed = check_if_following(api, username)
@@ -223,14 +224,16 @@ def post_comment(api: Client) -> None:
                 if 'comments_disabled' not in feed['items'][number_post]:
                     comment_block = False
                 else:
-                    cprint("The post has the comments blocked, please choose another post\n", 'red', attrs = ['bold'])
+                    cprint("The post has the comments blocked, please choose another post\n", 'red',
+                           attrs = ['bold'])
                     write_chat_bot("The post has the comments blocked, please choose another post")
                     another_try = input("Do you want to try another comment? (yes/no) ")
                     write_chat_bot("Do you want to try another comment? (yes/no) ")
                     write_chat_bot(another_try, name)
                     
                     if another_try.lower() in ['yes', 'y', 'ye']:
-                        id_post, number_post = get_id_post(feed, "Which post would you like to comment on?", edit = True)
+                        id_post, number_post = get_id_post(feed, "Which post would you like to comment on?",
+                                                           edit = True)
                     else:
                         want_put_comment = False
             
@@ -243,8 +246,11 @@ def post_comment(api: Client) -> None:
                     cprint("The comment has been posted correctly!\n", 'green', attrs = ['bold'])
                     write_chat_bot("The comment has been posted correctly!")
             else:
-                cprint("It's okay if you couldn't leave a comment, there are many posts in the sea, go get them tiger!\n", 'blue', attrs = ['bold', 'underline'])
-                write_chat_bot("It's okay if you couldn't leave a comment, there are many posts in the sea, go get them tiger!")
+                cprint(
+                    "It's okay if you couldn't leave a comment, there are many posts in the sea, go get them tiger!\n",
+                    'blue', attrs = ['bold', 'underline'])
+                write_chat_bot(
+                    "It's okay if you couldn't leave a comment, there are many posts in the sea, go get them tiger!")
         else:
             cprint("You cant get the feed", 'red', attrs = ['bold'])
             write_chat_bot("You cant get the feed")
@@ -286,7 +292,7 @@ def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Exc
     name = user_options(GET_NAME)
     try:
         if target_type != "comment":
-            username = get_username(api,name,like_type,target_type)
+            username = get_username(api, name, like_type, target_type)
             can_get_feed = check_if_following(api, username)
             if can_get_feed:
                 feed = api.username_feed(username)
@@ -302,8 +308,10 @@ def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Exc
                 else:
                     cprint("The user has no posts\n", 'red', attrs = ['bold', 'underline'])
             else:
-                cprint(f"You cannot access the feed of the user {username} because it is a private account that you do not follow, or because it has blocked you\n", 'red',
-                       attrs = ['bold', 'underline'])
+                cprint(
+                    f"You cannot access the feed of the user {username} because it is a private account that you do not follow, or because it has blocked you\n",
+                    'red',
+                    attrs = ['bold', 'underline'])
         else:
             cprint("Your feed: ", 'blue', attrs = ['bold'])
             feed = api.self_feed()
@@ -313,7 +321,8 @@ def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Exc
                 text = f"Which comment would you like to post a {like_type}?"
                 comment_data = prepare_comment(api = api, feed = feed['items'], text = text)
                 if like_type == 'like':
-                    like_comment(api, comment_data["comment_id"], comment_text = comment_data['comment_text'], own_feed = True)
+                    like_comment(api, comment_data["comment_id"], comment_text = comment_data['comment_text'],
+                                 own_feed = True)
                 else:
                     unlike(api, comment_data["comment_id"], target_type = 'comment')
             else:
@@ -371,9 +380,11 @@ def unlike(api: Client, target_id: str, target_type: str = 'post') -> None or Cl
         cprint(f"The {target_type} is unliked correctly!\n", 'green', attrs = ['bold'])
         write_chat_bot("The target is unliked correctly")
     else:
-        cprint(f"There was a problem disliking the {target_type}, please try again later!\n", 'red', attrs = ['bold'])
-       
-def like_comment(api: Client, target_id: str,comment_text: str = '', own_feed: bool = False):
+        cprint(f"There was a problem disliking the {target_type}, please try again later!\n", 'red',
+               attrs = ['bold'])
+
+
+def like_comment(api: Client, target_id: str, comment_text: str = '', own_feed: bool = False):
     name = user_options(GET_NAME)
     if not already_liked(api, target_id, own_feed = own_feed):
         result = api.comment_like(comment_id = target_id)
@@ -382,16 +393,19 @@ def like_comment(api: Client, target_id: str,comment_text: str = '', own_feed: b
             cprint(text, 'green', attrs = ['bold'])
             write_chat_bot(text)
         else:
-            cprint(f"There was a problem liking the comment, try again later!\n", 'red', attrs = ['bold', 'underline'])
+            cprint(f"There was a problem liking the comment, try again later!\n", 'red',
+                   attrs = ['bold', 'underline'])
             write_chat_bot("There was a problem liking the comment, try again later!")
     else:
-        do_unlike = input(f"The comment is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
+        do_unlike = input(f"The comment is already liked by you, you want to unliked? (yes/no): ".lower()) in [
+            'yes', 'ye', 'y']
         write_chat_bot(f"The comment is already liked by you, you want to unliked? (yes/no): ")
         write_chat_bot(do_unlike, name)
         if do_unlike:
             unlike(api, target_id)
         else:
             print_write_chatbot("The like has been left as it was\n")
+
 
 def like_post(api: Client, target_id: str, own_feed: bool = False) -> None or ClientError:
     """
@@ -411,11 +425,14 @@ def like_post(api: Client, target_id: str, own_feed: bool = False) -> None or Cl
             text = "The post has been liked correctly!\n"
             cprint(text, 'green', attrs = ['bold'])
         else:
-            cprint(f"There was a problem liking the post, try again later!\n", 'red', attrs = ['bold', 'underline'])
+            cprint(f"There was a problem liking the post, try again later!\n", 'red',
+                   attrs = ['bold', 'underline'])
     else:
-        do_unlike = input(f"The post is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes', 'ye', 'y']
+        do_unlike = input(f"The post is already liked by you, you want to unliked? (yes/no): ".lower()) in ['yes',
+                                                                                                            'ye',
+                                                                                                            'y']
         write_chat_bot(f"The post is already liked by you, you want to unliked? (yes/no): ")
-        write_chat_bot(do_unlike, name)    
+        write_chat_bot(do_unlike, name)
         if do_unlike:
             unlike(api, target_id)
         else:
@@ -535,17 +552,19 @@ def prepare_profile(profile: dict, attributes: dict, data_change: dict, genders:
         
         if change_attribute:
             if attribute == 'is_private':
-                print_write_chatbot("\nTo change your account from private to public or vice versa, enter public/private")
-        
+                print_write_chatbot(
+                    "\nTo change your account from private to public or vice versa, enter public/private")
+            
             elif attribute == 'gender':
                 print_write_chatbot("\nTo change your gender, enter male/female/unspecified")
-           
+            
             new_data = input(f"Enter the new value for {key}: ")
             
             write_chat_bot(f"Enter the new value for {key}: ")
             write_chat_bot(new_data, name)
             
-            secure = input(f"\nAre you sure to change {key} to '{new_data}'? yes/no: ").lower() in ['yes', 'y', 'ye']
+            secure = input(f"\nAre you sure to change {key} to '{new_data}'? yes/no: ").lower() in ['yes', 'y',
+                                                                                                    'ye']
             
             write_chat_bot(f"Are you sure to change {key} to '{new_data}'? yes/no: ")
             write_chat_bot(secure, name)
@@ -558,9 +577,11 @@ def prepare_profile(profile: dict, attributes: dict, data_change: dict, genders:
                         new_data = int(genders.index(new_data)) + 1
                     else:
                         while new_data not in genders:
-                            new_data = input("\nThe gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
+                            new_data = input(
+                                "\nThe gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
                             
-                            write_chat_bot("The gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
+                            write_chat_bot(
+                                "The gender you have selected does not correspond to those available (male / female / unspecified), please enter a valid one: ")
                             write_chat_bot(new_data, name)
                         
                         else:
@@ -593,17 +614,17 @@ def delete(api: Client, target_id: str, target_type: str, parent_id: str = '') -
     
     if result['status'] == 'ok':
         cprint(f"The {target_type} has been successfully removed!\n", 'green', attrs = ['bold'])
-
+    
     else:
         cprint(f"The {target_type} could not be removed. Please try again later\n", 'red', attrs = ['bold'])
 
 
-def delete_comment(api,feed,name) -> None:
+def delete_comment(api, feed, name) -> None:
     """
     PRE: Name of the user and post id
     POS: The comment will be deleted
     """
-    cprint("You cannot edit a comment, only delete it\n", 'blue', attrs = ['bold', 'underline'])       
+    cprint("You cannot edit a comment, only delete it\n", 'blue', attrs = ['bold', 'underline'])
     secure_delete = input("Do you want to delete a comment from a post? (yes/no): \n") in ['yes', 'ye', 'y']
     write_chat_bot("Do you want to delete a comment from a post? (yes/no):")
     write_chat_bot(secure_delete, name)
@@ -613,11 +634,13 @@ def delete_comment(api,feed,name) -> None:
         comment_data = prepare_comment(api = api, feed = feed['items'], text = text)
         delete(api, comment_data['comment_id'], 'comment', comment_data['post_id'])
 
-def edit_post(api,feed,id_post,number_post,name) -> None:
-    cprint("You can only edit the caption!\n", 'blue', attrs = ['bold', 'blink'])             
+
+def edit_post(api, feed, id_post, number_post, name) -> None:
+    cprint("You can only edit the caption!\n", 'blue', attrs = ['bold', 'blink'])
     old_caption = feed['items'][number_post]['caption']['text']
     new_caption = input("Enter the new caption: ")
-    secure = input(f"\nAre you sure to change '{old_caption}' to '{new_caption}'? (yes/no): ") in ['yes', 'ye', 'y']
+    secure = input(f"\nAre you sure to change '{old_caption}' to '{new_caption}'? (yes/no): ") in ['yes', 'ye',
+                                                                                                   'y']
     
     write_chat_bot(f"Are you sure to change '{old_caption}' to '{new_caption}'? (yes/no): ")
     write_chat_bot(secure, name)
@@ -627,12 +650,13 @@ def edit_post(api,feed,id_post,number_post,name) -> None:
         result = api.edit_media(media_id = id_post, caption = new_caption)
         if result['status'] == 'ok':
             cprint("It has been edited successfully!\n", 'green', attrs = ['bold'])
-            
+        
         else:
             cprint("An error occurred while changing it, please try again later\n", 'red', attrs = ['bold'])
-            
+    
     else:
         cprint("The post has not been modified\n", 'blue', attrs = ['bold'])
+
 
 def edit_actions(api: Client, edit_type: str, target_type: str = 'post'):
     """
@@ -650,7 +674,7 @@ def edit_actions(api: Client, edit_type: str, target_type: str = 'post'):
         if target_type == 'post':
             id_post, number_post = get_id_post(feed, text = f"Which post would you {edit_type}?", edit = True)
             if edit_type == 'edit':
-                edit_post(api,feed,id_post,number_post,name)
+                edit_post(api, feed, id_post, number_post, name)
             
             else:
                 secure = input(f"Are you sure to {edit_type} the post? (yes/no): \n") in ['yes', 'ye', 'y']
@@ -662,11 +686,12 @@ def edit_actions(api: Client, edit_type: str, target_type: str = 'post'):
                     delete(api, id_post, 'post')
         else:
             if edit_type == 'delete':
-                delete_comment(api,feed,name)
+                delete_comment(api, feed, name)
     else:
         cprint("Your feed is empty", 'red', attrs = ['bold'])
         write_chat_bot("Your feed is empty")
-        
+
+
 def unfollow(api: Client) -> Exception or ClientError or None:
     """
     PRE: The api parameter cant be null
@@ -682,7 +707,7 @@ def unfollow(api: Client) -> Exception or ClientError or None:
                     cprint(text, 'green', attrs = ['bold'])
     except Exception as error:
         write_status_log(error, 'Exception')
-        print(f"There was an error:{error}")                
+        print(f"There was an error:{error}")
 
 
 def follow(api: Client) -> Exception or ClientError or None:
@@ -699,7 +724,8 @@ def follow(api: Client) -> Exception or ClientError or None:
         user = api.username_info(username)['user']
         user_id = user['pk']
         if api.friendships_create(user_id = user_id):
-            text = f"{username} has a private account, we have sent him a request with success!" if user['is_private'] else f"{username} has been followed with success!"
+            text = f"{username} has a private account, we have sent him a request with success!" if user[
+                'is_private'] else f"{username} has been followed with success!"
             cprint(text, 'green', attrs = ['bold'])
         else:
             text = "There was a problem performing the action, please try again"
@@ -800,7 +826,8 @@ def show_last_messages(last_messages: dict, bot_id: str) -> None:
             its_me = "You sent" if i_sent else "He sent"
             
             if conversations['items'][0]['item_type'] == 'media':
-                message += f"\t\t-({its_me}) Its a image, url: " + f"{conversations['items'][0]['media']['image_versions2']['candidates'][0]['url']} \n"
+                message += f"\t\t-({its_me}) Its a image, url: " + \
+                           f"{conversations['items'][0]['media']['image_versions2']['candidates'][0]['url']} \n"
             
             elif conversations['items'][0]['item_type'] == 'text':
                 message += f"\t\t-({its_me}) Text: {conversations['items'][0]['text']}\n"
@@ -847,9 +874,12 @@ def message_actions(api: Client, action_type: str = 'send') -> None or Exception
     """
     name = user_options(GET_NAME)
     cprint("IMPORTANT!!\n", 'red', attrs = ['bold', 'blink', 'underline'])
-    cprint("Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message\n", 'red',
-           attrs = ['bold', 'underline'])
-    write_chat_bot("IMPORTANT!!\n Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message")
+    cprint(
+        "Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message\n",
+        'red',
+        attrs = ['bold', 'underline'])
+    write_chat_bot(
+        "IMPORTANT!!\n Thanks to Mark Zuckerberg, we can only show the latest events from each chat.\nWhether it is a like to a comment, share a profile / reel / publication / a message")
     try:
         if action_type != 'send':
             last_messages = api.direct_v2_inbox()['inbox']
@@ -857,13 +887,13 @@ def message_actions(api: Client, action_type: str = 'send') -> None or Exception
         else:
             cprint("Please wait a few seconds\n", 'blue', attrs = ['bold'])
             write_chat_bot("Please wait a few seconds")
-           
             
             aux_api = connection_aux_api(api.username, api.password)
             are_users = show_search_users(api, "Who do you want to send a message to? ")
             
             while not are_users:
-                are_users = show_search_users(api, "No users with that name were found, please enter a correct name: ")
+                are_users = show_search_users(api,
+                                              "No users with that name were found, please enter a correct name: ")
                 write_chat_bot("No users with that name were found, please enter a correct name: ")
             
             username = input("Please enter username: ")
@@ -880,7 +910,8 @@ def message_actions(api: Client, action_type: str = 'send') -> None or Exception
                 cprint(f"The message has been sent to {username} correctly!\n", 'green', attrs = ['bold'])
                 write_chat_bot("The message has been sent")
             else:
-                cprint(f"The message was not sent to {username} correctly, please try again later\n", 'red', attrs = ['bold'])
+                cprint(f"The message was not sent to {username} correctly, please try again later\n", 'red',
+                       attrs = ['bold'])
                 write_chat_bot("The message has not been sent")
     except Exception as error:
         print(f"There was an error:{error}")
@@ -941,7 +972,7 @@ def delete_cookie(file: str) -> None or Exception:
         create_time = data['created_ts']
         now = time.time()
         if (create_time + 3600) <= round(now):
-            remove_file(file)
+            delete_file(file)
             cprint("Cookie removed", 'yellow', attrs = ['bold'])
     except Exception as error:
         write_status_log(error, 'Exception')
@@ -996,7 +1027,9 @@ def connection_instagram(user_credentials: dict = {}) -> object:
         write_status_log(e, 'ClientLoginError')
         ClientLoginError(e)
     except ClientError as e:
-        write_status_log('ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response), 'ClientError')
+        write_status_log(
+            'ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response),
+            'ClientError')
         ClientError('ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
     except Exception as e:
         write_status_log('Unexpected Exception: {0!s}'.format(e), 'Exception')

@@ -1,4 +1,4 @@
-from logs import get_credentials, print_write_chat, input_user_chat
+from logs import get_credentials, print_write_chatbot, input_user_chat
 import facebook
 from termcolor import cprint
 
@@ -190,10 +190,10 @@ def connection_api(user_credentials: dict = {}) -> object:
     api = ''
     try:
         api = facebook.GraphAPI(access_token = page_token, version = "2.12")
-        print_write_chat('You have successfully connected with the Facebook api!\n',
+        print_write_chatbot('You have successfully connected with the Facebook api!\n',
                          color = 'green',
                          attrs_color = ['bold'])
     except Exception as error:
-        print_write_chat(f"Error to connect facebook_api: {str(error)}")
+        print_write_chatbot(f"Error to connect facebook_api: {str(error)}")
     
     return api
