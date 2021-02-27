@@ -1,7 +1,7 @@
 import os
 import sys
 from time import sleep
-from termcolor import colored, cprint
+from termcolor import colored
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 from apis import facebook, instagram
@@ -26,8 +26,7 @@ def animation(text: str) -> None:
 
 def facebook_credentials():
     """
-    The user is asked if he has an facebook page to connect,
-     if he does not have, the Crux account will be used
+    The user is asked if he has an facebook page to connect, if he does not have, the Crux account will be used
     
     Arguments:
         -
@@ -90,6 +89,7 @@ def run_bot(bot) -> None:
     """
     running = True
     is_taken_name = False
+    
     text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... " \
            "I mean bot! Oh my, I'm damned if they find out" \
            " I said that ... \nAh, well, before Elon Musk finds me and sends me to Mars.\n"
@@ -102,17 +102,18 @@ def run_bot(bot) -> None:
     welcome_message()
     read = False
     while not read:
-        print_write_chat("\nPLEASE READ ALL THE MESSAGE",
+        print_write_chat("PLEASE READ ALL THE MESSAGE",
                          color = 'blue',
                          attrs_color = ['bold', 'underline', 'blink'])
         
-        is_read = input_user_chat("Did you read all the message? (yes/no) ")
+        is_read = input_user_chat("Did you read all the message? (yes/no) ", first_time = True)
         read = user_answer_is_yes(is_read)
     
     while running:
         try:
+            
             if not is_taken_name:
-                name = input_user_chat("\nWhat's your name? ")
+                name = input_user_chat("What's your name? ", first_time = True)
                 is_taken_name = True
                 print_write_chat(f"Hi {name}!")
                 save_username(name)
@@ -181,8 +182,9 @@ def train_bot(bot) -> None:
 
 
 def main():
-    delete_file('logs/status.txt')
-    delete_file('logs/chat.txt')
+    for file in ['logs/chat.txt', 'logs/session.txt']:
+        delete_file(file)
+    
     bot = ChatBot(
         name = 'Crux',
         storage_adapter = 'chatterbot.storage.SQLStorageAdapter',
