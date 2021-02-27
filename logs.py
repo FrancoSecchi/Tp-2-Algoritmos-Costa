@@ -96,14 +96,14 @@ def input_user_chat(text: str, first_time = False) -> str:
     Returns:
         str - The value of the input given by the user
     """
-    user_name = get_username(first_time)
+    user_name = get_current_username(first_time)
     user_input = input("\n" + text)
     write_log(CHAT_FILE, text = user_input, username = user_name)
     print_write_chatbot(message = text, print_text = False)
     return user_input
 
 
-def get_username(first_time = False) -> str:
+def get_current_username(first_time = False) -> str:
     """
     Returns the current username
     
