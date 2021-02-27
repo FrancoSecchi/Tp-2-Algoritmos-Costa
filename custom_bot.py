@@ -1,156 +1,205 @@
 import os
-
-from apis import facebook, instagram
+import sys
+from time import sleep
+from termcolor import colored
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-from logs import write_status_log, remove_file, write_chat_bot, user_options, SAVE_USER, welcome_message
-from termcolor import colored, cprint
-from time import sleep
-import json
-import sys
+from apis import facebook, instagram
+from logs import delete_file, save_username, \
+    welcome_message, print_write_chat, input_user_chat, write_log, STATUS_FILE
+from utils.utils import user_answer_is_yes
 
 
-def animation(text, time = 0.025):
+def animation(text: str) -> None:
     """
-    PRE: the text parameter cant be null
-    POST: Make an animation by printing a text like a typewriter to give dynamism to the console
-    :param time:
-    :param text:
-    :return:
+    Make an animation by printing a text like a typewriter to give dynamism to the console
+    Arguments:
+        text (str) = Text to animate
+    Returns:
+        None
     """
     for letter in text:
-        sleep(time)  # In seconds
+        sleep(0.025)  # In seconds
         sys.stdout.write(letter)
         sys.stdout.flush()
 
 
-def access(name):
+def facebook_credentials():
     """
-    PRE: The parameter cant be null, and its the user name
-    POS: Returns the connections selected by the user
+    The user is asked if he has an facebook page to connect, if he does not have, the Crux account will be used
+    
+    Arguments:
+        -
+        
+    Returns:
+         object (facebook.GraphAPI()) - facebook.GraphAPI object
     """
-    response = input("\nWould you like to connect to Facebook? (yes/no): ").lower()
-    if response in ["yes", 'ye', 'y']:
-        page_token = input("\nPlease enter your page access token: ")
-        write_chat_bot("Please enter your page access token: ")
-        write_chat_bot(page_token, name)
-        graph = facebook.connection_api(token = page_token)
+    response = input_user_chat("\nWould you like to connect to Facebook? (yes/no): ")
+    if user_answer_is_yes(response.lower()):
+        page_token = input_user_chat("\nPlease enter your page access token: ")
+        facebook_api = facebook.connection_api(
+            user_credentials = {
+                'token': page_token
+            }
+        )
     else:
-        cprint("\nBy not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz", 'blue', attrs = ['bold'])
-        write_chat_bot("By not using the facebook tool with your personal page, we will provide the service with our Facebook page Crux.cruz")
-        graph = facebook.connection_api()
-    
-    ig_response = input("Would you like to connect to Instagram? (yes/no): ").lower()
-    write_chat_bot("Would you like to connect to Instagram? (yes/no): ")
-    write_chat_bot(ig_response, name)
-    if ig_response == ["yes", 'ye', 'y']:
-        username = input("\nPlease enter your username: ")
-        password = input("\nPlease enter your password: ")
-        write_chat_bot("Please enter your username: ")
-        write_chat_bot(username, name)
-        write_chat_bot("Please enter your password: ")
-        write_chat_bot(password, name)
-        insta_api = instagram.connection_instagram(username = username, password = password)
-    else:
-        insta_api = instagram.connection_instagram()
-        cprint("\nBy not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot", 'blue', attrs = ['bold'])
-        write_chat_bot("By not using the instagram tool with your personal page, we will provide the service with our Instagram account crux.bot")
-    
-    return graph, insta_api
+        print_write_chat("\nBy not using the facebook tool with your personal page, "
+                         "we will provide the service with our"
+                         "Facebook page Crux.cruz", color = 'blue', attrs_color = ['bold'])
+        facebook_api = facebook.connection_api()
+    return facebook_api
 
 
-def run_bot(chat_bot):
+def instagram_credentials():
     """
-    PRE: The chat_bot cant be null
-    POST: The conversation with the bot is executed
-    :param chat_bot:
-    :return:
+    The user is asked if he has an instagram account to connect,
+     if he does not have, the Crux account will be used
+    
+    Arguments:
+        -
+        
+    Returns:
+         object (instagram.Client()) - instagram.Client object
+    """
+    response = input_user_chat("\nWould you like to connect to Instagram? (yes/no): ")
+    
+    if user_answer_is_yes(response.lower()):
+        username = input_user_chat("\nPlease enter your username: ")
+        password = input_user_chat("\nPlease enter your password: ")
+        
+        instagram_api = instagram.connection_instagram(
+            user_credentials = {
+                'username': username,
+                'password': password
+            }
+        )
+    else:
+        instagram_api = instagram.connection_instagram()
+        print_write_chat("By not using the instagram tool with your personal page,"
+                         " we will provide the service with our Instagram account crux.bot",
+                         color = 'blue', attrs_color = ['bold'])
+    
+    return instagram_api
+
+
+def run_bot(bot) -> None:
+    """
+    Arguments:
+        bot (ChatBot)
     """
     running = True
     is_taken_name = False
-    text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... I mean bot! Oh my, I'm damned if they find out I said that ... \nAh, well, before Elon Musk finds me and sends me to Mars.\n"
+    
+    text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... " \
+           "I mean bot! Oh my, I'm damned if they find out" \
+           " I said that ... \nAh, well, before Elon Musk finds me and sends me to Mars.\n"
     animation(text)
-    subtitle = colored("There's something I want to tell you.\n", 'blue', attrs = ['bold', 'underline'])
+    subtitle = colored("There's something I want to tell you.\n", 'blue',
+                       attrs = ['bold', 'underline'])
     animation(subtitle)
-    write_chat_bot(text + " " + "There's something I want to tell you.\n")
+    print_write_chat(text + subtitle, print_text = False)
     
     welcome_message()
     read = False
     while not read:
-        cprint("\nPLEASE READ ALL THE MESSAGE", 'blue', attrs = ['bold', 'underline', 'blink'])
-        write_chat_bot("PLEASE READ ALL THE MESSAGE")
-        is_read = input("Did you read all the message? (yes/no) ")
-        write_chat_bot("Did you read all the message? (yes/no)")
-        write_chat_bot(is_read, 'Unknown')
-        read = is_read.lower() in ['yes', 'ye', 'y']
+        print_write_chat("PLEASE READ ALL THE MESSAGE",
+                         color = 'blue',
+                         attrs_color = ['bold', 'underline', 'blink'])
+        
+        is_read = input_user_chat("Did you read all the message? (yes/no) ", first_time = True)
+        read = user_answer_is_yes(is_read)
     
-    name = ''
     while running:
         try:
+            
             if not is_taken_name:
-                name = input("\nWhat's your name? ")
-                write_chat_bot("What's your name? ")
-                write_chat_bot(name, name)
+                name = input_user_chat("What's your name? ", first_time = True)
                 is_taken_name = True
-                print(f"\nHi {name}!")
-                write_chat_bot(f"Hi {name}!")
-                user_options(SAVE_USER, name = name, first_time = True)
-                graph, insta_api = access(name)
+                print_write_chat(f"Hi {name}!")
+                save_username(name)
+                graph, instagram_api = facebook_credentials(), instagram_credentials()
             
-            user_input = input("\nYou: ")
-            write_chat_bot(user_input, name)
+            user_input = input_user_chat("\nYou: ")
+            bot_response = str(bot.get_response(user_input))
             
-            bot_response = str(chat_bot.get_response(user_input))
             if "_" in bot_response:
                 exec(bot_response)
             else:
-                print(bot_response)
-                write_chat_bot(bot_response)
+                print_write_chat(bot_response)
             
-            running = input("Do you want to continue chatting with me?? (yes/no) ")
-            write_chat_bot("Do you want to continue chatting with me?? (yes/no) ")
-            write_chat_bot(running, name)
-            if running.lower() not in ['yes', 'ye', 'y']:
+            keep_running = input("Do you want to continue chatting with me?? (yes/no) ")
+            
+            if user_answer_is_yes(keep_running):
                 running = False
         
         except (KeyboardInterrupt, EOFError, SystemExit):
             running = False
-            write_chat_bot("It's the end", 'SystemExit')
+            print_write_chat("It's the end", color = 'blue', attrs_color = ['bold'])
     else:
         animation("\nMay the Force be with you\n")
-        write_chat_bot("May the Force be with you")
+        print_write_chat("May the Force be with you", print_text = False)
+
+
+def is_already_trained() -> bool:
+    """
+    Check if the bot's database already exists, if it exists, it means that the bot is trained and vice versa
+
+    Arguments:
+        -
+
+    Returns:
+        bool - Returns True if the bot is trained, otherwise it returns false
+    """
+    path_file = os.path.abspath("db.sqlite3")
+    return True if os.path.isfile(path_file) else False
+
+
+def train_bot(bot) -> None:
+    """
+    The txt containing the training is read and trains the bot
+    
+    Arguments:
+        bot (ChatBot) : ChatBot object
+    
+    Returns:
+        None
+    """
+    
+    trainer = ListTrainer(bot)
+    list_trainer = []
+    try:
+        with open("trainer.txt") as file:
+            lines = file.readlines()
+    
+    except Exception as error:
+        write_log(STATUS_FILE, str(error), 'Crux')
+        print_write_chat(str(error))
+    
+    for line in lines:
+        list_trainer.append(line.strip())
+    
+    trainer.train(list_trainer)
 
 
 def main():
-    chat_bot = ChatBot(
+    for file in ['logs/chat.txt', 'logs/session.txt']:
+        delete_file(file)
+    
+    bot = ChatBot(
         name = 'Crux',
         storage_adapter = 'chatterbot.storage.SQLStorageAdapter',
         logic_adapters = [
             {
                 'import_path': 'chatterbot.logic.BestMatch',
                 'default_response': 'I am sorry, but I do not understand.',
-                'maximum_similarity_threshold': 0.90
+                'maximum_similarity_threshold': 0.80
             }
         ],
-        database_uri = 'sqlite:///database.db'
     )
-    trainer = ListTrainer(chat_bot)
-    list_trainer = []
-    remove_file('logs/status.txt')
-    remove_file('logs/chat.txt')
-    try:
-        with open("trainer.txt") as file:
-            lines = file.readlines()
+    if not is_already_trained():
+        train_bot(bot)
     
-    except Exception as error:
-        write_status_log(error, 'Exception')
-        raise Exception(error)
-    
-    for line in lines:
-        list_trainer.append(line.strip())
-    
-    trainer.train(list_trainer)
-    run_bot(chat_bot)
+    run_bot(bot)
 
 
 main()
