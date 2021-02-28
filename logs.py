@@ -98,8 +98,8 @@ def input_user_chat(text: str, first_time = False) -> str:
     """
     user_name = get_current_username(first_time)
     user_input = input("\n" + text)
-    write_log(CHAT_FILE, text = user_input, username = user_name)
     print_write_chatbot(message = text, print_text = False)
+    write_log(CHAT_FILE, text = user_input, username = user_name)
     return user_input
 
 

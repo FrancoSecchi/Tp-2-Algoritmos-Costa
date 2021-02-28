@@ -34,16 +34,16 @@ def facebook_credentials() -> object:
     Returns:
          object (facebook.GraphAPI()) - facebook.GraphAPI object
     """
-    response = input_user_chat("\nWould you like to connect to Facebook? (yes/no): ")
+    response = input_user_chat("Would you like to connect to Facebook? (yes/no): ")
     if user_answer_is_yes(response.lower()):
-        page_token = input_user_chat("\nPlease enter your page access token: ")
+        page_token = input_user_chat("Please enter your page access token: ")
         facebook_api = facebook.connection_api(
             user_credentials = {
                 'token': page_token
             }
         )
     else:
-        print_write_chatbot("\nBy not using the facebook tool with your personal page, "
+        print_write_chatbot("By not using the facebook tool with your personal page, "
                             "we will provide the service with our"
                             "Facebook page Crux.cruz", color = 'blue', attrs_color = ['bold'])
         facebook_api = facebook.connection_api()
@@ -61,11 +61,11 @@ def instagram_credentials() -> object:
     Returns:
          object (instagram.Client()) - instagram.Client object
     """
-    response = input_user_chat("\nWould you like to connect to Instagram? (yes/no): ")
+    response = input_user_chat("Would you like to connect to Instagram? (yes/no): ")
     
     if user_answer_is_yes(response.lower()):
-        username = input_user_chat("\nPlease enter your username: ")
-        password = input_user_chat("\nPlease enter your password: ")
+        username = input_user_chat("Please enter your username: ")
+        password = input_user_chat("Please enter your password: ")
         
         instagram_api = instagram.connection_instagram(
             user_credentials = {
@@ -105,10 +105,9 @@ def take_name() -> True:
     :return:
     """
     name = input_user_chat("What's your name? ", first_time = True)
-    is_taken_name = True
     print_write_chatbot(f"Hi {name}!")
     save_username(name)
-    return is_taken_name
+    return True
 
 
 def run_bot(bot: ChatBot) -> None:
@@ -137,8 +136,7 @@ def run_bot(bot: ChatBot) -> None:
             
             if not is_taken_name:
                 is_taken_name = take_name()
-                
-            graph, instagram_api = facebook_credentials(), instagram_credentials()
+                graph, instagram_api = facebook_credentials(), instagram_credentials()
             
             user_input = input_user_chat("\nYou: ")
             bot_response = str(bot.get_response(user_input))
@@ -147,17 +145,17 @@ def run_bot(bot: ChatBot) -> None:
                 exec(bot_response)
             else:
                 print_write_chatbot(bot_response)
-                
-            keep_running = input("Do you want to continue chatting with me?? (yes/no) ")
             
-            if user_answer_is_yes(keep_running):
+            keep_running = input_user_chat("Do you want to continue chatting with me?? (yes/no): ")
+            
+            if not user_answer_is_yes(keep_running):
                 running = False
         
         except (KeyboardInterrupt, EOFError, SystemExit):
             running = False
-            print_write_chatbot("It's the end", color = 'blue', attrs_color = ['bold'])
     else:
-        animation("\nMay the Force be with you\n")
+        print_write_chatbot("It's the end", color = 'blue', attrs_color = ['bold'])
+        animation("May the Force be with you\n")
         print_write_chatbot("May the Force be with you", print_text = False)
 
 
@@ -171,7 +169,7 @@ def is_already_trained() -> bool:
     Returns:
         bool - Returns True if the bot is trained, otherwise it returns false
     """
-    path_file = os.path.abspath("db.sqlite3")
+    path_file = os.path.abspath("database.db")
     return True if os.path.isfile(path_file) else False
 
 
@@ -202,23 +200,34 @@ def train_bot(bot) -> None:
     trainer.train(list_trainer)
 
 
-def main():
-    for file in ['logs/chat.txt', 'logs/session.txt']:
-        delete_file(file)
+def initialize_bot():
+    """
     
-    bot = ChatBot(
+    :return:
+    """
+    return ChatBot(
         name = 'Crux',
         storage_adapter = 'chatterbot.storage.SQLStorageAdapter',
         logic_adapters = [
             {
                 'import_path': 'chatterbot.logic.BestMatch',
                 'default_response': 'I am sorry, but I do not understand.',
-                'maximum_similarity_threshold': 0.80
-            }
+                'maximum_similarity_threshold': 0.9
+            },
         ],
+        database_uri = 'sqlite:///database.db'
     )
+
+
+def main():
+    for file in ['logs/chat.txt', 'logs/session.txt']:
+        delete_file(file)
+    
     if not is_already_trained():
+        bot = initialize_bot()
         train_bot(bot)
+    else:
+        bot = initialize_bot()
     
     run_bot(bot)
 
