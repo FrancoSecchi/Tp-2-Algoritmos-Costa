@@ -1,9 +1,10 @@
-from logs import write_log, print_write_chat, input_user_chat, get_username, get_credentials
+from logs import (write_log, STATUS_FILE, get_credentials,
+                  print_write_chatbot, input_user_chat)
 import facebook
 from termcolor import cprint  
 
 
-def show_albums(albums_id):
+def show_albums(albums_id: list):
     """ 
     Prints a list of albums of the user
     
@@ -16,7 +17,7 @@ def show_albums(albums_id):
     """
     albums = facebook_api.get_connections(id = 'me', connection_name = 'albums')
     info_list = albums['data']
-    print_write_chat("Your albums are: ")
+    print_write_chatbot("Your albums are: ")
     for count, info in enumerate(info_list, start):
         print(count, info["name"])
         albums_id.append(info["id"])
@@ -36,7 +37,7 @@ def validate(number, list_):
         number = int(input_user_chat("re select: "))
 
 
-def upload_to_albums(facebook_api) -> None or Exception:
+def upload_to_albums(facebook_api: facebook.GraphAPI) -> None:
     """
     Uploads a picture from the user to the album the user must select
     
@@ -47,17 +48,16 @@ def upload_to_albums(facebook_api) -> None or Exception:
         None
     """
 
-    path = input_write_chatbot("Please enter the path of your picture: ")
-    username = get_username()
+    path = input_user_chat("Please enter the path of your picture: ")
     if path:
         albums_id = []
         show_albums(albums_id)
-        select = int(input_write_chatbot("Select the album: "))
+        select = int(input_user_chat("Select the album: "))
         validate_select(select, albums_id)
-        caption = input_write_chatbot("Caption: ")
+        caption = input_user_chat("Caption: ")
         try:
             facebook_api.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos", message = caption)
-            print_write_chat("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
+            print_write_chatbot("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
         except FileNotFoundError:
             write_log("The requested file cannot be found", "FileNotFoundError")
             print("The requested file cannot be found")
@@ -66,8 +66,8 @@ def upload_to_albums(facebook_api) -> None or Exception:
             print(f"There was a problem opening the file, error: {error}")
 
 
-def upload_photo(facebook_api) -> None or Exception:
-       """
+def upload_photo(facebook_api: facebook.GraphAPI) -> None or Exception:
+    """
     Asks the user the path of the photo and the caption the user wants to upload, and uploads the photo and the caption 
     
     Arguments:
@@ -81,7 +81,7 @@ def upload_photo(facebook_api) -> None or Exception:
     name = get_username()
     try:
         facebook_api.put_photo(image = open(path, 'rb'), message = caption)
-        print_write_chat("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
+        print_write_chatbot("The photo has been uploaded successfully!", 'green', attrs = ['bold'])
     except FileNotFoundError:
         write_log("The requested file cannot be found", 'FileNotFoundError')
         print("The requested file cannot be found")
@@ -89,7 +89,7 @@ def upload_photo(facebook_api) -> None or Exception:
         write_log(f"There was a problem opening the file, error: {error}", 'Exception')
         print("Error")
 
-def upload_post(facebook_api) -> None or Exception:
+def upload_post(facebook_api: facebook.GraphAPI) -> None or Exception:
     """
     Uploads the post written by the user and prints the success of the action if there are no errors 
     
@@ -108,7 +108,7 @@ def upload_post(facebook_api) -> None or Exception:
         write_log(error, 'Exception')
         print("Error")
 
-def follower_count(facebook_api) -> None:
+def follower_count(facebook_api: facebook.GraphAPI) -> None:
     """
     Prints the count of followers of the page
     
@@ -120,7 +120,7 @@ def follower_count(facebook_api) -> None:
     """
 
     followers = facebook_api.get_object(id = 'me', fields = 'followers_count')
-    print_write_chat(f"Number of followers: {str(followers['followers_count'])}\n")
+    print_write_chatbot(f"Number of followers: {str(followers['followers_count'])}\n")
 
 
 def if_text_in_info(text, info, post_id, count):
@@ -138,11 +138,11 @@ def if_text_in_info(text, info, post_id, count):
         None
     """
     if text in info:
-        print_write_chat(count, info["created_time"][0:10] + ":" + info[text])
+        print_write_chatbot(count, info["created_time"][0:10] + ":" + info[text])
         posts_id.append(info["id"])
 
 
-def like(facebook_api, selection):
+def like(facebook_api: facebook.GraphAPI, selection: int):
 
     """
     Likes the selection and prints the success of the action
@@ -155,9 +155,9 @@ def like(facebook_api, selection):
         object - (facebook_api)
     """
     facebook_api.put_like(object_id = selection)
-    print_write_chat("The post has been liked successfully!\n", 'green', attrs = ['bold'])
+    print_write_chatbot("The post has been liked successfully!\n", 'green', attrs = ['bold'])
     
-def comment(facebook_api, selection):
+def comment(facebook_api: facebook.GraphAPI, selection: int):
     """
     Ask what would you like to comment, comments your response and prints the success of the action
     
@@ -170,9 +170,9 @@ def comment(facebook_api, selection):
     """
     text = input_user_chat("What would you like to comment: ").capitalize()
     facebook_api.put_comment(object_id = selection, message = text)
-    print_write_chat("It has been successfully commented!\n", 'green', attrs = ['bold'])
+    print_write_chatbot("It has been successfully commented!\n", 'green', attrs = ['bold'])
 
-def delete_post(facebook_api, selection):
+def delete_post(facebook_api: facebook.GraphAPI, selection: str):
     """
     Deletes the selected post
     
@@ -184,9 +184,9 @@ def delete_post(facebook_api, selection):
         object - (facebook_api)
     """
     facebook_api.delete_object(id = selection)
-    print_write_chat("The post has been successfully removed!\n", 'green', attrs = ['bold'])
+    print_write_chatbot("The post has been successfully removed!\n", 'green', attrs = ['bold'])
 
-def edit_post(facebook_api, selection):
+def edit_post(facebook_api: facebook.GraphAPI, selection: int):
     """
     Edits the selection and prints the success of the action 
     
@@ -199,7 +199,7 @@ def edit_post(facebook_api, selection):
     """
     text = input_user_chat("What would you like to change?: ").capitalize()
     facebook_api.put_object(parent_object = selection, connection_name = '', message = text)
-    print_write_chat("Posting has been updated successfully!\n", 'green', attrs = ['bold'])
+    print_write_chatbot("Posting has been updated successfully!\n", 'green', attrs = ['bold'])
 
 
 def post_related(facebook_api, action, selected) -> None:
@@ -218,13 +218,11 @@ def post_related(facebook_api, action, selected) -> None:
     try:
         posts = facebook_api.get_connections(id = 'me', connection_name = selected)
         info_list = posts['data']
-        print_write_chat("The posts are: ")
+        print_write_chatbot("The posts are: ")
         for count, info in enumerate(info_list, start=1):
             if_text_in_info("message", info, posts_id, count)
             if_text_in_info("story", info, posts_id, count)
-            elif 'story' or 'message' not in info:
-                print_write_chat(count, info["created_time"][0:10])
-                posts_id.append(info["id"])
+
         option = int(input_user_chat("Select one: "))
         validate(option, posts_id)
         selection = posts_id[option - 1]
@@ -252,13 +250,13 @@ def connection_api(user_credentials: dict = {}) -> object:
     Returns the facebook Api and checks if there was any error while connecting to Facebook
     
     Arguments:
-        user_token (str): users token
+        user_credentials (str): users token
     
     Returns:
         object - (facebook_api)
     """
-    
-    if "token" not in user_credentials.keys():
+    facebook_api = ''
+    if not user_credentials:
         credentials = get_credentials()
         page_token = credentials['facebook']['token']
     else:
@@ -267,16 +265,13 @@ def connection_api(user_credentials: dict = {}) -> object:
     try:
         facebook_api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except ConnectionError as error:
-        write_log(error, 'ConnectionError')
+        write_log(STATUS_FILE, str(error), 'ConnectionError')
         print(f'You dont have internet: {error}')
     except Exception as error:
-        write_log(error, 'Exception')
+        write_log(STATUS_FILE, str(error), 'ConnectionError')
         print ("Error")
     else:
-        write_log('Successfully connected with Facebook the api')
-        api = facebook.GraphAPI(access_token = page_token, version = "2.12")
-        print_write_chat('You have successfully connected with the Facebook api!\n', color = 'green', attrs_color = ['bold'])
-    except Exception as error:
-        print_write_chat(f"Error to connect facebook_api: {str(error)}")
+        write_log(STATUS_FILE,'Successfully connected with Facebook the api', 'Crux')
+        print_write_chatbot('You have successfully connected with the Facebook api!\n', color = 'green', attrs_color = ['bold'])
     
-    return api
+    return facebook_api

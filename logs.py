@@ -40,7 +40,7 @@ def write_log(filename: str, text: str, username: str) -> None:
         with open(filename, 'a') as file:
             file.write(string_formatted)
     except Exception as e:
-        print_write_chat(message = str(e), color = "red")
+        print_write_chatbot(message = str(e), color = "red")
 
 
 def get_credentials():
@@ -58,18 +58,19 @@ def get_credentials():
             return json.load(file)
     except Exception as e:
         write_log(filename = STATUS_FILE, text = str(e), username = 'Crux')
-        print_write_chat(message = str(e), color = "red")
+        print_write_chatbot(message = str(e), color = "red")
 
 
-def print_write_chat(message: str, print_text: bool = True, color: str = 'white',
-                     attrs_color: list = []) -> None:
+def print_write_chatbot(message: str, print_text: bool = True, color: str = 'white',
+                        attrs_color: list = []) -> None:
     """
     A text is printed on the screen and that same text will be saved in the chat log
     
     Arguments:
         message (str) : Message to display
         print_text (bool) : Indicates if the text has to be printed,
-                            it is used in the case that a text is being printed through the input_user_chat function
+                            it is used in the case that a text
+                            is being printed through the input_user_chat function
                             (default True)
         color (str) : The color of the text to display (default "white")
         attrs_color (list) : Contains the available attributes for the text style.
@@ -86,7 +87,8 @@ def print_write_chat(message: str, print_text: bool = True, color: str = 'white'
 
 def input_user_chat(text: str, first_time = False) -> str:
     """
-    The user is asked for a specific input, the input is recorded in the logs, and the input value is returned
+    The user is asked for a specific input, the input is recorded in the logs,
+    and the input value is returned
     
     Arguments:
         text (str) : Text that will indicate what value the user must enter
@@ -95,14 +97,14 @@ def input_user_chat(text: str, first_time = False) -> str:
     Returns:
         str - The value of the input given by the user
     """
-    user_name = get_username(first_time)
+    user_name = get_current_username(first_time)
     user_input = input("\n" + text)
+    print_write_chatbot(message = text, print_text = False)
     write_log(CHAT_FILE, text = user_input, username = user_name)
-    print_write_chat(message = text, print_text = False)
     return user_input
 
 
-def get_username(first_time = False) -> str:
+def get_current_username(first_time = False) -> str:
     """
     Returns the current username
     
@@ -119,12 +121,12 @@ def get_username(first_time = False) -> str:
                 return file.readline()
         except Exception as error:
             write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
-            print_write_chat(message = str(error), color = "red")
+            print_write_chatbot(message = str(error), color = "red")
     else:
         return 'Unknown'
 
 
-def save_username(username) -> None:
+def save_username(username: str) -> None:
     """
     The name of the current user will be registered
     
@@ -140,7 +142,7 @@ def save_username(username) -> None:
             file.write(username)
     except Exception as error:
         write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
-        print_write_chat(message = str(error), color = "red", attrs_color = ['bold'])
+        print_write_chatbot(message = str(error), color = "red", attrs_color = ['bold'])
 
 
 def welcome_message() -> None:
@@ -160,10 +162,10 @@ def welcome_message() -> None:
         text = ''
         for line in lines:
             text += line.strip('\n') + "\n"
-        print_write_chat(text)
+        print_write_chatbot(text)
     except Exception as error:
         write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
-        print_write_chat(message = str(error), color = "red")
+        print_write_chatbot(message = str(error), color = "red")
 
 
 def delete_file(file: str) -> None:
@@ -181,8 +183,7 @@ def delete_file(file: str) -> None:
     if os.path.exists(basedir):
         try:
             os.remove(basedir)
-
+        
         except Exception as error:
             write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
-            print_write_chat(message = str(error), color = "red")
-    
+            print_write_chatbot(message = str(error), color = "red")
