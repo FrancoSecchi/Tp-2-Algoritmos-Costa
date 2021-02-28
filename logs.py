@@ -69,7 +69,8 @@ def print_write_chatbot(message: str, print_text: bool = True, color: str = 'whi
     Arguments:
         message (str) : Message to display
         print_text (bool) : Indicates if the text has to be printed,
-                            it is used in the case that a text is being printed through the input_user_chat function
+                            it is used in the case that a text
+                            is being printed through the input_user_chat function
                             (default True)
         color (str) : The color of the text to display (default "white")
         attrs_color (list) : Contains the available attributes for the text style.
