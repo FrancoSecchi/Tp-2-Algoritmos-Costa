@@ -280,7 +280,7 @@ def post_comment(api: Client) -> None:
         None
     """
     try:
-        username = get_username(api)
+        username = get_username(api, "Who do you want to find to post a comment on his post?")
         
         can_get_feed, own_feed = is_following_user(api = api,
                                                    username = username,

@@ -110,30 +110,34 @@ instagram.edit_profile(instagram_api)
 edit account
 instagram.edit_profile(instagram_api)
 like a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 I want to leave a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 I want to put a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 leave a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 put a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 i like post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 i want like comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 i want to put a like in the comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 i want to put a like in a comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 like comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 i like comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 like comment in instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 unlike a post instagram
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
+unlike post
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
+unlike post instagram
 instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
 unlike post
 instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
@@ -212,6 +216,8 @@ instagram.edit_actions(instagram_api, edit_type = "delete", target_type = "comme
 I want to leave a comment on a post
 instagram.post_comment(instagram_api)
 post a comment instagram
+instagram.post_comment(instagram_api)
+post comment instagram
 instagram.post_comment(instagram_api)
 I want to leave a comment in a post instagram
 instagram.post_comment(instagram_api)
