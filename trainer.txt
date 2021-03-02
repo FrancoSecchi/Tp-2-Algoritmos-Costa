@@ -10,11 +10,11 @@ Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the fir
 like a post facebook
 facebook.post_related(graph, action = "like", selected = "visitor_posts")
 like facebook
-facebook.related(graph, action = 'like', selected = "visitor_posts")
+facebook.post_related(graph, action = 'like', selected = "visitor_posts")
 i want to comment on a post facebook
-facebook.related(graph, action = "comment", selected = "visitor_posts")
+facebook.post_related(graph, action = "comment", selected = "visitor_posts")
 comment facebook
-facebook.related(graph, action = "comment", selected = "visitor_posts")
+facebook.post_related(graph, action = "comment", selected = "visitor_posts")
 I want to upload a photo/pic
 facebook.upload_photo(graph)
 upload pic
@@ -30,19 +30,23 @@ facebook.upload_post(graph)
 i want to write something
 facebook.upload_post(graph)
 I want to edit a post facebook
-facebook.related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(graph, action = "edit", selected = "published_posts")
 delete post facebook
-facebook.related(graph, action = "delete", selected = "published_posts")
+facebook.post_related(graph, action = "delete", selected = "published_posts")
 delete facebook
-facebook.related(graph, action = "delete", selected = "published_posts")
-edit facebook
-facebook.related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(graph, action = "delete", selected = "published_posts")
+edit post facebook
+facebook.post_related(graph, action = "edit", selected = "published_posts")
+edit a post in facebook
+facebook.post_related(graph, action = "edit", selected = "published_posts")
+edit a post facebook
+facebook.post_related(graph, action = "edit", selected = "published_posts")
 I want to read a post
-facebook.related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(graph, action = "read", selected = "visitor_posts")
 read facebook
-facebook.related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(graph, action = "read", selected = "visitor_posts")
 tell me my facebook posts
-facebook.related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(graph, action = "read", selected = "visitor_posts")
 I want to know my follower count on facebook
 facebook.follower_count(graph)
 How many followers do i have on facebook?
@@ -110,30 +114,34 @@ instagram.edit_profile(instagram_api)
 edit account
 instagram.edit_profile(instagram_api)
 like a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 I want to leave a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 I want to put a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 leave a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 put a like in a post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 i like post instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "like")
 i want like comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 i want to put a like in the comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 i want to put a like in a comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 like comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 i like comment instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 like comment in instagram
-instagram.likes_actions(instagram_api, target_type = "post")
+instagram.likes_actions(instagram_api, target_type = "comment", like_type = "like")
 unlike a post instagram
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
+unlike post
+instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
+unlike post instagram
 instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
 unlike post
 instagram.likes_actions(instagram_api, target_type = "post", like_type = "unlike")
@@ -212,6 +220,8 @@ instagram.edit_actions(instagram_api, edit_type = "delete", target_type = "comme
 I want to leave a comment on a post
 instagram.post_comment(instagram_api)
 post a comment instagram
+instagram.post_comment(instagram_api)
+post comment instagram
 instagram.post_comment(instagram_api)
 I want to leave a comment in a post instagram
 instagram.post_comment(instagram_api)

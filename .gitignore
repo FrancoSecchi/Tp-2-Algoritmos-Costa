@@ -1,5 +1,4 @@
 #En el caso que usen entornos virtuales, agregar la carpeta la cual contiene todas las configuraciones
 venv/
-logs/chat.txt
-logs/status.txt
+logs/*
 db.sqlite3
