@@ -37,7 +37,7 @@ def validate(number: int, list_: list) -> int:
     Returns:
         int - The value of the input given by the user
     """
-    while number not in range(len(list_) - 1):
+    while number not in range(len(list_)):
         number = int(input_user_chat("re select: "))
     return number
 
