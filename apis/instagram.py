@@ -225,7 +225,7 @@ def validate_post_comment_number(api: Client, feed: dict, position_comment: list
     post = feed[position_comment[0] - 1]
     comments = api.media_comments(post['pk'])
     position_comment[1] = validate_comment_number(comments = comments, comment_number = position_comment[1] - 1)
-
+    
     return position_comment
 
 
@@ -279,56 +279,55 @@ def post_comment(api: Client) -> None:
     Returns:
         None
     """
-    try:
-        username = get_username(api, "Who do you want to find to post a comment on his post?")
-        
-        can_get_feed, own_feed = is_following_user(api = api,
-                                                   username = username,
-                                                   client_username = api.username)
-        
-        if can_get_feed:
-            feed, is_feed_empty = get_user_feed(api, username, own_feed = own_feed)
-            if not is_feed_empty:
-                comment_block = True
-                text = "Which post would you like to comment on?"
-                post_id, number_post = get_post_id(feed, text), get_post_number(text = text,
-                                                                                max_cant_posts = len(
-                                                                                    feed['items']))
-                want_put_comment = True
-                while comment_block and want_put_comment:
-                    if 'comments_disabled' not in feed['items'][number_post]:
-                        comment_block = False
+    username = get_username(api, "Who do you want to find to post a comment on his post?")
+    
+    can_get_feed, own_feed = is_following_user(api = api,
+                                               username = username,
+                                               client_username = api.username)
+    
+    if can_get_feed:
+        feed, is_feed_empty = get_user_feed(api, username, own_feed = own_feed)
+        if not is_feed_empty:
+            comment_block = True
+            text = "Which post would you like to comment on?"
+            post_id, number_post = get_post_id(feed, text), get_post_number(text = text,
+                                                                            max_cant_posts = len(
+                                                                                feed['items']))
+            want_put_comment = True
+            while comment_block and want_put_comment:
+                if 'comments_disabled' not in feed['items'][number_post]:
+                    comment_block = False
+                else:
+                    print_write_chatbot(
+                        message = "The post has the comments blocked, please choose another post\n",
+                        color = 'red',
+                        attrs_color = ['bold'])
+                    another_try = input_user_chat("Do you want to try another comment? (yes/no) ")
+                    
+                    if utils.user_answer_is_yes(another_try):
+                        post_id, number_post = get_post_id(feed, text), get_post_number(text = text,
+                                                                                        max_cant_posts = len(
+                                                                                            feed['items']))
                     else:
-                        print_write_chatbot(
-                            message = "The post has the comments blocked, please choose another post\n",
-                            color = 'red',
-                            attrs_color = ['bold'])
-                        another_try = input_user_chat("Do you want to try another comment? (yes/no) ")
-                        
-                        if utils.user_answer_is_yes(another_try):
-                            post_id, number_post = get_post_id(feed, text), get_post_number(text = text,
-                                                                                            max_cant_posts = len(
-                                                                                                feed['items']))
-                        else:
-                            want_put_comment = False
-                
-                if want_put_comment:
-                    message = input_user_chat("Message: ")
-                    result = api.post_comment(media_id = post_id, comment_text = message)
+                        want_put_comment = False
+            
+            if want_put_comment:
+                message = input_user_chat("Message: ")
+                result = api.post_comment(media_id = post_id, comment_text = message)
+                try:
                     if result['status'] == 'ok':
                         print_write_chatbot(message = "The comment has been posted correctly!\n", color = 'green',
                                             attrs_color = ['bold'])
-                else:
-                    print_write_chatbot(
-                        message = "It's okay if you couldn't leave a comment,"
-                                  " there are many posts in the sea, go get them tiger!\n",
-                        color = 'blue', attrs_color = ['bold', 'underline'])
-        else:
-            print_write_chatbot(message = "You cant get the feed", color = 'red', attrs_color = ['bold'])
-    
-    except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
-        print_write_chatbot(f"There was an error: {error}", color = 'red', attrs_color = ['bold'])
+                except Exception as error:
+                    write_log(STATUS_FILE, str(error), 'Crux')
+                    print_write_chatbot(f"There was an error: {error}", color = 'red', attrs_color = ['bold'])
+            else:
+                print_write_chatbot(
+                    message = "It's okay if you couldn't leave a comment,"
+                              " there are many posts in the sea, go get them tiger!\n",
+                    color = 'blue', attrs_color = ['bold', 'underline'])
+    else:
+        print_write_chatbot(message = "You cant get the feed", color = 'red', attrs_color = ['bold'])
 
 
 def get_post_number(text: str, max_cant_posts: int) -> int:

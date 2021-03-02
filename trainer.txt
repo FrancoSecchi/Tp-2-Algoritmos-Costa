@@ -10,11 +10,11 @@ Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the fir
 like a post facebook
 facebook.post_related(graph, action = "like", selected = "visitor_posts")
 like facebook
-facebook.related(graph, action = 'like', selected = "visitor_posts")
+facebook.post_related(graph, action = 'like', selected = "visitor_posts")
 i want to comment on a post facebook
-facebook.related(graph, action = "comment", selected = "visitor_posts")
+facebook.post_related(graph, action = "comment", selected = "visitor_posts")
 comment facebook
-facebook.related(graph, action = "comment", selected = "visitor_posts")
+facebook.post_related(graph, action = "comment", selected = "visitor_posts")
 I want to upload a photo/pic
 facebook.upload_photo(graph)
 upload pic
@@ -30,19 +30,23 @@ facebook.upload_post(graph)
 i want to write something
 facebook.upload_post(graph)
 I want to edit a post facebook
-facebook.related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(graph, action = "edit", selected = "published_posts")
 delete post facebook
-facebook.related(graph, action = "delete", selected = "published_posts")
+facebook.post_related(graph, action = "delete", selected = "published_posts")
 delete facebook
-facebook.related(graph, action = "delete", selected = "published_posts")
-edit facebook
-facebook.related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(graph, action = "delete", selected = "published_posts")
+edit post facebook
+facebook.post_related(graph, action = "edit", selected = "published_posts")
+edit a post in facebook
+facebook.post_related(graph, action = "edit", selected = "published_posts")
+edit a post facebook
+facebook.post_related(graph, action = "edit", selected = "published_posts")
 I want to read a post
-facebook.related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(graph, action = "read", selected = "visitor_posts")
 read facebook
-facebook.related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(graph, action = "read", selected = "visitor_posts")
 tell me my facebook posts
-facebook.related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(graph, action = "read", selected = "visitor_posts")
 I want to know my follower count on facebook
 facebook.follower_count(graph)
 How many followers do i have on facebook?
