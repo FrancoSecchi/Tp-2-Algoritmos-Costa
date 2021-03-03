@@ -24,13 +24,13 @@ def show_albums(facebook_api: facebook.GraphAPI, albums_id: list) -> None:
         albums_id.append(info["id"])
 
 
-def validate(number: int, list_: list) -> int:
+def validate_number(number: int, list_: list) -> int:
     """
     Validates the input put by the user
     
     Arguments:
-        number (int): Number of the album selected
-        list_ (list): Contains the albums of the user
+        number (int): Number of the list selected
+        list_ (list): Contains the list of the user
     
     Returns:
         int - The value of the input given by the user
