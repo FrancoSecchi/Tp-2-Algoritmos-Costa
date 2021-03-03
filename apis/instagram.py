@@ -651,6 +651,71 @@ def edit_profile(api: Client) -> None:
         print_write_chatbot(f"There was an error:{error}", color = 'red', attrs_color = ['bold'])
 
 
+def get_new_user_gender(new_value: str, genders: list) -> int:
+    """
+    Returns the new value that determines the account gender.
+    
+    Possible numbers:
+        1 - Male
+        2 - Female
+        3 - Unspecified
+        
+    Arguments:
+        new_value (str) : The new value that determines the gender of the account
+        genders (list) : Possible genders list
+    
+    Returns:
+        int - Number of possible gender
+    """
+    if new_value in genders:
+        gender = int(genders.index(new_value)) + 1
+    else:
+        while new_value not in genders:
+            new_value = input_user_chat(
+                "The gender you have selected does not correspond"
+                " to those available (male / female / unspecified), please enter a valid one: ")
+        else:
+            gender = int(genders.index(new_value)) + 1
+    
+    return gender
+
+
+def get_new_account_privacy(new_value: str) -> bool:
+    """
+    Returns the new value that will determine if the account will be private or public
+    
+    Arguments:
+        new_value (str) : The new value that determines the privacy of the account
+        
+    Returns:
+        bool - True if the new_value is true
+    """
+    return True if new_value.lower() in ['private', 'priv', 'p'] else False
+
+
+def print_account_warnings(attribute: str) -> None:
+    """
+    Prints on screen the warnings for certain attributes when changing the profile data
+    
+    Arguments:
+        attribute (str) : The current attribute to change
+    """
+    if attribute == 'full_name':
+        print_write_chatbot("IMPORTANT!\n", color = 'red', attrs_color = ['bold', 'blink'])
+        print_write_chatbot(
+            "If you have changed the full name 2 times within a period of 14 days, "
+            "you will not be able to modify your full name, just leave it empty,"
+            " the program will not be able to change the full name.\n Be aware of your decision\n",
+            color = 'red',
+            attrs_color = ['bold'])
+    elif attribute == 'is_private':
+        print_write_chatbot(
+            "\nTo change your account from private to public or vice versa, enter public or private")
+    
+    elif attribute == 'gender':
+        print_write_chatbot("\nTo change your gender, enter male/female/unspecified")
+        
+
 def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data: dict, genders: list) -> None:
     """
     The user is asked for the new values for the personal data of the profile,
@@ -664,44 +729,22 @@ def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data:
 
     """
     for key, attribute in attributes.items():
-        if attribute == 'full_name':
-            print_write_chatbot("IMPORTANT!\n", color = 'red', attrs_color = ['bold', 'blink'])
-            print_write_chatbot(
-                "If you have changed the full name 2 times within a period of 14 days, "
-                "you will not be able to modify your full name, just leave it empty,"
-                " the program will not be able to change the full name.\n Be aware of your decision\n",
-                color = 'red',
-                attrs_color = ['bold'])
-        
         change_attribute = input_user_chat(f"Do you want to change {key}? yes/no: ")
-        
         if user_answer_is_yes(change_attribute):
-            if attribute == 'is_private':
-                print_write_chatbot(
-                    "\nTo change your account from private to public or vice versa, enter public/private")
-            
-            elif attribute == 'gender':
-                print_write_chatbot("\nTo change your gender, enter male/female/unspecified")
-            
-            new_data = input_user_chat(f"Enter the new value for {key}: ")
-            
-            secure = input_user_chat(f"\nAre you sure to change {key} to '{new_data}'? yes/no: ")
-            
+            print_account_warnings(attribute)
+        
+            new_value = input_user_chat(f"Enter the new value for {key}: ")
+        
+            secure = input_user_chat(f"\nAre you sure to change '{profile_data[attribute]}' "
+                                     f"to '{new_value}'? yes/no: ")
+        
             if user_answer_is_yes(secure):
                 if attribute == 'is_private':
-                    new_data = True if new_data.lower() in ['private', 'priv', 'p'] else False
+                    new_value = get_new_account_privacy(new_value)
                 elif attribute == 'gender':
-                    if new_data in genders:
-                        new_data = int(genders.index(new_data)) + 1
-                    else:
-                        while new_data not in genders:
-                            new_data = input_user_chat(
-                                "The gender you have selected does not correspond"
-                                " to those available (male / female / unspecified), please enter a valid one: ")
-                        else:
-                            new_data = int(genders.index(new_data)) + 1
-                
-                new_profile_data[attribute] = new_data
+                    new_value = get_new_user_gender(new_value, genders)
+            
+                new_profile_data[attribute] = new_value
             else:
                 print_write_chatbot(f"No changes have been made to the {key}")
         else:
