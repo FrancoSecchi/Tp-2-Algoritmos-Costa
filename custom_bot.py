@@ -27,10 +27,7 @@ def animation(text: str) -> None:
 def facebook_credentials() -> object:
     """
     The user is asked if he has an facebook page to connect, if he does not have, the Crux account will be used
-    
-    Arguments:
-        -
-        
+
     Returns:
          object (facebook.GraphAPI()) - facebook.GraphAPI object
     """
@@ -54,10 +51,7 @@ def instagram_credentials() -> object:
     """
     The user is asked if he has an instagram account to connect,
      if he does not have, the Crux account will be used
-    
-    Arguments:
-        -
-        
+          
     Returns:
          object (instagram.Client()) - instagram.Client object
     """
@@ -84,8 +78,7 @@ def instagram_credentials() -> object:
 
 def print_welcome_message() -> None:
     """
-    
-    :return:
+    Prints the welcome message of Crux with effects
     """
     text = "Hello! I am Crux. I am the boss here. Gosh I'm sorry ... " \
            "I mean bot! Oh my, I'm damned if they find out" \
@@ -99,10 +92,9 @@ def print_welcome_message() -> None:
     welcome_message()
 
 
-def take_name() -> True:
+def ask_name() -> True:
     """
-    
-    :return:
+    Ask the user for his/her name
     """
     name = input_user_chat("What's your name? ", first_time = True)
     print_write_chatbot(f"Hi {name}!")
@@ -112,12 +104,10 @@ def take_name() -> True:
 
 def run_bot(bot: ChatBot) -> None:
     """
-    
+    The user interacts with the bot. The bot can answer the user or execute the functions requested by the user
     Arguments:
         bot (ChatBot)
     
-    Returns:
-        None
     """
     print_welcome_message()
     running = True
@@ -135,7 +125,7 @@ def run_bot(bot: ChatBot) -> None:
         try:
             
             if not is_taken_name:
-                is_taken_name = take_name()
+                is_taken_name = ask_name()
                 graph, instagram_api = facebook_credentials(), instagram_credentials()
             
             user_input = input_user_chat("\nYou: ")
@@ -163,9 +153,6 @@ def is_already_trained() -> bool:
     """
     Check if the bot's database already exists, if it exists, it means that the bot is trained and vice versa
 
-    Arguments:
-        -
-
     Returns:
         bool - Returns True if the bot is trained, otherwise it returns false
     """
@@ -179,9 +166,7 @@ def train_bot(bot) -> None:
     
     Arguments:
         bot (ChatBot) : ChatBot object
-    
-    Returns:
-        None
+ 
     """
     
     trainer = ListTrainer(bot)
@@ -202,8 +187,7 @@ def train_bot(bot) -> None:
 
 def initialize_bot():
     """
-    
-    :return:
+    Starts the bot
     """
     return ChatBot(
         name = 'Crux',
