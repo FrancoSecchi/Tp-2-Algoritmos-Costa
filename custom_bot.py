@@ -80,7 +80,6 @@ def ask_name() -> True:
     name = input_user_chat("What's your name? ", first_time = True)
     print_write_chatbot(f"Hi {name}!")
     save_username(name)
-    return True
 
 
 def run_bot(bot: ChatBot) -> None:
@@ -105,7 +104,8 @@ def run_bot(bot: ChatBot) -> None:
     while running:
         try:
             if not is_taken_name:
-                is_taken_name = ask_name()
+                ask_name()
+                is_taken_name = True
                 facebook_api = connection_facebook_api()
                 instagram_api = connection_instagram_api()
             

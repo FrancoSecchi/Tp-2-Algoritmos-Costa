@@ -1,9 +1,11 @@
+import codecs
 import os
 import json
 import sys
 import time
 from time import sleep
 from logs import (write_log, STATUS_FILE, print_write_chatbot)
+from instagram_private_api import Client
 
 
 def user_answer_is_yes(input_user: str) -> bool:
@@ -89,29 +91,6 @@ def delete_file(file: str) -> None:
             print_write_chatbot(message = str(error), color = "red")
 
 
-def get_current_username(first_time = False) -> str:
-    """
-    Returns the current username
-
-    Arguments:
-        first_time (bool) : This indicates if the first time the user is asked for input
-                            (This is done exclusively before asking for the name)
-
-    Returns:
-        str - The current user name
-    """
-    if not first_time:
-        try:
-            with open('logs/session.txt', 'r') as file:
-                return file.readline()
-        except Exception as error:
-            write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
-            print_write_chatbot(message = str(error), color = "red")
-            return "Unknown"
-    else:
-        return 'Unknown'
-
-
 def animation(text: str) -> None:
     """
     Make an animation by printing a text like a typewriter to give dynamism to the console
@@ -142,3 +121,64 @@ def delete_expired_cookie(file: str) -> None:
         write_log(STATUS_FILE, str(error), 'Exception')
         print(f"There was an error:{error}")
 
+
+def to_json(python_object: bytes) -> dict:
+    """
+    Returns a dictionary indicating that the json
+    value is in bytes and makes a decode of the bytes that are in base64
+
+    Arguments:
+        python_object (bytes)
+    Returns:
+        dict
+    """
+    if isinstance(python_object, bytes):
+        return {'__class__': 'bytes',
+                '__value__': codecs.encode(python_object, 'base64').decode()}
+    raise TypeError(repr(python_object) + ' is not JSON serializable')
+
+
+def from_json(json_object: dict):
+    """
+    In the case that the json object is in bytes, it returns a decode of the bytes in base64
+    Arguments:
+        json_object (dict)
+
+    Returns:
+
+    """
+    if '__class__' in json_object and json_object['__class__'] == 'bytes':
+        return codecs.decode(json_object['__value__'].encode(), 'base64')
+    return json_object
+
+
+def on_login_callback(api: Client, new_settings_file: str) -> None:
+    """
+    Write, in a json, the cookies and settings to avoid re-login
+
+    Arguments:
+        api (Client): the actual Client object
+        new_settings_file (str): The json file where the credentials will be saved
+    """
+    cache_settings = api.settings
+    try:
+        with open(new_settings_file, 'w') as outfile:
+            json.dump(cache_settings, outfile, default = to_json)
+    except Exception as error:
+        write_log(STATUS_FILE, str(error), 'Exception')
+        print(f"There was an error:{error}")
+
+
+def get_cached_settings(settings_file) -> dict:
+    """
+    Returns cached bot settings
+    Arguments:
+        settings_file (str)
+    """
+    try:
+        with open(settings_file) as file_data:
+            cached_settings = json.load(file_data, object_hook = from_json)
+        return cached_settings
+    except Exception as error:
+        write_log(STATUS_FILE, str(error), 'Exception')
+        print(f"There was an error:{error}")

@@ -1,4 +1,3 @@
-from utils.utils import get_current_username
 from datetime import datetime
 from termcolor import cprint
 
@@ -42,6 +41,29 @@ def write_log(filename: str, text: str, username: str) -> None:
         print_write_chatbot(message = str(e), color = "red")
 
 
+def get_current_username(first_time = False) -> str:
+    """
+    Returns the current username
+
+    Arguments:
+        first_time (bool) : This indicates if the first time the user is asked for input
+                            (This is done exclusively before asking for the name)
+
+    Returns:
+        str - The current user name
+    """
+    if not first_time:
+        try:
+            with open('logs/session.txt', 'r') as file:
+                return file.readline()
+        except Exception as error:
+            write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+            print_write_chatbot(message = str(error), color = "red")
+            return "Unknown"
+    else:
+        return 'Unknown'
+
+
 def print_write_chatbot(message: str, print_text: bool = True, color: str = 'white',
                         attrs_color: list = []) -> None:
     """
@@ -83,5 +105,3 @@ def input_user_chat(text: str, first_time = False) -> str:
     print_write_chatbot(message = text, print_text = False)
     write_log(CHAT_FILE, text = user_input, username = user_name)
     return user_input
-
-

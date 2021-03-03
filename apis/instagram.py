@@ -1,8 +1,8 @@
 from instabot import Bot
 from logs import (write_log, STATUS_FILE, print_write_chatbot, input_user_chat)
-from utils.utils import user_answer_is_yes, get_credentials, delete_expired_cookie
+from utils.utils import user_answer_is_yes, get_credentials, delete_expired_cookie,\
+    to_json, from_json, on_login_callback, get_cached_settings
 from termcolor import colored
-import codecs
 import json
 import logging
 import os.path
@@ -172,14 +172,10 @@ def validate_number_post(post_number: int, max_number: int) -> int:
     Returns:
         int - The position of the post
     """
-    correct = False
-    while not correct:
-        if post_number < 0 or post_number >= max_number:
-            print_write_chatbot(message = "Number post incorrect", color = 'red', attrs_color = ['bold'])
-            post_number = int(input_user_chat("Enter a valid posting number: "))
-            print_write_chatbot("Enter a valid posting number: ")
-        else:
-            correct = True
+
+    while post_number < 0 or post_number >= max_number:
+        print_write_chatbot(message = "Number post incorrect", color = 'red', attrs_color = ['bold'])
+        post_number = int(input_user_chat("Enter a valid posting number: "))
     return post_number
 
 
@@ -194,16 +190,11 @@ def validate_comment_number(comments, comment_number) -> int:
     Returns:
         int - The position of the comment
     """
-    correct_comment = False
     
-    while not correct_comment:
-        if not comments['comments'][comment_number]:
+    while not comments['comments'][comment_number]:
             print_write_chatbot(message = "The comment doesnt exist, please enter a correct comment number",
                                 color = 'red', attrs_color = ['bold'])
             comment_number = int(input_user_chat("Number comment: "))
-        
-        else:
-            correct_comment = True
     return comment_number
 
 
@@ -1107,68 +1098,6 @@ def message_actions(api: Client, action_type: str = 'send') -> None:
 
 
 # ------------ CONNECTIONS AND CREDENTIALS ---------------#
-
-def to_json(python_object: bytes) -> dict:
-    """
-    Returns a dictionary indicating that the json
-    value is in bytes and makes a decode of the bytes that are in base64
-    
-    Arguments:
-        python_object (bytes)
-    Returns:
-        dict
-    """
-    if isinstance(python_object, bytes):
-        return {'__class__': 'bytes',
-                '__value__': codecs.encode(python_object, 'base64').decode()}
-    raise TypeError(repr(python_object) + ' is not JSON serializable')
-
-
-def from_json(json_object: dict):
-    """
-    In the case that the json object is in bytes, it returns a decode of the bytes in base64
-    Arguments:
-        json_object (dict)
-    
-    Returns:
-    
-    """
-    if '__class__' in json_object and json_object['__class__'] == 'bytes':
-        return codecs.decode(json_object['__value__'].encode(), 'base64')
-    return json_object
-
-
-def on_login_callback(api: Client, new_settings_file: str) -> None:
-    """
-    Write, in a json, the cookies and settings to avoid re-login
-    
-    Arguments:
-        api (Client): the actual Client object
-        new_settings_file (str): The json file where the credentials will be saved
-    """
-    cache_settings = api.settings
-    try:
-        with open(new_settings_file, 'w') as outfile:
-            json.dump(cache_settings, outfile, default = to_json)
-    except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Exception')
-        print(f"There was an error:{error}")
-
-
-def get_cached_settings(settings_file) -> dict:
-    """
-    Returns cached bot settings
-    Arguments:
-        settings_file (str)
-    """
-    try:
-        with open(settings_file) as file_data:
-            cached_settings = json.load(file_data, object_hook = from_json)
-        return cached_settings
-    except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Exception')
-        print(f"There was an error:{error}")
-
 
 def connection_instagram(user_credentials: dict = {}) -> object:
     """

@@ -1,9 +1,8 @@
 import os
-
-from logs import (write_log, STATUS_FILE, get_credentials,
-                  print_write_chatbot, input_user_chat)
 import facebook
-from termcolor import cprint
+from logs import (write_log, STATUS_FILE,
+                  print_write_chatbot, input_user_chat)
+from utils.utils import get_credentials
 
 
 def show_albums(facebook_api: facebook.GraphAPI, albums_id: list) -> None:
@@ -53,7 +52,7 @@ def upload_to_albums(facebook_api: facebook.GraphAPI) -> None:
     if path:
         albums_id = []
         show_albums(facebook_api, albums_id)
-        select = int(input_user_chat("Select the album: "))
+        select = int(input_user_chat("Select the album: ")) - 1
         select = validate_number(select, albums_id)
         caption = input_user_chat("Caption: ")
         try:
@@ -242,7 +241,7 @@ def post_related(facebook_api: facebook.GraphAPI, action, selected) -> None:
             if_text_in_info(info, posts_id, count)
         
         if action != "read":
-            option = int(input_user_chat("Select one: "))
+            option = int(input_user_chat("Select one: ")) - 1
             option = validate_number(option, posts_id)
             selection = posts_id[option - 1]
         
