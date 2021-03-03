@@ -1,30 +1,13 @@
 import os
-import sys
-from time import sleep
 from termcolor import colored
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 from apis import facebook, instagram
-from logs import delete_file, save_username, \
-    welcome_message, print_write_chatbot, input_user_chat, write_log, STATUS_FILE
-from utils.utils import user_answer_is_yes
+from logs import print_write_chatbot, input_user_chat, write_log, STATUS_FILE
+from utils.utils import user_answer_is_yes, animation, delete_file, welcome_message, save_username
 
 
-def animation(text: str) -> None:
-    """
-    Make an animation by printing a text like a typewriter to give dynamism to the console
-    Arguments:
-        text (str) = Text to animate
-    Returns:
-        None
-    """
-    for letter in text:
-        sleep(0.025)  # In seconds
-        sys.stdout.write(letter)
-        sys.stdout.flush()
-
-
-def facebook_credentials() -> object:
+def connection_facebook_api() -> object:
     """
     The user is asked if he has an facebook page to connect, if he does not have, the Crux account will be used
 
@@ -32,22 +15,21 @@ def facebook_credentials() -> object:
          object (facebook.GraphAPI()) - facebook.GraphAPI object
     """
     response = input_user_chat("Would you like to connect to Facebook? (yes/no): ")
+    credentials = {}
+
     if user_answer_is_yes(response.lower()):
         page_token = input_user_chat("Please enter your page access token: ")
-        facebook_api = facebook.connection_api(
-            user_credentials = {
-                'token': page_token
-            }
-        )
+        credentials = {'token': page_token}
     else:
         print_write_chatbot("By not using the facebook tool with your personal page, "
                             "we will provide the service with our"
                             "Facebook page Crux.cruz", color = 'blue', attrs_color = ['bold'])
-        facebook_api = facebook.connection_api()
+    
+    facebook_api = facebook.connection_api(user_credentials = credentials)
     return facebook_api
 
 
-def instagram_credentials() -> object:
+def connection_instagram_api() -> object:
     """
     The user is asked if he has an instagram account to connect,
      if he does not have, the Crux account will be used
@@ -56,22 +38,21 @@ def instagram_credentials() -> object:
          object (instagram.Client()) - instagram.Client object
     """
     response = input_user_chat("Would you like to connect to Instagram? (yes/no): ")
-    
+    credentials = {}
     if user_answer_is_yes(response.lower()):
         username = input_user_chat("Please enter your username: ")
         password = input_user_chat("Please enter your password: ")
         
-        instagram_api = instagram.connection_instagram(
-            user_credentials = {
+        credentials = {
                 'username': username,
                 'password': password
             }
-        )
     else:
-        instagram_api = instagram.connection_instagram()
         print_write_chatbot("By not using the instagram tool with your personal page,"
                             " we will provide the service with our Instagram account crux.bot",
                             color = 'blue', attrs_color = ['bold'])
+        
+    instagram_api = instagram.connection_instagram(user_credentials = credentials)
     
     return instagram_api
 
@@ -126,7 +107,7 @@ def run_bot(bot: ChatBot) -> None:
             
             if not is_taken_name:
                 is_taken_name = ask_name()
-                graph, instagram_api = facebook_credentials(), instagram_credentials()
+                facebook_api, instagram_api = connection_facebook_api(), connection_instagram_api()
             
             user_input = input_user_chat("\nYou: ")
             bot_response = str(bot.get_response(user_input))

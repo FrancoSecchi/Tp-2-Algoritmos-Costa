@@ -8,59 +8,59 @@ Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the fir
 Hey
 Hola! I’m the friendly Crux chatbot. I’m afraid I didn’t move past the first level of my Spanish course, but I can direct you to what you’re looking for!
 like a post facebook
-facebook.post_related(graph, action = "like", selected = "visitor_posts")
+facebook.post_related(facebook_api, action = "like", selected = "visitor_posts")
 like facebook
-facebook.post_related(graph, action = 'like', selected = "visitor_posts")
+facebook.post_related(facebook_api, action = 'like', selected = "visitor_posts")
 i want to comment on a post facebook
-facebook.post_related(graph, action = "comment", selected = "visitor_posts")
+facebook.post_related(facebook_api, action = "comment", selected = "visitor_posts")
 comment facebook
-facebook.post_related(graph, action = "comment", selected = "visitor_posts")
+facebook.post_related(facebook_api, action = "comment", selected = "visitor_posts")
 I want to upload a photo/pic
-facebook.upload_photo(graph)
+facebook.upload_photo(facebook_api)
 upload pic
-facebook.upload_photo(graph)
+facebook.upload_photo(facebook_api)
 photo
-facebook.upload_photo(graph)
+facebook.upload_photo(facebook_api)
 upload to an album
-facebook.upload_to_albums(graph)
+facebook.upload_to_albums(facebook_api)
 I want to upload a post
-facebook.upload_post(graph)
+facebook.upload_post(facebook_api)
 Post something
-facebook.upload_post(graph)
+facebook.upload_post(facebook_api)
 i want to write something
-facebook.upload_post(graph)
+facebook.upload_post(facebook_api)
 I want to edit a post facebook
-facebook.post_related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(facebook_api, action = "edit", selected = "published_posts")
 delete post facebook
-facebook.post_related(graph, action = "delete", selected = "published_posts")
+facebook.post_related(facebook_api, action = "delete", selected = "published_posts")
 delete facebook
-facebook.post_related(graph, action = "delete", selected = "published_posts")
+facebook.post_related(facebook_api, action = "delete", selected = "published_posts")
 edit post facebook
-facebook.post_related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(facebook_api, action = "edit", selected = "published_posts")
 edit a post in facebook
-facebook.post_related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(facebook_api, action = "edit", selected = "published_posts")
 edit a post facebook
-facebook.post_related(graph, action = "edit", selected = "published_posts")
+facebook.post_related(facebook_api, action = "edit", selected = "published_posts")
 I want to read a post
-facebook.post_related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(facebook_api, action = "read", selected = "visitor_posts")
 read facebook
-facebook.post_related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(facebook_api, action = "read", selected = "visitor_posts")
 tell me my facebook posts
-facebook.post_related(graph, action = "read", selected = "visitor_posts")
+facebook.post_related(facebook_api, action = "read", selected = "visitor_posts")
 I want to know my follower count on facebook
-facebook.follower_count(graph)
+facebook.follower_count(facebook_api)
 How many followers do i have on facebook?
-facebook.follower_count(graph)
+facebook.follower_count(facebook_api)
 How much people follow me on facebook?
-facebook.follower_count(graph)
+facebook.follower_count(facebook_api)
 People follow me facebook?
-facebook.follower_count(graph)
+facebook.follower_count(facebook_api)
 follow me facebook?
-facebook.follower_count(graph)
+facebook.follower_count(facebook_api)
 follow me facebook
-facebook.follower_count(graph)
+facebook.follower_count(facebook_api)
 followers facebook
-facebook.follower_count(graph)
+facebook.follower_count(facebook_api)
 I want to follow a user instagram
 instagram.follow_actions(instagram_api)
 follow a user instagram

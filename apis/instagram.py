@@ -1,13 +1,11 @@
 from instabot import Bot
-from logs import (write_log, STATUS_FILE, get_credentials,
-                  delete_file, print_write_chatbot, input_user_chat)
-from utils import utils
-from termcolor import cprint, colored
+from logs import (write_log, STATUS_FILE, print_write_chatbot, input_user_chat)
+from utils.utils import user_answer_is_yes, get_credentials, delete_cookie
+from termcolor import colored
 import codecs
 import json
 import logging
 import os.path
-import time
 
 try:
     from instagram_private_api import (
@@ -304,7 +302,7 @@ def post_comment(api: Client) -> None:
                         attrs_color = ['bold'])
                     another_try = input_user_chat("Do you want to try another comment? (yes/no) ")
                     
-                    if utils.user_answer_is_yes(another_try):
+                    if user_answer_is_yes(another_try):
                         post_id, number_post = get_post_id(feed, text), get_post_number(text = text,
                                                                                         max_cant_posts = len(
                                                                                             feed['items']))
@@ -521,7 +519,7 @@ def want_unlike_target(target_type: str) -> bool:
     """
     do_unlike = input_user_chat(f"The {target_type} is already"
                                 f" liked by you, you want to unliked? (yes/no): ".lower())
-    return utils.user_answer_is_yes(do_unlike)
+    return user_answer_is_yes(do_unlike)
 
 
 def like_post(api: Client, post_id: str, own_feed: bool = False) -> None:
@@ -677,7 +675,7 @@ def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data:
         
         change_attribute = input_user_chat(f"Do you want to change {key}? yes/no: ")
         
-        if utils.user_answer_is_yes(change_attribute):
+        if user_answer_is_yes(change_attribute):
             if attribute == 'is_private':
                 print_write_chatbot(
                     "\nTo change your account from private to public or vice versa, enter public/private")
@@ -689,7 +687,7 @@ def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data:
             
             secure = input_user_chat(f"\nAre you sure to change {key} to '{new_data}'? yes/no: ")
             
-            if utils.user_answer_is_yes(secure):
+            if user_answer_is_yes(secure):
                 if attribute == 'is_private':
                     new_data = True if new_data.lower() in ['private', 'priv', 'p'] else False
                 elif attribute == 'gender':
@@ -750,7 +748,7 @@ def delete_comment(api: Client, feed: dict) -> None:
                         attrs_color = ['bold', 'underline'])
     secure_delete = input_user_chat("Do you want to delete a comment from a post? (yes/no): \n")
     
-    if utils.user_answer_is_yes(secure_delete):
+    if user_answer_is_yes(secure_delete):
         text = "Which comment would you delete?"
         comment_data = prepare_comment(api = api, feed = feed['items'], text = text)
         delete(api, target_id = comment_data['comment_id'], target_type = 'comment',
@@ -773,7 +771,7 @@ def edit_post(api: Client, feed: dict, post_id: str, number_post: int) -> None:
     new_caption = input_user_chat("Enter the new caption: ")
     secure = input_user_chat(f"\nAre you sure to change '{old_caption}' to '{new_caption}'? (yes/no): ")
     
-    if utils.user_answer_is_yes(secure):
+    if user_answer_is_yes(secure):
         result = api.edit_media(media_id = post_id, caption = new_caption)
         if result['status'] == 'ok':
             print_write_chatbot("It has been edited successfully!\n", color = 'green', attrs_color = ['bold'])
@@ -807,7 +805,7 @@ def edit_actions(api: Client, edit_type: str, target_type: str = 'post') -> None
                 edit_post(api, feed, post_id, number_post)
             else:
                 secure = input_user_chat(f"Are you sure to {edit_type} the post? (yes/no): \n")
-                if utils.user_answer_is_yes(secure):
+                if user_answer_is_yes(secure):
                     delete(api, post_id, 'post')
         else:
             if edit_type == 'delete':
@@ -828,9 +826,9 @@ def unfollow(api: Client) -> None:
     results = get_follows(api)
     username = input_user_chat(f"Who do you want to unfollow? ")
     for user in results['users']:
-      if user['username'] == username and api.friendships_destroy(user['pk']):
-        text = f"{username} has been successfully unfollowed!"
-        print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
+        if user['username'] == username and api.friendships_destroy(user['pk']):
+            text = f"{username} has been successfully unfollowed!"
+            print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
 
 
 def follow(api: Client) -> None:
@@ -841,19 +839,15 @@ def follow(api: Client) -> None:
         api (Client) : Object instagram Client
  
     """
+    search_users(api)
+    username = input_user_chat(f"Who do you want to follow? ")
+    user = api.username_info(username)['user']
+    user_id = user['pk']
     try:
-        search_users(api)
-        username = input_user_chat(f"Who do you want to follow? ")
-        user = api.username_info(username)['user']
-        user_id = user['pk']
-        if api.friendships_create(user_id = user_id):
-            text = f"{username} has a private account, we have sent him a request with success!" if user[
-                'is_private'] else f"{username} has been followed with success!"
-            print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
-        else:
-            text = "There was a problem performing the action, please try again"
-            print_write_chatbot(message = text, color = 'red', attrs_color = ['bold'])
-    
+        api.friendships_create(user_id = user_id)
+        text = f"{username} has a private account, we have sent him a request with success!" if user[
+            'is_private'] else f"{username} has been followed with success!"
+        print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
     except Exception as error:
         write_log(STATUS_FILE, str(error), 'Crux')
         print_write_chatbot(f"There was an error:{error}", color = "red", attrs_color = ['bold'])
@@ -1097,27 +1091,6 @@ def on_login_callback(api: Client, new_settings_file: str) -> None:
     try:
         with open(new_settings_file, 'w') as outfile:
             json.dump(cache_settings, outfile, default = to_json)
-    except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
-        print(f"There was an error:{error}")
-
-
-def delete_cookie(file: str) -> None:
-    """
-    If more than 1 hour has passed, the cookie will be deleted to avoid errors
-    
-    Arguments:
-        file (str) : The relative path of the cookie file
- 
-    """
-    try:
-        with open(file, 'r') as f:
-            data = json.load(f)
-        create_time = data['created_ts']
-        now = time.time()
-        if (create_time + 3600) <= round(now):
-            delete_file(file)
-            cprint("Cookie removed", 'yellow', attrs = ['bold'])
     except Exception as error:
         write_log(STATUS_FILE, str(error), 'Crux')
         print(f"There was an error:{error}")
