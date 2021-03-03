@@ -847,22 +847,22 @@ def follow(api: Client) -> None:
         api (Client) : Object instagram Client
  
     """
-    try:
-        search_users(api)
-        username = input_user_chat(f"Who do you want to follow? ")
-        user = api.username_info(username)['user']
-        user_id = user['pk']
-        if api.friendships_create(user_id = user_id):
-            text = f"{username} has a private account, we have sent him a request with success!" if user[
+    search_users(api)
+    username = input_user_chat(f"Who do you want to follow? ")
+    user = api.username_info(username)['user']
+    user_id = user['pk']
+    if api.friendships_create(user_id = user_id):
+      try:
+        text = f"{username} has a private account, we have sent him a request with success!" if user[
                 'is_private'] else f"{username} has been followed with success!"
-            print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
-        else:
-            text = "There was a problem performing the action, please try again"
-            print_write_chatbot(message = text, color = 'red', attrs_color = ['bold'])
-    
-    except Exception as error:
+        print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
+      except Exception as error:
         write_log(STATUS_FILE, str(error), 'Crux')
         print_write_chatbot(f"There was an error:{error}", color = "red", attrs_color = ['bold'])
+    else:
+      text = "There was a problem performing the action, please try again"
+      print_write_chatbot(message = text, color = 'red', attrs_color = ['bold'])
+    
 
 
 def get_follows(api: Client, show: bool = True, follow_type: str = 'following') -> dict:
