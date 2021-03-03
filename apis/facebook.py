@@ -87,7 +87,7 @@ def search_file() -> str:
     return path
 
 
-def upload_photo(facebook_api: facebook.GraphAPI) -> None or Exception:
+def upload_photo(facebook_api: facebook.GraphAPI) -> None:
     """
     Asks the user the path of the photo and the caption
     the user wants to upload, and uploads the photo and the caption
