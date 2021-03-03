@@ -825,17 +825,12 @@ def unfollow(api: Client) -> None:
         api (Client) : Object instagram Client
 
     """
-    try:
-        results = get_follows(api)
-        username = input_user_chat(f"Who do you want to unfollow? ")
-        for user in results['users']:
-            if user['username'] == username:
-                if api.friendships_destroy(user['pk']):
-                    text = f"{username} has been successfully unfollowed!"
-                    print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
-    except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
-        print(f"There was an error:{error}")
+    results = get_follows(api)
+    username = input_user_chat(f"Who do you want to unfollow? ")
+    for user in results['users']:
+      if user['username'] == username and api.friendships_destroy(user['pk']):
+        text = f"{username} has been successfully unfollowed!"
+        print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
 
 
 def follow(api: Client) -> None:
