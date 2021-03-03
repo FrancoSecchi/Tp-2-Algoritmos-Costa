@@ -117,8 +117,6 @@ def animation(text: str) -> None:
     Make an animation by printing a text like a typewriter to give dynamism to the console
     Arguments:
         text (str) = Text to animate
-    Returns:
-        None
     """
     for letter in text:
         sleep(0.025)  # In seconds
@@ -126,13 +124,12 @@ def animation(text: str) -> None:
         sys.stdout.flush()
 
 
-def delete_cookie(file: str) -> None:
+def delete_expired_cookie(file: str) -> None:
     """
     If more than 1 hour has passed, the cookie will be deleted to avoid errors
 
     Arguments:
         file (str) : The relative path of the cookie file
-
     """
     try:
         with open(file, 'r') as f:
@@ -141,7 +138,6 @@ def delete_cookie(file: str) -> None:
         now = time.time()
         if (create_time + 3600) <= round(now):
             delete_file(file)
-            print_write_chatbot("Cookie removed", color = 'blue', attrs_color = ['bold'])
     except Exception as error:
         write_log(STATUS_FILE, str(error), 'Exception')
         print(f"There was an error:{error}")

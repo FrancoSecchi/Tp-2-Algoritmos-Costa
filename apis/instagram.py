@@ -1,6 +1,6 @@
 from instabot import Bot
 from logs import (write_log, STATUS_FILE, print_write_chatbot, input_user_chat)
-from utils.utils import user_answer_is_yes, get_credentials, delete_cookie
+from utils.utils import user_answer_is_yes, get_credentials, delete_expired_cookie
 from termcolor import colored
 import codecs
 import json
@@ -714,7 +714,7 @@ def print_account_warnings(attribute: str) -> None:
     
     elif attribute == 'gender':
         print_write_chatbot("\nTo change your gender, enter male/female/unspecified")
-        
+
 
 def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data: dict, genders: list) -> None:
     """
@@ -732,18 +732,18 @@ def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data:
         change_attribute = input_user_chat(f"Do you want to change {key}? yes/no: ")
         if user_answer_is_yes(change_attribute):
             print_account_warnings(attribute)
-        
+            
             new_value = input_user_chat(f"Enter the new value for {key}: ")
-        
+            
             secure = input_user_chat(f"\nAre you sure to change '{profile_data[attribute]}' "
                                      f"to '{new_value}'? yes/no: ")
-        
+            
             if user_answer_is_yes(secure):
                 if attribute == 'is_private':
                     new_value = get_new_account_privacy(new_value)
                 elif attribute == 'gender':
                     new_value = get_new_user_gender(new_value, genders)
-            
+                
                 new_profile_data[attribute] = new_value
             else:
                 print_write_chatbot(f"No changes have been made to the {key}")
@@ -1108,9 +1108,15 @@ def message_actions(api: Client, action_type: str = 'send') -> None:
 
 # ------------ CONNECTIONS AND CREDENTIALS ---------------#
 
-def to_json(python_object) -> dict:
+def to_json(python_object: bytes) -> dict:
     """
-
+    Returns a dictionary indicating that the json
+    value is in bytes and makes a decode of the bytes that are in base64
+    
+    Arguments:
+        python_object (bytes)
+    Returns:
+        dict
     """
     if isinstance(python_object, bytes):
         return {'__class__': 'bytes',
@@ -1118,8 +1124,14 @@ def to_json(python_object) -> dict:
     raise TypeError(repr(python_object) + ' is not JSON serializable')
 
 
-def from_json(json_object):
+def from_json(json_object: dict):
     """
+    In the case that the json object is in bytes, it returns a decode of the bytes in base64
+    Arguments:
+        json_object (dict)
+    
+    Returns:
+    
     """
     if '__class__' in json_object and json_object['__class__'] == 'bytes':
         return codecs.decode(json_object['__value__'].encode(), 'base64')
@@ -1138,6 +1150,21 @@ def on_login_callback(api: Client, new_settings_file: str) -> None:
     try:
         with open(new_settings_file, 'w') as outfile:
             json.dump(cache_settings, outfile, default = to_json)
+    except Exception as error:
+        write_log(STATUS_FILE, str(error), 'Exception')
+        print(f"There was an error:{error}")
+
+
+def get_cached_settings(settings_file) -> dict:
+    """
+    Returns cached bot settings
+    Arguments:
+        settings_file (str)
+    """
+    try:
+        with open(settings_file) as file_data:
+            cached_settings = json.load(file_data, object_hook = from_json)
+        return cached_settings
     except Exception as error:
         write_log(STATUS_FILE, str(error), 'Exception')
         print(f"There was an error:{error}")
@@ -1165,37 +1192,29 @@ def connection_instagram(user_credentials: dict = {}) -> object:
     settings_file = os.path.abspath('credentials/instagram_api.json')
     
     if os.path.isfile(settings_file):
-        delete_cookie(settings_file)
-    try:
-        if not os.path.isfile(settings_file):
-            # If the credentials do not exist, do a new login
+        delete_expired_cookie(settings_file)
+        
+    if not os.path.isfile(settings_file):
+        # If the credentials do not exist, do a new login
+        try:
             api = Client(
                 username, password,
                 on_login = lambda x: on_login_callback(x, settings_file))
-        else:
-            # If the credentials do not exist, do a new login
-            try:
-                with open(settings_file) as file_data:
-                    cached_settings = json.load(file_data, object_hook = from_json)
-            except Exception as error:
-                write_log(STATUS_FILE, str(error), 'Exception')
-                print(f"There was an error:{error}")
-            
-            device_id = cached_settings.get('device_id')
+        except Exception as err:
+            write_log(STATUS_FILE, str(err), "Exception")
+    
+    else:
+        # If the credentials do not exist, do a new login
+        cached_settings = get_cached_settings(settings_file)
+        device_id = cached_settings.get('device_id')
+        try:
             api = Client(
                 username, password,
                 device_id = device_id,
                 settings = cached_settings)
-    
-    except ClientLoginError as e:
-        write_log(STATUS_FILE, str(e), 'ClientLoginError')
-        print_write_chatbot(str(e), color = "red", attrs_color = ['bold'])
-    except ClientError as e:
-        write_log(STATUS_FILE, e.msg, "ClientError")
-        print_write_chatbot(
-            'ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
-    except Exception as e:
-        write_log(STATUS_FILE, str(e), "Exception")
+        
+        except Exception as e:
+            write_log(STATUS_FILE, str(e), "Exception")
     
     print_write_chatbot("You have successfully connected with the instagram! \n", color = 'green',
                         attrs_color = ['bold'])

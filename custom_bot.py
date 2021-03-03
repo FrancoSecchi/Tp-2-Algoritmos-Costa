@@ -104,10 +104,10 @@ def run_bot(bot: ChatBot) -> None:
     
     while running:
         try:
-            
             if not is_taken_name:
                 is_taken_name = ask_name()
-                facebook_api, instagram_api = connection_facebook_api(), connection_instagram_api()
+                facebook_api = connection_facebook_api()
+                instagram_api = connection_instagram_api()
             
             user_input = input_user_chat("\nYou: ")
             bot_response = str(bot.get_response(user_input))
