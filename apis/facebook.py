@@ -54,7 +54,7 @@ def upload_to_albums(facebook_api: facebook.GraphAPI) -> None:
         albums_id = []
         show_albums(facebook_api, albums_id)
         select = int(input_user_chat("Select the album: "))
-        select = validate(select, albums_id)
+        select = validate_number(select, albums_id)
         caption = input_user_chat("Caption: ")
         try:
             facebook_api.put_photo(image = open(path, 'rb'), album_path = albums_id[select - 1] + "/photos",
@@ -243,7 +243,7 @@ def post_related(facebook_api: facebook.GraphAPI, action, selected) -> None:
         
         if action != "read":
             option = int(input_user_chat("Select one: "))
-            option = validate(option, posts_id)
+            option = validate_number(option, posts_id)
             selection = posts_id[option - 1]
         
         if action == "like":
@@ -285,7 +285,7 @@ def connection_api(user_credentials: dict = {}) -> object:
     try:
         facebook_api = facebook.GraphAPI(access_token = page_token, version = "2.12")
     except Exception as err:
-        write_log(STATUS_FILE, str(err), 'ConnectionError')
+        write_log(STATUS_FILE, str(err), 'Exception')
         print("Error")
     else:
         write_log(STATUS_FILE, 'Successfully connected with Facebook the api', 'GraphAPI')

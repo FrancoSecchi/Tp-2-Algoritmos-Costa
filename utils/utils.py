@@ -32,7 +32,7 @@ def get_credentials():
         with open("credentials/crux_credentials.json", 'r') as file:
             return json.load(file)
     except Exception as e:
-        write_log(filename = STATUS_FILE, text = str(e), username = 'Crux')
+        write_log(filename = STATUS_FILE, text = str(e), username = 'Exception')
         print_write_chatbot(message = str(e), color = "red")
 
 
@@ -51,7 +51,7 @@ def save_username(username: str) -> None:
             file.truncate(0)
             file.write(username)
     except Exception as error:
-        write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+        write_log(filename = STATUS_FILE, text = str(error), username = 'Exception')
         print_write_chatbot(message = str(error), color = "red", attrs_color = ['bold'])
 
 
@@ -68,7 +68,7 @@ def welcome_message() -> None:
             text += line.strip('\n') + "\n"
         print_write_chatbot(text)
     except Exception as error:
-        write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+        write_log(filename = STATUS_FILE, text = str(error), username = 'Exception')
         print_write_chatbot(message = str(error), color = "red")
 
 
@@ -84,9 +84,8 @@ def delete_file(file: str) -> None:
     if os.path.exists(basedir):
         try:
             os.remove(basedir)
-        
         except Exception as error:
-            write_log(filename = STATUS_FILE, text = str(error), username = 'Crux')
+            write_log(filename = STATUS_FILE, text = str(error), username = 'Exception')
             print_write_chatbot(message = str(error), color = "red")
 
 
@@ -144,6 +143,6 @@ def delete_cookie(file: str) -> None:
             delete_file(file)
             print_write_chatbot("Cookie removed", color = 'blue', attrs_color = ['bold'])
     except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
+        write_log(STATUS_FILE, str(error), 'Exception')
         print(f"There was an error:{error}")
 

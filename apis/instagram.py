@@ -317,7 +317,7 @@ def post_comment(api: Client) -> None:
                         print_write_chatbot(message = "The comment has been posted correctly!\n", color = 'green',
                                             attrs_color = ['bold'])
                 except Exception as error:
-                    write_log(STATUS_FILE, str(error), 'Crux')
+                    write_log(STATUS_FILE, str(error), 'Exception')
                     print_write_chatbot(f"There was an error: {error}", color = 'red', attrs_color = ['bold'])
             else:
                 print_write_chatbot(
@@ -408,7 +408,7 @@ def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Non
                 print_write_chatbot(message = "Your feed is empty", color = 'red', attrs_color = ['bold'])
     
     except Exception as error:
-        write_log(STATUS_FILE, f"There was an error:{error}", 'Crux')
+        write_log(STATUS_FILE, f"There was an error:{error}", 'Exception')
         print_write_chatbot(f"There was an error:{error}", color = 'red', attrs_color = ['bold'])
 
 
@@ -647,7 +647,7 @@ def edit_profile(api: Client) -> None:
             print_write_chatbot(message = text, color = 'red', attrs_color = ['bold'])
     
     except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
+        write_log(STATUS_FILE, str(error), 'Exception')
         print_write_chatbot(f"There was an error:{error}", color = 'red', attrs_color = ['bold'])
 
 
@@ -869,9 +869,13 @@ def unfollow(api: Client) -> None:
     results = get_follows(api)
     username = input_user_chat(f"Who do you want to unfollow? ")
     for user in results['users']:
-        if user['username'] == username and api.friendships_destroy(user['pk']):
-            text = f"{username} has been successfully unfollowed!"
-            print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
+        try:
+            if user['username'] == username and api.friendships_destroy(user['pk']):
+                text = f"{username} has been successfully unfollowed!"
+                print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
+        except Exception as error:
+            write_log(STATUS_FILE, str(error), 'Exception')
+            print_write_chatbot(f"Error to unfollow: {error}", color = "red", attrs_color = ['bold'])
 
 
 def follow(api: Client) -> None:
@@ -892,7 +896,7 @@ def follow(api: Client) -> None:
             'is_private'] else f"{username} has been followed with success!"
         print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
     except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
+        write_log(STATUS_FILE, str(error), 'Exception')
         print_write_chatbot(f"There was an error:{error}", color = "red", attrs_color = ['bold'])
 
 
@@ -1135,7 +1139,7 @@ def on_login_callback(api: Client, new_settings_file: str) -> None:
         with open(new_settings_file, 'w') as outfile:
             json.dump(cache_settings, outfile, default = to_json)
     except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
+        write_log(STATUS_FILE, str(error), 'Exception')
         print(f"There was an error:{error}")
 
 
@@ -1174,7 +1178,7 @@ def connection_instagram(user_credentials: dict = {}) -> object:
                 with open(settings_file) as file_data:
                     cached_settings = json.load(file_data, object_hook = from_json)
             except Exception as error:
-                write_log(STATUS_FILE, str(error), 'Crux')
+                write_log(STATUS_FILE, str(error), 'Exception')
                 print(f"There was an error:{error}")
             
             device_id = cached_settings.get('device_id')
@@ -1184,14 +1188,14 @@ def connection_instagram(user_credentials: dict = {}) -> object:
                 settings = cached_settings)
     
     except ClientLoginError as e:
-        write_log(STATUS_FILE, str(e), 'Crux')
-        print(e)
+        write_log(STATUS_FILE, str(e), 'ClientLoginError')
+        print_write_chatbot(str(e), color = "red", attrs_color = ['bold'])
     except ClientError as e:
-        write_log(STATUS_FILE, e.msg, "Crux")
+        write_log(STATUS_FILE, e.msg, "ClientError")
         print_write_chatbot(
             'ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
     except Exception as e:
-        write_log(STATUS_FILE, str(e), "Crux")
+        write_log(STATUS_FILE, str(e), "Exception")
     
     print_write_chatbot("You have successfully connected with the instagram! \n", color = 'green',
                         attrs_color = ['bold'])
@@ -1217,9 +1221,9 @@ def connection_aux_api(username: str, password: str) -> object:
         aux_api.login(username = username, password = password, use_cookie = False)
     
     except Exception as error:
-        write_log(STATUS_FILE, str(error), 'Crux')
+        write_log(STATUS_FILE, str(error), 'Exception')
         print_write_chatbot(f"There was an error:{error}", color = "red", attrs_color = ['bold'])
     
-    write_log(STATUS_FILE, "You have successfully connected with the app", 'Crux')
+    write_log(STATUS_FILE, "You have successfully connected with the app", 'instagram.Bot')
     
     return aux_api
