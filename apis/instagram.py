@@ -314,15 +314,15 @@ def post_comment(api: Client) -> None:
             if want_put_comment:
                 message = input_user_chat("Message: ")
                 result = api.post_comment(media_id = post_id, comment_text = message)
-                try:
-                    if result['status'] == 'ok':
-                        print_write_chatbot(message = "The comment has been posted correctly!\n", color = 'green',
-                                            attrs_color = ['bold'])
-                except Exception as error:
+                if result['status'] == 'ok':
+                  try:
+                    print_write_chatbot(message = "The comment has been posted correctly!\n", color = 'green',
+                                       attrs_color = ['bold'])
+                  except Exception as error:
                     write_log(STATUS_FILE, str(error), 'Crux')
                     print_write_chatbot(f"There was an error: {error}", color = 'red', attrs_color = ['bold'])
-            else:
-                print_write_chatbot(
+                else:
+                  print_write_chatbot(
                     message = "It's okay if you couldn't leave a comment,"
                               " there are many posts in the sea, go get them tiger!\n",
                     color = 'blue', attrs_color = ['bold', 'underline'])
@@ -829,8 +829,14 @@ def unfollow(api: Client) -> None:
     username = input_user_chat(f"Who do you want to unfollow? ")
     for user in results['users']:
       if user['username'] == username and api.friendships_destroy(user['pk']):
-        text = f"{username} has been successfully unfollowed!"
-        print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
+        try:
+          text = f"{username} has been successfully unfollowed!"
+          print_write_chatbot(message = text, color = 'green', attrs_color = ['bold'])
+        except Exception as error:
+          write_status_log(error, 'Exception')
+          print(f"There was an error:{error}")                
+          write_log(STATUS_FILE, str(error), 'Crux')
+          print(f"There was an error:{error}")
 
 
 def follow(api: Client) -> None:
