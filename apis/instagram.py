@@ -454,8 +454,6 @@ def unlike_comment(api: Client, comment_id: str) -> None:
         api (Client) : object instagram Client
         comment_id (str) : Id of the comment
     
-    Returns:
-        None
     """
     result = api.comment_unlike(comment_id)
     
@@ -474,9 +472,7 @@ def unlike_post(api: Client, post_id: str) -> None:
     Arguments:
         api (Client) : Object instagram Client
         post_id (str) : Id of the post
-    
-    Returns:
-    
+  
     """
     result = api.delete_like(post_id)
     
@@ -497,8 +493,6 @@ def like_comment(api: Client, comment_id: str, own_feed: bool = False):
         comment_id (str): Id of the comment
         own_feed (bool) : If it's the current user's feed
     
-    Returns:
-         None
     """
     if not already_liked(api, comment_id, type_like = 'comment', own_feed = own_feed):
         result = api.comment_like(comment_id = comment_id)
@@ -538,9 +532,7 @@ def like_post(api: Client, post_id: str, own_feed: bool = False) -> None:
         api (Client) : object instagram Client
         post_id (str) : Id of the post
         own_feed (bool) : If it's the current user's feed
-        
-    Return:
-        None
+
     """
     if not already_liked(api, post_id, own_feed = own_feed):
         result = api.post_like(media_id = post_id)
@@ -612,8 +604,6 @@ def edit_profile(api: Client) -> None:
     
     Arguments:
         api (Client) - object Client instagram
-    Returns:
-        None
     """
     
     # I call _call_api because the original function "current_user" was passing wrong parameters
@@ -673,9 +663,7 @@ def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data:
         attributes (dict) : Stores all available fields that can be changed
         new_profile_data (dict) : Empty dictionary that will store the new values
         genders (list) : List of available genres
-    
-    Returns:
-        None
+
     """
     for key, attribute in attributes.items():
         if attribute == 'full_name':
@@ -733,8 +721,6 @@ def delete(api: Client, target_id: str, target_type: str, parent_id: str = '') -
         parent_id (str) : In the event that a comment is deleted,
                           it stores the id of the post that contains said comment,
                           
-    Returns:
-        None
     """
     
     if target_type == 'post':
@@ -759,8 +745,6 @@ def delete_comment(api: Client, feed: dict) -> None:
         api (Client) : Object instagram Client
         feed (dict) : the user feed
     
-    Returns:
-        None
     """
     print_write_chatbot("You cannot edit a comment, only delete it\n", color = 'blue',
                         attrs_color = ['bold', 'underline'])
@@ -811,8 +795,6 @@ def edit_actions(api: Client, edit_type: str, target_type: str = 'post') -> None
         edit_type (str) : Can be delete or edit
         target_type (str) : Can be post or comment
 
-    Returns:
-        None
     """
     feed = api.self_feed()
     is_feed_empty = feed['items'][0]
@@ -841,9 +823,7 @@ def unfollow(api: Client) -> None:
     
     Arguments:
         api (Client) : Object instagram Client
-    
-    Returns:
-        None
+
     """
     try:
         results = get_follows(api)
@@ -864,9 +844,7 @@ def follow(api: Client) -> None:
     
     Arguments:
         api (Client) : Object instagram Client
-    
-    Returns:
-        None
+ 
     """
     try:
         search_users(api)
@@ -895,9 +873,7 @@ def get_follows(api: Client, show: bool = True, follow_type: str = 'following') 
         api (Client) : Object instagram Client
         show (bool) : Indicates whether the filtered user names should be printed or not
         follow_type (str) : Can be following or followed
-    
-    Returns:
-        None
+ 
     """
     rank = api.generate_uuid()
     user_id = api.authenticated_user_id
@@ -1003,9 +979,7 @@ def show_last_messages(last_messages: dict, bot_id: str) -> None:
     Arguments:
         last_messages (dict) : Dict which contains all the information of the last event for each chat
         bot_id (str): Id of the current instagram account
-        
-    Returns:
-        None
+ 
     """
     text_show = ''
     message_number = 1
@@ -1032,9 +1006,6 @@ def validate_message() -> str:
     """
     Validate that the message you want to send to a user is not empty
     
-    Arguments:
-        -
-    
     Returns:
         str - Validated message
     """
@@ -1054,9 +1025,7 @@ def send_message(api: Client) -> None:
     
     Arguments:
         api(client): client object of Instagram
-        
-     Returns:
-        None
+
     """
     print_write_chatbot("Please wait a few seconds\n", color = 'blue', attrs_color = ['bold'])
     text = "Who do you want to send a message to?"
@@ -1081,9 +1050,7 @@ def message_actions(api: Client, action_type: str = 'send') -> None:
     Arguments:
         api(client): client object of Instagram
         action_type (str) : Can be send or show
-    
-     Returns:
-        None
+
     """
     print_write_chatbot("IMPORTANT!!\n", color = 'red', attrs_color = ['bold', 'blink', 'underline'])
     print_write_chatbot(
@@ -1130,8 +1097,6 @@ def on_login_callback(api: Client, new_settings_file: str) -> None:
     Arguments:
         api (Client): the actual Client object
         new_settings_file (str): The json file where the credentials will be saved
-    Returns:
-        None
     """
     cache_settings = api.settings
     try:
@@ -1148,9 +1113,7 @@ def delete_cookie(file: str) -> None:
     
     Arguments:
         file (str) : The relative path of the cookie file
-    
-    Returns:
-        None
+ 
     """
     try:
         with open(file, 'r') as f:

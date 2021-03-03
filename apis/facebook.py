@@ -14,8 +14,6 @@ def show_albums(facebook_api: facebook.GraphAPI, albums_id: list) -> None:
         facebook_api (facebook.GraphAPI)
         albums_id (list): Contains the albums of the user
     
-    Returns:
-        None
         
     """
     albums = facebook_api.get_connections(id = 'me', connection_name = 'albums')
@@ -48,9 +46,7 @@ def upload_to_albums(facebook_api: facebook.GraphAPI) -> None:
     
     Arguments:
         facebook_api (object) : facebook api graph
-    
-    Returns:
-        None
+  
     """
     
     path = input_user_chat("Please enter the path of your picture: ")
@@ -75,12 +71,9 @@ def search_file() -> str:
     """
     A file is searched and validated based on an absolute path
     
-    Arguments:
-        -
-    
     Returns:
         str - Absoulte path of file
-    :return:
+    
     """
     found_file = False
     path = ''
@@ -102,8 +95,6 @@ def upload_photo(facebook_api: facebook.GraphAPI) -> None or Exception:
     Arguments:
         facebook_api (object) : facebook api graphThe facebook api
     
-    Returns:
-        None
     """
     path = search_file()
     caption = input_user_chat("Caption: ")
@@ -123,8 +114,6 @@ def upload_post(facebook_api: facebook.GraphAPI) -> None:
     Arguments:
         facebook_api (object) : facebook api graph
     
-    Returns:
-        None
     """
     user_message = input_user_chat("What would you like to write?: ")
     try:
@@ -141,9 +130,7 @@ def follower_count(facebook_api: facebook.GraphAPI) -> None:
     
     Arguments:
         facebook_api (object) : facebook api graph
-    
-    Returns:
-        None
+ 
     """
     
     followers = facebook_api.get_object(id = 'me', fields = 'followers_count')
@@ -222,8 +209,6 @@ def if_text_in_info(info: dict, posts_id: list, count: int):
         posts_id (list) : List of the posts of the page
         count (int) : The number of the post
 
-    Returns:
-        None
     """
     
     if "message" in info:
@@ -246,7 +231,6 @@ def post_related(facebook_api: facebook.GraphAPI, action, selected) -> None:
         action (str) : The action the user wants to do
         selected (str) : The connection name the user selected
     
-    Returns: None
     """
     posts_id = []
     selection = 0
