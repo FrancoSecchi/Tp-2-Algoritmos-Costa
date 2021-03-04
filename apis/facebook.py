@@ -221,12 +221,16 @@ def if_text_in_info(info: dict, posts_id: list, count: int):
     posts_id.append(info["id"])
 
 
-def get_posts(facebook_api: facebook.GraphAPI, type_post: str):
+def get_posts(facebook_api: facebook.GraphAPI, type_post: str) -> dict:
     """
+    Returns own posts or visitor posts based on type_post
     
     Arguments:
-         facebook_api (facebook.GraphAPI)
-         type_post (str)
+         facebook_api (facebook.GraphAPI) : object facebook API
+         type_post (str) : indicator of type posts (Ej published_posts, visitor_posts)
+    
+    Returns:
+        dict
     """
     return facebook_api.get_connections(id = 'me', connection_name = type_post)
 
