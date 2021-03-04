@@ -62,15 +62,15 @@ facebook.follower_count(facebook_api)
 followers facebook
 facebook.follower_count(facebook_api)
 I want to follow a user instagram
-instagram.follow_actions(instagram_api)
+instagram.follow(instagram_api)
 follow a user instagram
-instagram.follow_actions(instagram_api)
+instagram.follow(instagram_api)
 follow a user
-instagram.follow_actions(instagram_api)
+instagram.follow(instagram_api)
 unfollow a user instagram
-instagram.follow_actions(instagram_api, follow_type = "unfollow")
+instagram.unfollow(instagram_api)
 unfollow
-instagram.follow_actions(instagram_api, follow_type = "unfollow")
+instagram.unfollow(instagram_api)
 I want to unfollow a user instagram
 instagram.follow_actions(instagram_api, follow_type = "unfollow")
 show my followers instagram
@@ -88,17 +88,17 @@ instagram.get_follows(instagram_api, follow_type = "followers")
 follow me instagram
 instagram.get_follows(instagram_api, follow_type = "followers")
 Show who I follow instagram
-instagram.get_follows(instagram_api)
+instagram.get_follows(instagram_api, follow_type = 'following')
 who I follow instagram
-instagram.get_follows(instagram_api)
+instagram.get_follows(instagram_api, follow_type = 'following')
 get following instagram
-instagram.get_follows(instagram_api)
+instagram.get_follows(instagram_api, follow_type = 'following')
 my followings instagram
-instagram.get_follows(instagram_api)
+instagram.get_follows(instagram_api, follow_type = 'following')
 I want to see who I am following on my account instagram
-instagram.get_follows(instagram_api)
+instagram.get_follows(instagram_api, follow_type = 'following')
 following instagram
-instagram.get_follows(instagram_api)
+instagram.get_follows(instagram_api, follow_type = 'following')
 i want edit my profile account
 instagram.edit_profile(instagram_api)
 i want edit my profile account

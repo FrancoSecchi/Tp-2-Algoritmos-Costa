@@ -221,7 +221,17 @@ def if_text_in_info(info: dict, posts_id: list, count: int):
     posts_id.append(info["id"])
 
 
-def post_related(facebook_api: facebook.GraphAPI, action, selected) -> None:
+def get_posts(facebook_api: facebook.GraphAPI, type_post: str):
+    """
+    
+    Arguments:
+         facebook_api (facebook.GraphAPI)
+         type_post (str)
+    """
+    return facebook_api.get_connections(id = 'me', connection_name = type_post)
+
+
+def post_related(facebook_api: facebook.GraphAPI, action: str, selected: str) -> None:
     """
     The posts of the page are shown and depending on the action, it will be edited / liked/ deleted / commented
     
@@ -233,18 +243,18 @@ def post_related(facebook_api: facebook.GraphAPI, action, selected) -> None:
     """
     posts_id = []
     selection = 0
+    posts = get_posts(facebook_api, selected)
+    info_list = posts['data']
+    print_write_chatbot("The posts are: ")
+    for count, info in enumerate(info_list, start = 1):
+        if_text_in_info(info, posts_id, count)
+    
+    if action != "read":
+        option = int(input_user_chat("Select one: ")) - 1
+        option = validate_number(option, posts_id)
+        selection = posts_id[option]
+    
     try:
-        posts = facebook_api.get_connections(id = 'me', connection_name = selected)
-        info_list = posts['data']
-        print_write_chatbot("The posts are: ")
-        for count, info in enumerate(info_list, start = 1):
-            if_text_in_info(info, posts_id, count)
-        
-        if action != "read":
-            option = int(input_user_chat("Select one: ")) - 1
-            option = validate_number(option, posts_id)
-            selection = posts_id[option - 1]
-        
         if action == "like":
             like(facebook_api, selection)
         elif action == "comment":

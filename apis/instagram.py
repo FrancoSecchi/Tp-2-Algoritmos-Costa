@@ -210,7 +210,7 @@ def validate_post_comment_number(api: Client, feed: dict, position_comment: list
     Returns:
         list -  The position of the post and the comment
     """
-    position_comment[0] = validate_number_post(post_number = position_comment[0], max_number = len(feed))
+    position_comment[0] = validate_number_post(post_number = position_comment[0] - 1, max_number = len(feed))
     post = feed[position_comment[0] - 1]
     comments = api.media_comments(post['pk'])
     position_comment[1] = validate_comment_number(comments = comments, comment_number = position_comment[1] - 1)
@@ -279,9 +279,7 @@ def post_comment(api: Client) -> None:
         if not is_feed_empty:
             comment_block = True
             text = "Which post would you like to comment on?"
-            post_id, number_post = get_post_id(feed, text), get_post_number(text = text,
-                                                                            max_cant_posts = len(
-                                                                                feed['items']))
+            post_id, number_post = get_post_id(feed, text)
             want_put_comment = True
             while comment_block and want_put_comment:
                 if 'comments_disabled' not in feed['items'][number_post]:
@@ -332,9 +330,9 @@ def get_post_number(text: str, max_cant_posts: int) -> int:
     return validate_number_post(post_number, max_cant_posts)
 
 
-def get_post_id(feed: dict, text: str) -> str:
+def get_post_id(feed: dict, text: str) -> tuple:
     """
-    Returns the id of the post
+    Returns the id and the position of the post
      
     Arguments:
         feed (dict) : the user feed
@@ -342,11 +340,11 @@ def get_post_id(feed: dict, text: str) -> str:
                      different questions depending by the current user want to do
     
     Returns:
-        str - the id of the post
+        tuple - the id and the position of the post
     """
     number_post = get_post_number(text = text, max_cant_posts = len(feed['items']))
     post_id = feed['items'][number_post]['pk']
-    return post_id
+    return post_id, number_post
 
 
 def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> None:
@@ -363,7 +361,7 @@ def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Non
     """
     try:
         if target_type != "comment":
-            username = get_username(api, f"\nWhich user do you want to {like_type} the {target_type}?")
+            username = get_username(api, f"\nWhich user do you want to {like_type} the {target_type}? ")
             can_get_feed = is_following_user(api, username)
             if can_get_feed:
                 feed, is_feed_empty = get_user_feed(api, username = username, show_feed = False)
@@ -372,9 +370,9 @@ def likes_actions(api: Client, target_type: str, like_type: str = 'like') -> Non
                     show_user_feed(api, feed['items'], own_feed = own_feed)
                     post_id = get_post_id(feed = feed, text = f"Which post would you {like_type} to post a like?")
                     if like_type == 'like':
-                        like_post(api, post_id = post_id, own_feed = own_feed)
+                        like_post(api, post_id = post_id[0], own_feed = own_feed)
                     else:
-                        unlike_post(api, post_id)
+                        unlike_post(api, post_id[0])
                 else:
                     print_write_chatbot(message = "The user has no posts\n", color = 'red',
                                         attrs_color = ['bold', 'underline'])
@@ -618,8 +616,6 @@ def edit_profile(api: Client) -> None:
     text_to_print += all_data
     get_new_profile_data(user_profile, attributes, new_profile_data, genders)
     
-    print_write_chatbot(text_to_print)
-    
     try:
         status_account = api.set_account_private() if new_profile_data['is_private'] else api.set_account_public()
         result = api.edit_profile(
@@ -720,13 +716,13 @@ def get_new_profile_data(profile_data: dict, attributes: dict, new_profile_data:
 
     """
     for key, attribute in attributes.items():
+        print_account_warnings(attribute)
         change_attribute = input_user_chat(f"Do you want to change {key}? yes/no: ")
         if user_answer_is_yes(change_attribute):
-            print_account_warnings(attribute)
             
             new_value = input_user_chat(f"Enter the new value for {key}: ")
             
-            secure = input_user_chat(f"\nAre you sure to change '{profile_data[attribute]}' "
+            secure = input_user_chat(f"\nAre you sure to change {key} "
                                      f"to '{new_value}'? yes/no: ")
             
             if user_answer_is_yes(secure):
@@ -754,7 +750,6 @@ def delete(api: Client, target_id: str, target_type: str, parent_id: str = '') -
                           it stores the id of the post that contains said comment,
                           
     """
-    
     if target_type == 'post':
         result = api.delete_media(media_id = target_id)
     else:
@@ -780,7 +775,7 @@ def delete_comment(api: Client, feed: dict) -> None:
     """
     print_write_chatbot("You cannot edit a comment, only delete it\n", color = 'blue',
                         attrs_color = ['bold', 'underline'])
-    secure_delete = input_user_chat("Do you want to delete a comment from a post? (yes/no): \n")
+    secure_delete = input_user_chat("Do you want to delete a comment from a post? (yes/no):")
     
     if user_answer_is_yes(secure_delete):
         text = "Which comment would you delete?"
@@ -832,15 +827,16 @@ def edit_actions(api: Client, edit_type: str, target_type: str = 'post') -> None
     is_feed_empty = feed['items'][0]
     
     if is_feed_empty:
+        show_user_feed(api, feed['items'], True)
         if target_type == 'post':
             text = f"Which post would you {edit_type}?"
-            post_id, number_post = get_post_id(feed, text = text), get_post_number(text, len(feed['items']))
+            post_id, number_post = get_post_id(feed, text = text)
             if edit_type == 'edit':
-                edit_post(api, feed, post_id, number_post)
+                edit_post(api, feed = feed, post_id = post_id, number_post = number_post)
             else:
                 secure = input_user_chat(f"Are you sure to {edit_type} the post? (yes/no): \n")
                 if user_answer_is_yes(secure):
-                    delete(api, post_id, 'post')
+                    delete(api, target_id = str(post_id), target_type = 'post')
         else:
             if edit_type == 'delete':
                 delete_comment(api, feed)
