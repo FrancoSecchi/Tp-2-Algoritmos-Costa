@@ -1,6 +1,6 @@
 from instabot import Bot
 from logs import (write_log, STATUS_FILE, print_write_chatbot, input_user_chat)
-from utils.utils import user_answer_is_yes, get_credentials, delete_expired_cookie,\
+from utils.utils import user_answer_is_yes, get_credentials, delete_expired_cookie, \
     to_json, from_json, on_login_callback, get_cached_settings
 from termcolor import colored
 import json
@@ -172,7 +172,7 @@ def validate_number_post(post_number: int, max_number: int) -> int:
     Returns:
         int - The position of the post
     """
-
+    
     while post_number < 0 or post_number >= max_number:
         print_write_chatbot(message = "Number post incorrect", color = 'red', attrs_color = ['bold'])
         post_number = int(input_user_chat("Enter a valid posting number: "))
@@ -192,9 +192,9 @@ def validate_comment_number(comments, comment_number) -> int:
     """
     
     while not comments['comments'][comment_number]:
-            print_write_chatbot(message = "The comment doesnt exist, please enter a correct comment number",
-                                color = 'red', attrs_color = ['bold'])
-            comment_number = int(input_user_chat("Number comment: "))
+        print_write_chatbot(message = "The comment doesnt exist, please enter a correct comment number",
+                            color = 'red', attrs_color = ['bold'])
+        comment_number = int(input_user_chat("Number comment: "))
     return comment_number
 
 
@@ -1118,7 +1118,7 @@ def connection_instagram(user_credentials: dict = {}) -> object:
     
     if os.path.isfile(settings_file):
         delete_expired_cookie(settings_file)
-        
+    
     if not os.path.isfile(settings_file):
         # If the credentials do not exist, do a new login
         try:
@@ -1171,3 +1171,25 @@ def connection_aux_api(username: str, password: str) -> object:
     write_log(STATUS_FILE, "You have successfully connected with the app", 'instagram.Bot')
     
     return aux_api
+
+
+class InstagramApi(Client):
+    
+    def __init__(self, username, password):
+        user_credentials = self.get_credentials(username, password)
+        self.username = user_credentials['username']
+        self.password = user_credentials['password']
+        self._connect_api()
+    
+    def _connect_api(self):
+        pass
+    
+    @staticmethod
+    def get_credentials(username, password):
+        if not username and password:
+            credentials = get_credentials()
+            username = credentials['instagram']['username']
+            password = credentials['instagram']['password']
+        return {'username': username, 'password': password}
+    
+    
